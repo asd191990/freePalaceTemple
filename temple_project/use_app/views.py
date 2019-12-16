@@ -27,17 +27,19 @@ from docx.shared import Cm, Pt
 
 @login_required
 def x_try(request):
+    find_x=r"C:\Users\asd19\temple_project\output\file0.docx"
+    comtypes.CoInitialize()  #轉pdf
     try:
-        zz={"bye":[[[{"table_name":"點光明燈者"},[{"table_data":"我我我我我、你妳你妳你妳你你你"}]]]]}
-        zz["today"] =date.today()
-        tpl = DocxTemplate(r'C:\Users\asd19\Downloads\各種燈.docx')
-        tpl.render(zz)
-        tpl.save(r'C:\Users\asd19\Downloads\try.docx')
-        os.system('C:\\Users\\asd19\\Downloads\\try.docx')
-        x="ok"
+        word = comtypes.client.CreateObject('Word.Application')
+        doc = word.Documents.Open(find_x)
+        doc.Close()
+        word.Quit()
+        x="ee"
     except Exception as e:
         x = e
-
+        doc.Close()
+        word.Quit()
+    
     return render(request, "try.html", locals())
 
 
@@ -217,9 +219,7 @@ def validate_username(request):
     return JsonResponse(data)
 
 
-
 def validate_file_other(request):
-
 
     get_file = request.GET.get('file_string', None)
     get_name_id = request.GET.get('name_id', None)
@@ -228,31 +228,34 @@ def validate_file_other(request):
 
     if old_name != get_name:
         if activity_data.objects.filter(name=get_name).exists():
-             data = {
-                "result": "新的代碼重複"
-            }
-             return JsonResponse(data)
+            data = {"result": "新的代碼重複"}
+            return JsonResponse(data)
 
     if get_file == "":
-        activity_data.objects.filter(name=old_name).update(name= get_name, table_name = get_name_id)
+        activity_data.objects.filter(name=old_name).update(
+            name=get_name, table_name=get_name_id)
     else:
-        activity_data.objects.filter(name=old_name).update(name= get_name, table_name = get_name_id, use_file = get_file)
-    data = {
-            "result": "更改成功"
-        }
+        activity_data.objects.filter(name=old_name).update(
+            name=get_name, table_name=get_name_id, use_file=get_file)
+    data = {"result": "更改成功"}
     return JsonResponse(data)
-    
+
+
 from django.views.decorators.csrf import csrf_exempt
+
+
 @csrf_exempt
 def validate_file(request):
     if request.method == 'POST':
-        the_file = request.FILES.get('file') 
-        data = {"ok": "檔案更改成功","result1":the_file.size}
-        cc = open(r"C:\Users\asd19\temple_project\files\files\\" + the_file.name, 'wb')    # 伺服器建立上傳同名的檔案
-        for line in the_file.chunks():                      # 分塊拿上傳資料
+        the_file = request.FILES.get('file')
+        data = {"ok": "檔案更改成功", "result1": the_file.size}
+        cc = open(r"C:\Users\asd19\temple_project\files\files\\" +
+                  the_file.name, 'wb')  # 伺服器建立上傳同名的檔案
+        for line in the_file.chunks():  # 分塊拿上傳資料
             cc.write(line)
         cc.close()
         return JsonResponse(data)
+
 
 def validate_remove_file(request):
     del_file = request.GET.get('remove_name_id', None)
@@ -434,7 +437,7 @@ def people_form(request):
                             home_id=request.session['get_home_id']).filter(
                                 name=get_all_name[i]).count() == 0):
                         People_data.objects.create(
-                            name=get_all_name[i],
+                            name=get_all_name[i].replace(" ", ""),
                             birthday=get_all_birthday[i],
                             gender=get_all_gender[i],
                             home_id=request.session['get_home_id'])
@@ -480,16 +483,37 @@ def validate_submit(request):
         day = str(date.today())
         x["today"] = day
         tpl.render(x)
-        tpl.save(r'C:\Users\asd19\Downloads\OKOK.docx')
+       
 
-        comtypes.CoInitialize() #轉pdf
+
+        comtypes.CoInitialize()  #轉pdf
         word = comtypes.client.CreateObject('Word.Application')
-        doc = word.Documents.Open(r"C:\\Users\\asd19\\Downloads\\OKOK.docx")
-        doc.SaveAs(r"C:\Users\asd19\Downloads\ok", FileFormat=17)
-        os.system('C:\\Users\\asd19\\Downloads\\ok.pdf')
+
+        file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        find_folder = os.path.join(file_location, "output")
+        find_yes_no = os.path.exists(find_folder)
+
+        if not find_yes_no:
+            os.makedirs(find_folder)
+        
+        find_num = 0
+        while(True):
+            find_x =  os.path.join(find_folder,"file"+ str(find_num) +".docx") 
+            if not os.path.exists(find_x):
+                tpl.save(find_x)
+                doc = word.Documents.Open(find_x)
+                find_y = os.path.join(find_folder,"file"+ str(find_num) +"_to_pdf") 
+                doc.SaveAs(find_y,FileFormat=17)
+                os.system(find_y +".pdf")
+                break
+            find_num += 1
+          
+        
         doc.Close()
         word.Quit()
-        data = {"result":"已經送出"}
+        data = {"result": "已經送出"}
+
+
 #        data = {"result": str(x)}
     except Exception as e:
         data = {"result": e}
