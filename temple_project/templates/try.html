@@ -1,0 +1,69 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>TRY</title>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script>
+
+
+        $(function () {
+
+         
+
+
+            $("#w").keyup(function () {
+                $.ajax({
+
+                    url: '{% url "validate_date" %}',
+                    data: { "find_value": $("#w").val() },
+                    dataType: 'json',
+                    success: function (data) {
+
+                        $("#data_table tbody").html("");
+
+                        for (let i = 0; i < data.find_format.length; i++) {
+                            let split_data = data.find_format[i].split("/")
+                            $('#data_table').append("<tr><td>" + split_data[0] + "</td><td>" + split_data[1] + "</td><td><button class=\"fix\" value=\"" + split_data[1] + "/" + split_data[0] + "\">修改 </button>   <button class=\"btn btn-info del\" value=\" " + split_data[0] + "\">刪除 </button></td></tr>")
+                           
+
+                        }
+                    }
+                })
+            })
+            $('body').on('click','.fix', function () { alert("jQuery on綁定事件."); });
+
+            $(".fix").on('click',function(){
+                alert("e1")
+            })
+            $('.fix').on('click', function () { alert("jQuery on綁定事件."); })
+         
+            $("#open").click(function (e) {
+
+
+                //            alert($("tr").find('td').eq(0).text())
+
+            });
+
+
+        })
+    </script>
+</head>
+
+<body>
+        <!-- {% lorem 2 p random%} <br> -->
+   <br>     
+    {{x}} <br>
+
+<br>
+{{ccc}}<br>
+<br>
+{{ccz}} <br><br>
+{{y}}<br>
+</body>
+
+</html>

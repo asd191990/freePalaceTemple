@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %} 表單 {% endblock %}
+{% block form %}
+{% load crispy_forms_tags %}
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script >
+        $(document).ready(function () {
+            let old_phone = "";
+            let old_address = "";
+            let set_button
+            $("#id_phone").keyup(function () {
+
+                $.ajax({
+
+                    url: '{% url "validate_date" %}',
+                    data: {
+                        "find_value": $("#id_phone").val()
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+
+                        $("#data_table tbody").html("");
+
+                        for (let i = 0; i < data.find_format.length; i++) {
+                            let split_data = data.find_format[i].split("/")
+                            $('#data_table').append("<tr><td id=" + split_data[0] + ">" + split_data[0] + "</td><td id=" + split_data[1] + ">" + split_data[1] + "</td><td><button class=\"btn btn-info fix\" value=\"" + split_data[1] + "/" + split_data[0] + "\">修改 </button>   <button class=\"btn btn-info del\" value=\"" + split_data[0] + "\">刪除 </button></td></tr>")
+                        }
+                    }
+                })
+            });
+
+
+            $('body').on('click', '.fix', function (e) {
+
+                get_value = $(this).attr("value").split("/")
+                old_address = get_value[0];
+                old_phone = get_value[1];
+                set_button = this
+                $("#phone").val(old_phone);
+                $("#address").val(old_address);
+                $("#login_inputbox").dialog("open");
+                e.preventDefault();
+
+            });
+
+            $('body').on('click', '.del', function () {
+
+                if (confirm("確定刪除此家庭資料嗎？")) {
+                    get_value = $(this).attr("value")
+                    $.ajax({
+                        url: '{% url "validate_del" %}',
+
+                        data: {
+                            "phone": get_value
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.is_taken) {
+                                alert(data.result);
+                            } else {
+                                alert(data.error_message)
+                            }
+                        }
+                    })
+                    $(this).closest("tr").remove()
+                } else {
+                    alert("已取消")
+                }
+            });
+
+
+            var check_login = function () {
+                let new_phone = $("#phone").val()
+                let re = /^\d{2}-?\d{3}-?\d{4}$/
+                if( re.test(new_phone))
+                {
+                let new_address = $("#address").val()                
+                $.ajax({
+                    url: '{% url "validate_username" %}',
+
+                    data: {
+                        "old_phone": old_phone,
+                        "old_address": old_address,
+                        "new_phone": new_phone,
+                        "new_address": new_address
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.is_taken) {
+                            alert(data.result);
+                            document.getElementById(old_address).innerHTML = new_address;
+                            document.getElementById(old_address).id = new_address;
+                            document.getElementById(old_phone).innerHTML = new_phone;
+                            document.getElementById(old_phone).id = new_phone;
+                            set_button.value = new_address + "/" + new_phone
+                        } else {
+                            alert(data.error_message)
+                        }
+                    }
+                })                
+                $(this).dialog("close");}
+                else{
+                    alert("家庭電話錯誤")
+                }
+
+            }
+
+
+            $("#login_inputbox").dialog({
+
+                width: 400,
+                autoOpen: false,
+                modal: true,
+                title: "修改系統",
+                buttons: {
+                    "送出": check_login,
+                    "取消": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+
+        })
+    </script>
+
+</head>
+<div id="login_inputbox" title="Info" hidden>
+    <p>請輸入改動資料</p>
+    <p>新家庭電話 : <input id="phone" type="text"></p>
+    <p>地址: <input id="address" type="text"></p>
+</div>
+<div id="login_result" hidden>
+    <p>帳號或密碼錯誤</p>
+</div>
+
+<body>
+
+
+    <div style="margin-left:50px;">
+
+        <form method='POST' enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="col-6">
+                {{ form|crispy }} </div>
+
+            <input type="submit" class="btn btn-success" value="送出" style="margin-top:20px">
+        </form>
+
+        {{x_bug}}
+
+    </div>
+
+    {% if messages %}
+    <script>
+        alert("{{messages}}");
+    </script>
+    {% endif %}
+
+    <br>
+    <hr>
+    <div style="margin-left:50px;">
+        <h2>{{ get_x }}已經有:</h2>
+        {% if get_all_data.all %}
+        <br>
+        <table class="table" id="data_table">
+            <thead>
+                <tr>
+                    <th scope="col">{{title_one}}</th>
+                    <th scope="col">{{title_two}}</th>
+                    <th scope="col">功能</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for c in get_all_data.all %}
+                <tr>
+                    {% if c.home_phone %}
+                    <td id="{{c.home_phone}}"> {{ c.home_phone }} </td>
+                    {% endif %} {% if c.address %}
+                    <td id="{{c.address}}"> {{ c.address }} </td>
+                    {% endif %} {% if c.name %}
+                    <td> {{ c.name }} </td>
+                    {% endif %} {% if c.name_id %}
+                    <td> {{ c.name_id }} </td>
+                    {% endif %}
+                    <td><button class="btn btn-info fix" value="{{c.address}}/{{c.home_phone }}">修改 </button>
+                        <button class="btn btn-info del" value="{{c.home_phone}}">刪除 </button> </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>無資料</p>
+        {% endif %}
+    </div>
+</body>
+
+{% endblock %}

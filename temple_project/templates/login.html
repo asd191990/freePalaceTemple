@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+登入
+
+{% endblock  %}
+
+<html lang="en">
+
+{% block message %}
+
+<head>
+    <meta charset="utf-8">
+    <title>TRY</title>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script>
+    </script>
+</head>
+
+<body>
+    <p>登入後才能執行各項功能</p>
+    <hr>
+    <span style="color: red">{{message}}</span>
+    <form  method="POST" name="form1">
+        {% csrf_token %}
+        {{ form }} 
+        <input type="submit" name="button" id="button" value="登入" />
+
+    </form>
+</body>
+
+</html>{% endblock  %}

@@ -1,0 +1,36 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+
+<body>
+
+  <nav class="nav navbar-default">
+
+    <ul class="nav nav-pills nav-fill">
+      <div class="navbar-header" >
+        <a class="navbar-brand" href="#">服務網站</a>
+      </div>
+      <li><a href="/ ">首頁</a></li>
+
+      <li><a href="/home_register">家庭註冊</a></li>
+      <li><a href="/people_register">成員註冊</a></li>
+      <li><a href="/activity_register">文件註冊</a></li>
+      <li><a href="/join_activity">香客參加 / 服務註冊</a></li>
+      <!-- <li><a href="/admin">後臺管理</a></li> </div> -->
+     <li> {% if request.user.is_authenticated %}
+      <a href="logout" style="text-decoration:none;"><button class="btn btn-info">登出</button> </a>
+      {% else %}
+      <a href="use_login" style="text-decoration:none;"><button class="btn btn-info">登入</button> </a>
+      {% endif %}</li>
+      <li>  <a href="register" style="text-decoration:none;"><button class="btn btn-info">註冊</button> </a></li>
+    </ul>
+  </nav>
+
+
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>

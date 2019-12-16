@@ -1,0 +1,193 @@
+{% extends "base.html" %} {% block title %} 表單 {% endblock %} {% block form %}
+
+<head>
+    <div id="fix_box" hidden>
+        <p>請輸入改動資料</p>
+        <p>姓名 : <input id="name" type="text"></p>
+        <p>生日: <input id="birthday" type="datetime-local"></p> 
+        <p>性別: <select id="gender">
+                <option value="female">女</option>
+                <option value="male">男</option>
+            </select> </p>
+        <p>如沒有要改生日就不用輸入</p>
+    </div>
+
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            let old_name = ""
+            let old_gender = ""
+            let old_bithday
+            let get_home_id
+            let set_button
+
+            $(".fix").click(function (e) {
+                get_value = $(this).attr("value").split("/")
+                old_name = get_value[0];
+                old_gender = get_value[1];
+                old_bithday = get_value[2];
+                get_home_id = get_value[3]
+                set_button = this
+                $("#name").val(old_name);
+                $("#gender").val(old_gender);
+                $("#birthday").val(old_bithday);
+                $("#fix_box").dialog("open");
+                e.preventDefault();
+            });
+
+
+
+            var check_login = function () {
+                let new_name = $("#name").val()
+                let new_birthday = $("#birthday").val().toString()
+                let new_gender = $("#gender").val()
+
+                $.ajax({
+                    url: '{% url "validate_people_data" %}',
+
+                    data: {
+                        "old_name": old_name,
+                        "new_name": new_name,
+                        "new_birthday": new_birthday,
+                        "new_gender": new_gender,
+                        "home_id": get_home_id
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.is_taken) {
+                            alert(data.result);
+                            $("#fix_box").dialog("close");
+                            window.location.reload()
+                        }
+                        else {
+                            alert(data.error_message)
+                        }
+
+                    }
+                })
+
+            };
+
+            $("#fix_box").dialog({
+                width: 400,
+                autoOpen: false,
+                modal: true,
+                title: "修改系統",
+                buttons: {
+                    "送出": check_login,
+                    "取消": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+            $(".del").click(function () {
+
+                if (confirm("確定刪除此香客資料嗎？")) {
+                    get_value = $(this).attr("value").split("▲")
+
+                    $.ajax({
+                        url: '{% url "validate_people_del" %}',
+
+                        data: {
+                            "home_id": get_value[0],
+                            "del_name": get_value[1]
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.is_taken) {
+                                alert(data.result);
+                                window.location.reload()
+                            } else {
+                                alert(data.error_message)
+                            }
+                        }
+                    })
+                }
+                else {
+                    alert("已取消");
+                }
+
+            });
+
+        })
+
+    </script>
+
+</head>
+
+<body>
+    <div style="margin-left:50px;">
+        {{display_home}} {% csrf_token %}
+        {% if one_two %}
+
+        <form method='POST' enctype="multipart/form-data">
+            {% csrf_token %} 選擇家庭為: {{x_try}} <br>
+            <br>
+            <div id="use">
+                {{ form.as_table }}
+                <br>
+            </div>
+
+            <div><input class="btn btn-outline-dark" type="submit" value="送出" /> <button type="button"
+                    class="btn btn-outline-dark" onclick="ShowMeDate()">增加欄位</button> </div>
+        </form>
+        <br>
+        <hr>
+        <h2>{{ get_x }}已經有:</h2>
+        {% if get_all_data.all %}
+        <br>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">{{title_one}}</th>
+                    <th scope="col">{{title_two}}</th>
+                    <th scope="col">{{title_three}}</th>
+                    <th scope="col">功能</th>
+            </thead>
+            <tbody>
+                {% for c in get_all_data.all %}
+                <tr>
+                    <td id={{c.name}}> {{ c.name }} </td>
+                    <td id={{c.name}}{{c.birthday}}> {{ c.birthday|date:"Y 年 / m 月 / d 日     / H 點" }} </td>
+                    {% if c.gender == "female" %}
+                    <td id={{c.name}}{{c.gender}}> 女 </td>
+                    {% else %}
+                    <td id={{c.name}}{{c.gender}}> 男 </td>
+                    {% endif %}
+                    <td>
+                        <button class="btn btn-success fix"
+                            value="{{c.name}}/{{c.gender}}/{{c.birthday}}/{{c.home_id}}"> 修改</button>
+                        <button class="btn btn-success del" value="{{c.home_id}}▲{{c.name}}"> 刪除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>無資料</p>
+        {% endif %} {% else %}
+
+        <form method='POST'>
+            {% csrf_token %} {{find_home_form.as_table}}
+            <input class="btn btn-outline-dark" type="submit" value="搜尋">
+            <form>
+
+                {% endif %}
+    </div>
+    {{bug_bug}}
+    <p>{{x_bug}}</p>
+
+    <script>
+        function ShowMeDate() {
+            var item = "<br>" + document.getElementById("use").innerHTML;
+            document.getElementById('use').insertAdjacentHTML("afterend", item);
+
+        }
+    </script>
+</body>
+{% endblock %}

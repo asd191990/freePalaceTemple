@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %} 表單 {% endblock %}
+{% block form %}
+{% load crispy_forms_tags %}
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+
+            let old_name
+
+            $('body').on('click', '.fix', function (e) {
+
+                get_value = $(this).attr("value").split("/")
+                old_name = get_value[0];
+                $("#name").val(get_value[0]);
+                $("#x_id").val(get_value[1]);
+                $("#login_inputbox").dialog("open");
+                e.preventDefault();
+
+            });
+
+            $('body').on('click', '.del', function () {
+
+                if (confirm("確定刪除此活動資料嗎？")) {
+                    get_value = $(this).attr("value")
+                    $.ajax({
+                        url: '{% url "validate_remove_file" %}',
+
+                        data: {
+                            "remove_name_id": get_value
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            alert(data.result);
+                        }
+                    })
+                    $(this).closest("tr").remove()
+                } else {
+                    alert("已取消")
+                }
+            });
+
+
+            var check_login = function () {
+
+                let form_data = new FormData()
+
+                try {
+                    var f_obj = $('#x_file')[0].files[0];
+                    console.log("文件对象：", f_obj);
+                    console.log("文件名称是：", f_obj.name);
+                    console.log("文件大小是：", f_obj.size);
+                    form_data.append("file", f_obj)
+
+                } catch (error) {
+
+                }
+                let file_string = ""
+                try {
+                    file_string = "files/" + document.getElementById('x_file').files[0].name
+                } catch (error) {
+                }
+                $.ajax({
+                    url: '{% url "validate_file_other" %}',
+                    data: {
+                        "file_string": file_string,
+                        "name": $("#name").val(), //新改的名字
+                        "old_name": old_name,//舊名字
+                        "name_id": $("#x_id").val(),//新改的欄位
+                    },
+                    async: false,
+                    success: function (data) {
+                        alert(data.result);
+                    }
+                })
+
+                if (form_data.get("file") !== null) {
+                    $.ajax({
+
+                        url: '{% url "validate_file" %}',
+                        type: "POST",
+                        data: form_data,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            alert(data.ok);
+                        }
+                    })
+                }
+                $(this).dialog("close");
+                window.location.reload()
+            }
+            //  {
+            //             "the_file": form_data,
+            //             "name": $("#name").val(),
+            //             "name_id": "eee",// $("#x_id").val(),
+            //             "old_name": old_name
+            //         }
+
+
+            $("#login_inputbox").dialog({
+
+                width: 500,
+                autoOpen: false,
+                modal: true,
+                title: "修改系統",
+                buttons: {
+                    "送出": check_login,
+                    "取消": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+
+        })
+    </script>
+
+</head>
+
+<body>
+
+
+    <div style="margin-left:50px;">
+
+        <form method='POST' enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="col-6">
+                {{ form|crispy }} </div>
+
+            <input type="submit" class="btn btn-success" value="送出" style="margin-top:20px">
+        </form>
+
+        {{x_bug}}
+
+    </div>
+    <div id="login_inputbox" method="POST" hidden enctype="multipart/form-data">
+        <form method='POST' enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <label for="id_name" class="control-label ">
+                活動名稱
+            </label>
+            <input type="text" name="name" class="textinput textInput" id="name">
+            <br>
+            <br>
+            <label for="id_x_file" class="control-label ">
+                檔案上傳
+            </label>
+            <input type="file" name="x_file" class="clearablefileinput" id="x_file">
+            <br>
+            <label for="id_x_id" class="control-label ">
+                活動欄位
+            </label>
+            <input type="text" name="x_id" class="textinput textInput" id="x_id">
+            <p>如沒有要改檔案則不用上傳</p>
+            </from>
+    </div>
+
+    {% if messages %}
+    <script>
+        alert("{{messages}}");
+    </script>
+    {% endif %}
+
+    <br>
+    <hr>
+    <div style="margin-left:50px;">
+        <h2>{{ get_x }}已經有:</h2>
+        {% if get_all_data.all %}
+        <br>
+        <table class="table" id="data_table">
+            <thead>
+                <tr>
+                    <th scope="col">{{title_one}}</th>
+                    <th scope="col">{{title_two}}</th>
+                    <th scope="col">功能</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for c in get_all_data.all %}
+                <tr>
+                    <td> {{ c.name }} </td>
+                    <td> {{ c.table_name }} </td>
+                    <td><button class="btn btn-info fix" value="{{c.name}}/{{c.table_name }}">修改 </button>
+                        <button class="btn btn-info del" value="{{c.id}}">刪除 </button> </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>無資料</p>
+        {% endif %}
+    </div>
+</body>
+
+{% endblock %}

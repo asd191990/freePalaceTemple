@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+首頁
+
+{% endblock  %}
+
+{% block message %}
+<div style="margin-left:50px;">
+
+    <ul>歡迎使用
+        <br><br>
+        <a href="register" style="text-decoration:none;"><button class="btn btn-info">註冊</button> </a>
+        <br></br>
+        {% if register_ok %}
+        <script>
+            alert("註冊成功")
+        </script>
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
+        {{ message}}
+        <p>{{request.user}}使用者 您已經登入囉<h1>歡迎使用</h1>
+        </p>
+        {% else %}
+
+        你還未登入哦～
+
+        {% endif %}
+
+    </ul>
+    <hr>
+    <div style="margin-left:50px;">
+        文件註冊說明
+        
+    </div>
+
+</div>
+
+{% endblock  %}

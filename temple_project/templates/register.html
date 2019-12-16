@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %} 表單 {% endblock %}
+{% block form %}
+{% load crispy_forms_tags %}
+
+<head>
+    <meta charset="utf-8">
+    <title>TRY</title>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script>
+    </script>
+</head>
+
+<body>
+      
+    <form method="post" style="margin-left:50px;">
+        {% csrf_token %}
+        {{ form|crispy}}
+            
+        <button class="btn btn-info del" name="submit">註冊</button>
+        <input  type="hidden" name="next"  />
+      </form>
+
+</body>
+
+</html>
+
+{% endblock %}
