@@ -213,13 +213,13 @@
                                 if (all_people_list[o][j].input.indexOf(table_set_array[i][0]) !== -1) {
                                     one = true
                                     if (table_set_array[i][1] === "T") {
-                                        people_data.push({ "table_data": all_people_list[o][j].name + " ── " + all_people_list[o][j].age })
+                                        people_data.unshift({ "table_data": all_people_list[o][j].name + " ── " + all_people_list[o][j].age })
 
                                     }
                                     else {
-                                        if (find_people.length + all_people_list[o][j].name.length >= 24) { //判斷欄位有沒有超過設定
+                                        if (find_people.length + all_people_list[o][j].name.length >= 28) { //判斷欄位有沒有超過設定
                                             find_people = find_people.substring(0, find_people.length - 1)
-                                            people_data.push({ "table_data": find_people })
+                                            people_data.unshift({ "table_data": find_people })
                                             find_people = ""
                                         }
                                         find_people += all_people_list[o][j].name + "、"
@@ -229,7 +229,7 @@
                             }
                             if (one && find_people !== "") {
                                 find_people = find_people.substring(0, find_people.length - 1)
-                                people_data.push({ "table_data": find_people })
+                                people_data.unshift({ "table_data": find_people })
                                 all_table_data.push(people_data)
                                 a_home_all_data.push(all_table_data)
                             }

@@ -4,7 +4,7 @@
     <div id="fix_box" hidden>
         <p>請輸入改動資料</p>
         <p>姓名 : <input id="name" type="text"></p>
-        <p>生日: <input id="birthday" type="datetime-local"></p> 
+        <p>生日: <input id="birthday" type="date"></p> 
         <p>性別: <select id="gender">
                 <option value="female">女</option>
                 <option value="male">男</option>
@@ -153,7 +153,7 @@
                 {% for c in get_all_data.all %}
                 <tr>
                     <td id={{c.name}}> {{ c.name }} </td>
-                    <td id={{c.name}}{{c.birthday}}> {{ c.birthday|date:"Y 年 / m 月 / d 日     / H 點" }} </td>
+                    <td id={{c.name}}{{c.birthday}}> {{ c.birthday|date:"Y 年 / m 月 / d 日" }} </td>
                     {% if c.gender == "female" %}
                     <td id={{c.name}}{{c.gender}}> 女 </td>
                     {% else %}

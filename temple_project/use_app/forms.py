@@ -49,7 +49,7 @@ class peopleform(forms.Form):
     birthday = forms.DateTimeField(
         label="生日",
         required=False,
-        widget=forms.TextInput(attrs={'type': 'datetime-local'}))
+        widget=forms.TextInput(attrs={'type': 'date'}))
     gender = forms.ChoiceField(label='性別',
                                required=False,
                                choices=(('male', '男'), ('female', '女')),
