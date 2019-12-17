@@ -41,6 +41,6 @@ urlpatterns = [
     path('ajax/validate_remove_file', views.validate_remove_file, name='validate_remove_file'),    
     path('ajax/validate_get_table', views.validate_get_table, name='validate_get_table'),
     path('ajax/validate_file_other', views.validate_file_other, name='validate_file_other'),
-    
+    path('dowload',views.download,name="download"),
     re_path(r".",views.index)    
 ]

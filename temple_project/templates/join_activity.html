@@ -32,7 +32,7 @@
                 show_page_text()
                 initialization()
                 switch_file()
-                $("#page_use_phone").text("當前使用的是"+page_array[0] + "的電話")
+                $("#page_use_phone").text("當前使用的是" + page_array[0] + "的電話")
             })
 
             class people_value {
@@ -51,22 +51,27 @@
             }
 
 
-            $("#determine").click(function () { //用名字找陣列的資料
+            $("#determine,#left,#rigth,#submit").click(function () { //用名字找陣列的資料
+                let have_up_date = false
                 for (let i = 0; i < table_set_array.length; i++) {  //判斷表格 
+                    
                     $("input[name=people" + i + "]").each(function () { // 顯示value 用 for迴圈找
+                        
                         for (let j = 0; j < all_people_list[use_page].length; j++) { //迴圈一個一個對比 value 跟人名
 
                             if (all_people_list[use_page][j].name == $(this).attr("value")) {
-                                
+
                                 let find_index = all_people_list[use_page][j].input.indexOf(table_set_array[i][0])
                                 if ($(this).prop('checked')) {//先判斷有沒有勾選 有勾選時 判斷有沒有再input裡面了
                                     if (find_index === -1) { //沒有找到時 新增進input                                    
                                         all_people_list[use_page][j].input.push(table_set_array[i][0])
-                                      //  alert(all_people_list[use_page][j].name + " u " + all_people_list[use_page][j].output())
+                                        have_up_date = true
+                                        //  alert(all_people_list[use_page][j].name + " u " + all_people_list[use_page][j].output())
                                     }
                                 }
                                 else {// 如果沒有勾選判斷有沒有再input裡面 如果有要移除。 如果有就新增
                                     if (find_index !== -1) {
+                                        have_up_date = true
                                         all_people_list[use_page][j].input.splice(find_index, 1)
                                         // alert(all_people_list[use_page][j].name + " u " + all_people_list[use_page][j].output())
                                         // alert(all_people_list[use_page][j].name + " remove " + table_set_array[i][0])
@@ -77,7 +82,8 @@
 
                     });
                 }
-                alert("已暫儲")
+                if (have_up_date)
+                    alert("已暫儲")
             })
 
 
@@ -128,7 +134,7 @@
                 });
                 table_initialization()
                 all_people_list = get_people_list()
-                $("#page_use_phone").text("當前使用的是"+page_array[0] + "的電話")
+                $("#page_use_phone").text("當前使用的是" + page_array[0] + "的電話")
             }
             function switch_file() {
                 $("#table_list").empty();
@@ -291,13 +297,13 @@
                         $("#page").val(use_page + 1)
                         switch_file()
                     }
-                    $("#page_use_phone").text("當前使用的是"+page_array[use_page] + "的電話")
+                    $("#page_use_phone").text("當前使用的是" + page_array[use_page] + "的電話")
                 }
 
             })
             function show_page_text() {
                 $("#page").val(parseInt(use_page) + 1);
-                $("#page_use_phone").text("當前使用的是"+page_array[use_page] + "的電話")
+                $("#page_use_phone").text("當前使用的是" + page_array[use_page] + "的電話")
             }
             $("#find_phone").change(function () {
                 get_find = page_array.indexOf($(this).val())
@@ -336,7 +342,8 @@
         </div>
         <hr>
         <div style="display:flex;">
-            <h2>勾選輸出資料</h2> <h2 id ="page_use_phone" style="margin-left: 40px;"> 55</h2>
+            <h2>勾選輸出資料</h2>
+            <h2 id="page_use_phone" style="margin-left: 40px;"> 55</h2>
         </div>
         <div id="table_list" style="display:flex "> </div>
         <p id="people_list"></p>

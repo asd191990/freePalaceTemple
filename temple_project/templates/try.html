@@ -12,10 +12,6 @@
 
 
         $(function () {
-
-         
-
-
             $("#w").keyup(function () {
                 $.ajax({
 
@@ -23,47 +19,43 @@
                     data: { "find_value": $("#w").val() },
                     dataType: 'json',
                     success: function (data) {
-
-                        $("#data_table tbody").html("");
-
-                        for (let i = 0; i < data.find_format.length; i++) {
-                            let split_data = data.find_format[i].split("/")
-                            $('#data_table').append("<tr><td>" + split_data[0] + "</td><td>" + split_data[1] + "</td><td><button class=\"fix\" value=\"" + split_data[1] + "/" + split_data[0] + "\">修改 </button>   <button class=\"btn btn-info del\" value=\" " + split_data[0] + "\">刪除 </button></td></tr>")
-                           
-
-                        }
                     }
                 })
             })
-            $('body').on('click','.fix', function () { alert("jQuery on綁定事件."); });
-
-            $(".fix").on('click',function(){
-                alert("e1")
-            })
-            $('.fix').on('click', function () { alert("jQuery on綁定事件."); })
-         
-            $("#open").click(function (e) {
-
-
-                //            alert($("tr").find('td').eq(0).text())
-
-            });
-
-
+            $scope.OpenAnExternalFile = function (filename) {
+                //
+                //  Open an external file (i.e. a file which ISN'T in our IIS folder)
+                //  To do this, we get an ASP.Net Handler to manually load the file, 
+                //  then return it's contents in a Response.
+                //
+                var URL = '/Handlers/DownloadExternalFile.ashx?filename=' + encodeURIComponent(filename);
+                window.open(URL);
+            }
         })
     </script>
 </head>
 
 <body>
-        <!-- {% lorem 2 p random%} <br> -->
-   <br>     
+    <!-- {% lorem 2 p random%} <br> -->
+    <br>
     {{x}} <br>
 
-<br>
-{{ccc}}<br>
-<br>
-{{ccz}} <br><br>
-{{y}}<br>
+    <br>
+    {{ccc}}<br>
+    <br>
+    {{ccz}} <br><br>
+    {{y}}<br>
+    <BR><Br>
+    <div class="col-md-4">
+        <a href="{% url 'download' %}" rel="external nofollow">
+            點我下載
+
+        </a>
+    </div>
+
+    <br><br> <a href="C:\Users\asd19\temple_project\output\file0.docx">連接</a>
+
+    <br><br> {{c}}<br>
 </body>
 
 </html>

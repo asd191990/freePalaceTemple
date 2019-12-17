@@ -27,21 +27,31 @@ from docx.shared import Cm, Pt
 
 @login_required
 def x_try(request):
-    find_x=r"C:\Users\asd19\temple_project\output\file0.docx"
-    comtypes.CoInitialize()  #轉pdf
+    file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    find_folder = os.path.join(file_location, "output")
+
+    x={"bye":[[[{"table_name":"測試用"},[{"table_data":"陳閔致 ── 2019年11月05號"},{"table_data":"陳閔致1 ── 2019年11月01號"},{"table_data":"我我我我我 ── 2019年01月01號"}]]]]}
     try:
-        word = comtypes.client.CreateObject('Word.Application')
-        doc = word.Documents.Open(find_x)
-        doc.Close()
-        word.Quit()
-        x="ee"
+        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\廟口案子\各種燈.docx")
+        tpl.render(x)
+        
+        # x=find_folder
+        # y = os.listdir(x)
+        # c =""
+        # for ww in y:
+        #     c +=" ___ "+ ww
+        # ccz =os.path.join( find_folder , y[0])
     except Exception as e:
         x = e
-        doc.Close()
-        word.Quit()
-    
+        
     return render(request, "try.html", locals())
 
+def download(request):
+    file = open('crm/models.py', 'rb')
+    response = HttpResponse(file)
+    response['Content-Type'] = 'application/octet-stream' #設定頭資訊，告訴瀏覽器這是個檔案
+    response['Content-Disposition'] = 'attachment;filename="models.py"'
+    return response
 
 def validate_get_table(request):
     use_file = request.GET.get("use_file", None)
