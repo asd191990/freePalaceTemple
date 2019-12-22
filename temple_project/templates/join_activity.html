@@ -54,9 +54,9 @@
             $("#determine,#left,#rigth,#submit").click(function () { //用名字找陣列的資料
                 let have_up_date = false
                 for (let i = 0; i < table_set_array.length; i++) {  //判斷表格 
-                    
+
                     $("input[name=people" + i + "]").each(function () { // 顯示value 用 for迴圈找
-                        
+
                         for (let j = 0; j < all_people_list[use_page].length; j++) { //迴圈一個一個對比 value 跟人名
 
                             if (all_people_list[use_page][j].name == $(this).attr("value")) {
@@ -325,6 +325,7 @@
         <p id="file"></p>
         <p id="result"></p>
 
+
         <div style="display:flex;">
             <div style="margin-right:10px;">
                 <form method='POST'>
@@ -343,13 +344,20 @@
         <hr>
         <div style="display:flex;">
             <h2>勾選輸出資料</h2>
+
+
+
+
             <h2 id="page_use_phone" style="margin-left: 40px;"> 55</h2>
         </div>
+
+
+        
         <div id="table_list" style="display:flex "> </div>
         <p id="people_list"></p>
         <span id="left">&larr;</span> <span id="page_start">ee</span> / <input id="page" style="width:60px"> / <span
-            id="page_end">ee</span> <span id="rigth">&rarr;</span> <button class="btn btn-info"
-            id="determine">確定當頁資料</button>
+            id="page_end">ee</span> <span id="rigth">&rarr;</span>
+        <button class="btn btn-info" id="determine">確定當頁資料</button>
 
 
         <h1>{{x_bug}}</h1>

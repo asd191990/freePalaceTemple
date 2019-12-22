@@ -22,7 +22,6 @@ import comtypes.client
 from docxtpl import DocxTemplate
 from docx.enum.section import WD_ORIENT
 from docx import Document
-from docx.shared import Cm, Pt
 
 
 @login_required
@@ -30,17 +29,26 @@ def x_try(request):
     file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     find_folder = os.path.join(file_location, "output")
 
-    x={"bye":[[[{"table_name":"測試用"},[{"table_data":"陳閔致 ── 2019年11月05號"},{"table_data":"陳閔致1 ── 2019年11月01號"},{"table_data":"我我我我我 ── 2019年01月01號"}]]]]}
+    x={"bye":[[[{"table_name":"點光明燈者"},[{"table_data":"陳閔致、曹美雲、蕭孟勳、劉美惠、柯星雯"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"李冰茜、葉俊吉、蔣原杰"},{"table_data":"陳恭宜、陳依光、曹志嘉、謝純鑫、張珊財、陳政姍、羅弘寧"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"李雅婷、雅文、陳家銘"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"葉宇軒、郭靜怡、黃于城、林裕白、沈俊吉"}]]]]}
+    #{"bye":[[[{"table_name":"點光明燈者"},[{"table_data":"陳閔致、曹美雲、蕭孟勳、劉美惠、柯星雯、楊逸凡、楊雅嵐"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"陳恭宜、陳依光、曹志嘉、謝純鑫"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"許雅喜、李雅婷、雅文"}]]]]}
     try:
-        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\廟口案子\各種燈.docx")
-        tpl.render(x)
+        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\廟口案子\範例用文件.docx")
+        y = x["bye"]
+        c = ""
+
+        for w in range(len(y)):
+            c +="這組有："
+            num = 0
+            for m in range(len(y[w][0][1])):
+                get_string =y[w][0][1][m]["table_data"]
+                num += len(get_string.split("、"))
+            c +=str(num)+ " 個人！　　"
+     #   y = y[1][0][1][1]["table_data"]
+#        c= y[0][0][1]
+
         
-        # x=find_folder
-        # y = os.listdir(x)
-        # c =""
-        # for ww in y:
-        #     c +=" ___ "+ ww
-        # ccz =os.path.join( find_folder , y[0])
+      #  tpl.render(x)
+
     except Exception as e:
         x = e
         
@@ -79,7 +87,7 @@ def validate_people_all_date(request):
     get_allname_array = []
     for i in range(the_data.count()):
         get_allname_array.append(the_data[i].name + "|" +
-                                 the_data[i].birthday.strftime('%Y年%m月%d號'))
+                                 the_data[i].birthday.strftime('%Y年%m月%d號%H時'))
 
     data = {"reslut": '㊣'.join(get_allname_array)}
     return JsonResponse(data)
@@ -482,8 +490,8 @@ def validate_submit(request):
     get_activity_ID = ""
     get_activity_ID = activity_data.objects.get(id=use_file)
 
-    # data = {"result": request.GET.get("all_data", None)}
-    # return JsonResponse(data)
+    data = {"result": request.GET.get("all_data", None)}
+    return JsonResponse(data)
     try:
         tpl = DocxTemplate(get_activity_ID.use_file)
         #tpl = DocxTemplate(r'C:\Users\asd19\Downloads\one.docx')
@@ -491,7 +499,7 @@ def validate_submit(request):
         x = json.loads(x)
         x["title"] = request.GET.get("title", None)
         day = str(date.today())
-        x["today"] = day
+        x["today"] = day        
         tpl.render(x)
        
 
