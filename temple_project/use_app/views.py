@@ -29,30 +29,36 @@ def x_try(request):
     file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     find_folder = os.path.join(file_location, "output")
 
-    x={"bye":[[[{"table_name":"點光明燈者"},[{"table_data":"陳閔致、曹美雲、蕭孟勳、劉美惠、柯星雯"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"李冰茜、葉俊吉、蔣原杰"},{"table_data":"陳恭宜、陳依光、曹志嘉、謝純鑫、張珊財、陳政姍、羅弘寧"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"李雅婷、雅文、陳家銘"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"葉宇軒、郭靜怡、黃于城、林裕白、沈俊吉"}]]]]}
+    x={'bye': [[[{'table_name': '點光明燈者'}, [{'table_data': '陳閔致、曹美雲'}]], [{'table_name': '安奉太歲星君者'}, [{'table_data': '楊逸凡 ── 2017年10月27號18時'}, {'table_data': '劉美惠 ── 2012年01月28號04時'}, {'table_data': '蕭孟勳 ── 2019年01月01號10時'}, {'table_data': '曹美雲 ── 2019年12月09號05時'}]]], [[{'table_name': '安奉太歲星君者'}, [{'table_data': '張珊財 ── 1989年03月15號22時'}, {'table_data': '謝純鑫 ── 2013年04月15號14時'}]], [{'table_name': '安奉財神燈者'}, [{'table_data': '曹志嘉 ── 2011年07月04號20時'}, {'table_data': '陳依光 ── 2007年09月11號06時'}, {'table_data': '陳恭宜 ── 2020年10月27號18時'}]]], [[{'table_name': '點光明燈者'}, [{'table_data': '李雅婷、雅文、陳家銘'}]], [{'table_name': '安奉文昌燈者'}, [{'table_data': '雅文 ── 2020年10月28號21時'}, {'table_data': '李雅婷 ── 2016年12月29號04時'}, {'table_data': '許雅喜 ── 2017年02月18號17時'}]]]], 'title': '各種燈', 'today': '2019-12-23'}
     #{"bye":[[[{"table_name":"點光明燈者"},[{"table_data":"陳閔致、曹美雲、蕭孟勳、劉美惠、柯星雯、楊逸凡、楊雅嵐"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"陳恭宜、陳依光、曹志嘉、謝純鑫"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"許雅喜、李雅婷、雅文"}]]]]}
     try:
-        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\廟口案子\範例用文件.docx")
-        y = x["bye"]
-        c = ""
+        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\廟口案子\祈安植福文疏.docx")
+        y = x
+        day = str(date.today())
+        y["today"] = day        
+        d=y["bye"][2][1][0]
+        for w in range(len(y["bye"])):
+            
+            for t in range(len(y["bye"][w])):
+                num = 0 
+                for m in range(len(y["bye"][w][t][1])):
+                    get_string =y["bye"][w][t][1][m]["table_data"]
+                    num += len(get_string.split("、"))
+                y["bye"][w][t].insert(1,{"people":num})
+                                            
+      #      y["bye"][w][0].insert(1,{"people":num})
 
-        for w in range(len(y)):
-            c +="這組有："
-            num = 0
-            for m in range(len(y[w][0][1])):
-                get_string =y[w][0][1][m]["table_data"]
-                num += len(get_string.split("、"))
-            c +=str(num)+ " 個人！　　"
-     #   y = y[1][0][1][1]["table_data"]
-#        c= y[0][0][1]
-
-        
-      #  tpl.render(x)
-
+   #     d = y
+  #      d=y["bye"][2][1][1]
+        tpl.render(y)
+        tpl.save(r"C:\Users\asd19\Downloads\廟口案子\tryw.docx")
     except Exception as e:
         x = e
         
     return render(request, "try.html", locals())
+
+
+
 
 def download(request):
     file = open('crm/models.py', 'rb')
@@ -490,8 +496,8 @@ def validate_submit(request):
     get_activity_ID = ""
     get_activity_ID = activity_data.objects.get(id=use_file)
 
-    data = {"result": request.GET.get("all_data", None)}
-    return JsonResponse(data)
+    # data = {"result": request.GET.get("all_data", None)}
+    # return JsonResponse(data)
     try:
         tpl = DocxTemplate(get_activity_ID.use_file)
         #tpl = DocxTemplate(r'C:\Users\asd19\Downloads\one.docx')
@@ -499,7 +505,17 @@ def validate_submit(request):
         x = json.loads(x)
         x["title"] = request.GET.get("title", None)
         day = str(date.today())
-        x["today"] = day        
+        x["today"] = day    
+        #data = {"result": str(x)}
+        #return JsonResponse(data)
+
+        for w in range(len(x["bye"])):
+            for t in range(len(x["bye"][w])):
+                num = 0 
+                for m in range(len(x["bye"][w][t][1])):
+                    get_string =x["bye"][w][t][1][m]["table_data"]
+                    num += len(get_string.split("、"))
+                x["bye"][w][t].insert(1,{"people":num})
         tpl.render(x)
        
 
