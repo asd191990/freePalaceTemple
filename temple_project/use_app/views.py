@@ -91,12 +91,41 @@ def validate_people_all_date(request):
     Get_home_id = Home.objects.get(home_phone=get_phone).id
     the_data = People_data.objects.filter(home_id=Get_home_id)
     get_allname_array = []
-    for i in range(the_data.count()):
-        get_allname_array.append(the_data[i].name + "|" +
-                                 the_data[i].birthday.strftime('%Y年%m月%d號%H時'))
+    for i in range(the_data.count()):        
+        set_birthday = the_data[i].birthday.strftime('%Y年%m月%d號')
+        set_hour =  the_data[i].birthday.hour
+        set_birthday +="　" + str(hour_string(int(set_hour))) 
+        get_allname_array.append(the_data[i].name + "|" + set_birthday)
 
     data = {"reslut": '㊣'.join(get_allname_array)}
     return JsonResponse(data)
+def hour_string(x):
+    if x > 23 or x<=1:
+        return "子時"
+    elif x > 1 and x<=3:
+        return "丑時"
+    elif x > 3 and x<=5:
+        return "寅時"
+    elif x > 5 and x<=7:
+        return "卯時"
+    elif x > 7 and x<=9:
+        return "辰時"
+    elif x > 9 and x<=11:
+        return "巳時"
+    elif x > 11 and x<=13:
+        return "午時"
+    elif x > 13 and x<=15:
+        return "未時"
+    elif x > 15 and x<= 17:
+        return "申時"
+    elif x > 17 and x<= 19:
+        return "酉時"
+    elif x > 19 and x<=21:
+        return "戌時"
+    elif x > 21 and x<=23:
+        return "亥時"
+
+    return "wait"
 
 
 def logout(request):
@@ -529,6 +558,7 @@ def validate_submit(request):
 
         if not find_yes_no:
             os.makedirs(find_folder)
+        tpl.save(r"C:\Users\asd19\temple_project\output\file0.docx")
         
         find_num = 0
         while(True):
