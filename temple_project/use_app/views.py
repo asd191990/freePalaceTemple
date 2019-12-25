@@ -517,7 +517,7 @@ def people_form(request):
     context = locals()
     return render(request, "people_add.html", context)
 
-
+import uuid
 def validate_submit(request):
 
     use_file = request.GET.get("use_file", None)
@@ -557,20 +557,18 @@ def validate_submit(request):
         find_yes_no = os.path.exists(find_folder)
 
         if not find_yes_no:
-            os.makedirs(find_folder)
-        tpl.save(r"C:\Users\asd19\temple_project\output\file0.docx")
-        
-        find_num = 0
+            os.makedirs(find_folder) 
+
         while(True):
-            find_x =  os.path.join(find_folder,"file"+ str(find_num) +".docx") 
+            random_string =str(uuid.uuid4())
+            find_x =  os.path.join(find_folder,random_string +".docx") 
             if not os.path.exists(find_x):
                 tpl.save(find_x)
                 doc = word.Documents.Open(find_x)
-                find_y = os.path.join(find_folder,"file"+ str(find_num) +"_to_pdf") 
+                find_y = os.path.join(find_folder,  str(uuid.uuid4()) +"_to_pdf")
                 doc.SaveAs(find_y,FileFormat=17)
                 os.system(find_y +".pdf")
                 break
-            find_num += 1
           
         
         doc.Close()
