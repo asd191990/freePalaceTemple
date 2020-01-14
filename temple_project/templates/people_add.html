@@ -85,34 +85,6 @@
                 }
             });
 
-            $(".del").click(function () {
-
-                if (confirm("確定刪除此香客資料嗎？")) {
-                    get_value = $(this).attr("value").split("▲")
-
-                    $.ajax({
-                        url: '{% url "validate_people_del" %}',
-
-                        data: {
-                            "home_id": get_value[0],
-                            "del_name": get_value[1]
-                        },
-                        dataType: 'json',
-                        success: function (data) {
-                            if (data.is_taken) {
-                                alert(data.result);
-                                window.location.reload()
-                            } else {
-                                alert(data.error_message)
-                            }
-                        }
-                    })
-                }
-                else {
-                    alert("已取消");
-                }
-
-            });
 
         })
 
@@ -123,7 +95,6 @@
 <body>
     <div style="margin-left:50px;">
         {{display_home}} {% csrf_token %}
-        {% if one_two %}
 
         <form method='POST' enctype="multipart/form-data">
             {% csrf_token %} 選擇家庭為: {{x_try}} <br>
@@ -132,14 +103,15 @@
                 {{ form.as_table }}
                 <br>
             </div>
-
+            
             <div><input class="btn btn-outline-dark" type="submit" value="送出" /> <button type="button"
                     class="btn btn-outline-dark" onclick="ShowMeDate()">增加欄位</button> </div>
+                    {{use_bug}}
         </form>
         <br>
         <hr>
         <h2>{{ get_x }}已經有:</h2>
-        {% if get_all_data.all %}
+        {% if people_all %}
         <br>
         <table class="table">
             <thead>
@@ -150,7 +122,7 @@
                     <th scope="col">功能</th>
             </thead>
             <tbody>
-                {% for c in get_all_data.all %}
+                {% for c in people_all %}
                 <tr>
                     <td id={{c.name}}> {{ c.name }} </td>
                     <td id={{c.name}}{{c.birthday}}> {{ c.birthday|date:"Y 年 / m 月 / d 日 / H 時" }} </td>
@@ -162,7 +134,7 @@
                     <td>
                         <button class="btn btn-success fix"
                             value="{{c.name}}/{{c.gender}}/{{c.birthday}}/{{c.home_id}}"> 修改</button>
-                        <button class="btn btn-success del" value="{{c.home_id}}▲{{c.name}}"> 刪除</button>
+                      <a href="home_del/{{c.home_id}}/{{c.pk}}">  <button class="btn btn-success del" value="{{c.home_id}}▲{{c.name}}"> 刪除</button> </a> 
                     </td>
                 </tr>
                 {% endfor %}
@@ -170,14 +142,8 @@
         </table>
         {% else %}
         <p>無資料</p>
-        {% endif %} {% else %}
-
-        <form method='POST'>
-            {% csrf_token %} {{find_home_form.as_table}}
-            <input class="btn btn-outline-dark" type="submit" value="搜尋">
-            <form>
-
-                {% endif %}
+        {% endif %} 
+     
     </div>
     {{bug_bug}}
     <p>{{x_bug}}</p>

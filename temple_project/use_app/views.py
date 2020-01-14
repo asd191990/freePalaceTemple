@@ -24,6 +24,8 @@ from docx.enum.section import WD_ORIENT
 from docx import Document
 
 
+
+
 @login_required
 def x_try(request):
     file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,6 +61,10 @@ def x_try(request):
 
 
 
+
+def home_page(request,pk):
+
+    return render(request,"index.html",locals())
 
 def download(request):
     file = open('crm/models.py', 'rb')
@@ -437,40 +443,25 @@ def process_haveno_blank(get_list):
     return True
 
 
+def home_del(request,pk,people_id):
+    People_data.objects.filter(home_id=pk,pk=people_id).delete()
+    return HttpResponseRedirect(reverse('home',  kwargs={'pk':pk}));
+
+    
+
 @login_required(login_url='/use_login')
-def people_form(request):
+def people_form(request,pk):
     form = peopleform(request.POST or None)
-    find_home_form = find_home(request.POST or None)
+    
+
+    people_all = People_data.objects.filter(home_id=pk)
+
+    x_try = Home.objects.get(pk=pk).home_phone
 
     title_one = "香客名字"
     title_two = "香客生日"
     title_three = "香客性別"
     get_x = "此家庭香客"
-
-    try:
-        get = Home.objects.get(home_phone=request.POST["homephone"])
-        get_all_data = People_data.objects.filter(home_id=get.id)  # 表單資料
-    except:
-        pass
-
-    try:
-        if request.method == "POST" and request.POST["homephone"] != "":
-            try:
-                get_find_home = Home.objects.get(
-                    home_phone=request.POST["homephone"])
-
-                x_try = request.POST["homephone"]
-
-                request.session['get_home_id'] = get_find_home.id
-
-                request.session['get_home_num'] = request.POST["homephone"]
-
-                one_two = True
-            except Exception as e:
-                x_bug = "搜尋不到此家庭"
-
-    except:
-        pass
 
     if request.method == "POST" and request.POST.getlist('name'):
 
@@ -480,38 +471,23 @@ def people_form(request):
 
         if process_haveno_blank(get_all_birthday) and process_haveno_blank(
                 get_all_gender) and process_haveno_blank(get_all_name):
-
+            use_bug = ""
             for i in range(len(get_all_name)):
-                try:
+          
+                x_bug = ""
 
-                    x_bug = ""
-
-                    if get_all_name[i] != "" and (People_data.objects.filter(
-                            home_id=request.session['get_home_id']).filter(
-                                name=get_all_name[i]).count() == 0):
-                        People_data.objects.create(
+                if (People_data.objects.filter(home_id=pk).filter(name=get_all_name[i]).count() == 0):
+                    People_data.objects.create(
                             name=get_all_name[i].replace(" ", ""),
                             birthday=get_all_birthday[i],
                             gender=get_all_gender[i],
-                            home_id=request.session['get_home_id'])
-                    else:
-                        if get_all_name[i] == "":
-                            x_bug += "禁止空白\n"
-                        else:
-                            x_bug += get_all_name[i] + "的名字有重複 \n"
-
-                    if x_bug == "":
-                        x_bug = "已經送出"
-                    else:
-                        if len(get_all_name) >= 2:
-                            x_bug += "其他正確資料已經送出"
-
-                except Exception as e:
-                    x_bug = ""  # e    # len(get_all_gender)
-
+                            home_id=pk)
+                else:
+                    use_bug += get_all_name[i] + " "
+            form = peopleform(None)
+            if use_bug !="":
+                use_bug = "名字重複的名單有:" + use_bug 
         else:
-            one_two = True
-            x_try = request.session['get_home_num']
             x_bug = "請輸入全部欄位"
 
     context = locals()

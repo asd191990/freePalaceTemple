@@ -36,14 +36,14 @@ class activity_form(forms.Form):
 
 class homeform(forms.Form):
     address = forms.CharField(label="地址")
-    phone = forms.CharField(label="家庭電話",
-                            validators=[
-                                validators.RegexValidator(
-                                    "^\d{2}-?\d{3}-?\d{4}$",
-                                    message='請輸入正確格式的電話號碼！')
-                            ])
+    phone = forms.CharField(label="家庭電話")
 
-
+# ,
+#                             validators=[
+#                                 validators.RegexValidator(
+#                                     "^\d{2}-?\d{3}-?\d{4}$",
+#                                     message='請輸入正確格式的電話號碼！')
+#                             ]
 class peopleform(forms.Form):
     name = forms.CharField(required=False, label="輸入香客名稱",max_length=20)
     birthday = forms.DateTimeField(

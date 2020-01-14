@@ -77,9 +77,9 @@
 
             var check_login = function () {
                 let new_phone = $("#phone").val()
-                let re = /^\d{2}-?\d{3}-?\d{4}$/
-                if( re.test(new_phone))
-                {
+                // let re = /^\d{2}-?\d{3}-?\d{4}$/
+                // if( re.test(new_phone))
+                // {}
                 let new_address = $("#address").val()                
                 $.ajax({
                     url: '{% url "validate_username" %}',
@@ -104,10 +104,10 @@
                         }
                     }
                 })                
-                $(this).dialog("close");}
-                else{
-                    alert("家庭電話錯誤")
-                }
+                $(this).dialog("close");
+                // else{
+                //     alert("家庭電話錯誤")
+                // }
 
             }
 
@@ -190,8 +190,9 @@
                     {% endif %} {% if c.name_id %}
                     <td> {{ c.name_id }} </td>
                     {% endif %}
-                    <td><button class="btn btn-info fix" value="{{c.address}}/{{c.home_phone }}">修改 </button>
-                        <button class="btn btn-info del" value="{{c.home_phone}}">刪除 </button> </td>
+                    <td><a href="home/{{c.pk}}" ><button class="btn btn-info fix" >新增此家庭的香客</button></a>
+                        <button class="btn btn-info fix" value="{{c.address}}/{{c.home_phone }}">修改此家庭資訊 </button>
+                        <button class="btn btn-info del" value="{{c.home_phone}}">刪除此家庭 </button> </td>
                 </tr>
                 {% endfor %}
             </tbody>

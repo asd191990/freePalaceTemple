@@ -19,8 +19,9 @@ from django.urls import path, re_path
 
 from . import views
 urlpatterns = [
+    path("home/home_del/<int:pk>/<int:people_id>",views.home_del),
     path('', views.index),
-    path('people_register', views.people_form),
+    path("home/<int:pk>",views.people_form,name= "home"),
     path('activity_register', views.activityform),
     path('home_register', views.home_form),
     path('join_activity', views.join_activity),
