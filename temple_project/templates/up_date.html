@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}
+首頁
+
+{% endblock  %}
+
+{% block message %}
+<div style="margin-left:50px;">
+
+    上傳檔案 <br><br>
+    <form method="post" enctype="multipart/form-data">
+        {%csrf_token%}
+        <p><input type="file" name="upload"></p>
+        <p><input type="submit" value="submit"></p>
+    </form>
+
+</div>
+
+{% endblock  %}

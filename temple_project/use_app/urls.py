@@ -22,7 +22,6 @@ urlpatterns = [
     path("home/home_del/<int:pk>/<int:people_id>",views.home_del),
     path('', views.index),
     path("home/<int:pk>",views.people_form,name= "home"),
-    path('activity_register', views.activityform),
     path('home_register', views.home_form),
     path('join_activity', views.join_activity),
     path("register",views.register),
@@ -38,10 +37,8 @@ urlpatterns = [
     path('ajax/validate_get_people', views.validate_get_Home, name='validate_get_Home'),
     path('ajax/validate_people_all_date', views.validate_people_all_date, name='validate_people_all_date'),
     path('ajax/validate_submit', views.validate_submit, name='validate_submit'),
-    path('ajax/validate_file', views.validate_file, name='validate_file'),
-    path('ajax/validate_remove_file', views.validate_remove_file, name='validate_remove_file'),    
+  
     path('ajax/validate_get_table', views.validate_get_table, name='validate_get_table'),
-    path('ajax/validate_file_other', views.validate_file_other, name='validate_file_other'),
-    path('dowload',views.download,name="download"),
+    path('csv_add',views.csv_add,name="csv_add"),
     re_path(r".",views.index)    
 ]

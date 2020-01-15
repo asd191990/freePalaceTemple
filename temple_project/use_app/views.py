@@ -2,7 +2,7 @@ from datetime import date
 import datetime
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect, render_to_response, redirect
 from django.http import JsonResponse
-from .forms import homeform, peopleform, find_home, activity_form, choose_form, login_form
+from .forms import homeform, peopleform, activity_form, choose_form, login_form,fix_peopleform,UploadFileForm
 
 from .models import Home, People_data, activity_data
 
@@ -62,16 +62,32 @@ def x_try(request):
 
 
 
+import csv
+def csv_add(request):
+    use_form = UploadFileForm(request.POST or None)
+    if(request.method == "POST"):
+        obj = request.FILES.get('upload')
+        #uploaddir = os.path.join(settings.MEDIA_ROOT, 'p_w_picpaths/')
+
+        fobj = open(obj.name, 'wb')
+        for line in obj.chunks():  # 分塊拿上傳資料
+            fobj.write(line)
+        fobj.close()
+        with open(obj.name, newline='') as csvfile:
+
+        # 讀取 CSV 檔案內容   
+            rows = csv.reader(csvfile)
+
+        # 以迴圈輸出每一列
+            for row in rows:
+                print(row)
+
+    return render(request,"up_date.html",locals())
+
 def home_page(request,pk):
 
     return render(request,"index.html",locals())
 
-def download(request):
-    file = open('crm/models.py', 'rb')
-    response = HttpResponse(file)
-    response['Content-Type'] = 'application/octet-stream' #設定頭資訊，告訴瀏覽器這是個檔案
-    response['Content-Disposition'] = 'attachment;filename="models.py"'
-    return response
 
 def validate_get_table(request):
     use_file = request.GET.get("use_file", None)
@@ -105,6 +121,7 @@ def validate_people_all_date(request):
 
     data = {"reslut": '㊣'.join(get_allname_array)}
     return JsonResponse(data)
+
 def hour_string(x):
     if x > 23 or x<=1:
         return "子時"
@@ -179,32 +196,16 @@ def validate_people_data(request):
     new_birthday = request.GET.get("new_birthday", None)
     new_gender = request.GET.get("new_gender", None)
     home_id = request.GET.get("home_id", None)
-
+    time = request.GET.get("time", None)
     if old_name != new_name:
-        if People_data.objects.filter(home_id=home_id, name=new_name).exists():
-            data = {"is_taken": False, "error_message": "要更改的名字已經被註冊過了"}
-        else:
-            if new_birthday == "":
-                People_data.objects.filter(
-                    home_id=home_id, name=old_name).update(name=new_name,
-                                                           gender=new_gender)
-            else:
-                People_data.objects.filter(home_id=home_id,
-                                           name=old_name).update(
-                                               name=new_name,
-                                               birthday=new_birthday,
-                                               gender=new_gender)
-
-            data = {'is_taken': True, "result": "更改成功"}
+        data = {"is_taken": False, "error_message": "要更改的名字已經被註冊過了"}  
     else:
         if new_birthday == "":
-            People_data.objects.filter(home_id=home_id,
-                                       name=old_name).update(name=new_name,
-                                                             gender=new_gender)
+            People_data.objects.filter(home_id=home_id,name=old_name).update(name=new_name, gender=new_gender,time=time)
         else:
             People_data.objects.filter(home_id=home_id, name=old_name).update(
-                name=new_name, birthday=new_birthday, gender=new_gender)
-            data = {'is_taken': True, "result": "更改成功"}
+                name=new_name, birthday=new_birthday, gender=new_gender,time=time)
+        data = {'is_taken': True, "result": "更改成功"}
 
     return JsonResponse(data)
 
@@ -452,7 +453,7 @@ def home_del(request,pk,people_id):
 @login_required(login_url='/use_login')
 def people_form(request,pk):
     form = peopleform(request.POST or None)
-    
+    fix_form = fix_peopleform(None)
 
     people_all = People_data.objects.filter(home_id=pk)
 
@@ -468,9 +469,9 @@ def people_form(request,pk):
         get_all_name = request.POST.getlist('name')
         get_all_birthday = request.POST.getlist('birthday')
         get_all_gender = request.POST.getlist('gender')
+        get_all_time = request.POST.getlist('time')
 
-        if process_haveno_blank(get_all_birthday) and process_haveno_blank(
-                get_all_gender) and process_haveno_blank(get_all_name):
+        if process_haveno_blank(get_all_birthday) and process_haveno_blank(get_all_name):
             use_bug = ""
             for i in range(len(get_all_name)):
           
@@ -480,7 +481,7 @@ def people_form(request,pk):
                     People_data.objects.create(
                             name=get_all_name[i].replace(" ", ""),
                             birthday=get_all_birthday[i],
-                            gender=get_all_gender[i],
+                            gender=get_all_gender[i],time = get_all_time[i],
                             home_id=pk)
                 else:
                     use_bug += get_all_name[i] + " "

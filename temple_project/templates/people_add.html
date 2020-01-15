@@ -3,12 +3,7 @@
 <head>
     <div id="fix_box" hidden>
         <p>請輸入改動資料</p>
-        <p>姓名 : <input id="name" type="text"></p>
-        <p>生日: <input id="birthday" type="date"></p> 
-        <p>性別: <select id="gender">
-                <option value="female">女</option>
-                <option value="male">男</option>
-            </select> </p>
+        {{ fix_form.as_p}}
         <p>如沒有要改生日就不用輸入</p>
     </div>
 
@@ -24,6 +19,7 @@
             let old_bithday
             let get_home_id
             let set_button
+            let old_time 
 
             $(".fix").click(function (e) {
                 get_value = $(this).attr("value").split("/")
@@ -31,10 +27,12 @@
                 old_gender = get_value[1];
                 old_bithday = get_value[2];
                 get_home_id = get_value[3]
+                old_time = get_value[4]
                 set_button = this
-                $("#name").val(old_name);
-                $("#gender").val(old_gender);
-                $("#birthday").val(old_bithday);
+                $("#id_x_name").val(old_name);
+                $("#id_x_gender").val(old_gender);
+                $("#id_x_birthday").val(old_bithday);
+                $("#id_x_time").val(old_time.toString());
                 $("#fix_box").dialog("open");
                 e.preventDefault();
             });
@@ -42,10 +40,10 @@
 
 
             var check_login = function () {
-                let new_name = $("#name").val()
-                let new_birthday = $("#birthday").val().toString()
-                let new_gender = $("#gender").val()
-
+                let new_name = $("#id_x_name").val()
+                let new_birthday = $("#id_x_birthday").val().toString()
+                let new_gender = $("#id_x_gender").val()
+                let new_time = $("#id_x_time").val()
                 $.ajax({
                     url: '{% url "validate_people_data" %}',
 
@@ -54,7 +52,8 @@
                         "new_name": new_name,
                         "new_birthday": new_birthday,
                         "new_gender": new_gender,
-                        "home_id": get_home_id
+                        "home_id": get_home_id,
+                        "time": new_time
                     },
                     dataType: 'json',
                     success: function (data) {
@@ -118,6 +117,7 @@
                 <tr>
                     <th scope="col">{{title_one}}</th>
                     <th scope="col">{{title_two}}</th>
+                    <th scope="col">時辰</th>
                     <th scope="col">{{title_three}}</th>
                     <th scope="col">功能</th>
             </thead>
@@ -126,6 +126,7 @@
                 <tr>
                     <td id={{c.name}}> {{ c.name }} </td>
                     <td id={{c.name}}{{c.birthday}}> {{ c.birthday|date:"Y 年 / m 月 / d 日 / H 時" }} </td>
+                    <td>{{c.time}}</td>
                     {% if c.gender == "female" %}
                     <td id={{c.name}}{{c.gender}}> 女 </td>
                     {% else %}
@@ -133,7 +134,7 @@
                     {% endif %}
                     <td>
                         <button class="btn btn-success fix"
-                            value="{{c.name}}/{{c.gender}}/{{c.birthday}}/{{c.home_id}}"> 修改</button>
+                            value="{{c.name}}/{{c.gender}}/{{c.birthday}}/{{c.home_id}}/{{c.time}}"> 修改</button>
                       <a href="home_del/{{c.home_id}}/{{c.pk}}">  <button class="btn btn-success del" value="{{c.home_id}}▲{{c.name}}"> 刪除</button> </a> 
                     </td>
                 </tr>

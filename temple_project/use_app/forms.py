@@ -7,6 +7,8 @@ from django.db import models
 # from django.forms import ModelChoiceField
 from django.core import validators
 
+class UploadFileForm(forms.Form):
+    file = forms.FileField()
 
 class login_form(forms.Form):
 
@@ -18,9 +20,6 @@ class choose_form(forms.Form):
     activity_ID = forms.ModelChoiceField(label="請選擇活動名稱",initial=1,
         queryset=activity_data.objects.all()
     )
-
-class find_home(forms.Form):
-    homephone = forms.CharField(label="輸入家庭電話", max_length=20, required=False)
 
 
 class activity_form(forms.Form):
@@ -36,25 +35,47 @@ class activity_form(forms.Form):
 
 class homeform(forms.Form):
     address = forms.CharField(label="地址")
-    phone = forms.CharField(label="家庭電話")
-
-# ,
-#                             validators=[
-#                                 validators.RegexValidator(
-#                                     "^\d{2}-?\d{3}-?\d{4}$",
-#                                     message='請輸入正確格式的電話號碼！')
-#                             ]
+    phone = forms.CharField(label="家庭電話"   
+,
+                            validators=[
+                                validators.RegexValidator(
+                                    "(^\d{2}-?\d{3}-?\d{4}$)|(^d{10}$)",
+                                    message='請輸入正確格式的電話號碼！')
+                            ])
 class peopleform(forms.Form):
     name = forms.CharField(required=False, label="輸入香客名稱",max_length=20)
     birthday = forms.DateTimeField(
         label="生日",
         required=False,
-        widget=forms.TextInput(attrs={'type': 'datetime-local'}))
+        widget=forms.TextInput(attrs={'type': 'date'}))
+    time = forms.ChoiceField(label='時辰',
+                               required=False,
+                               choices=(('子', '子'), ('丑', '丑'), ('寅', '寅'), ('卯', '卯'), ('辰', '辰'), ('巳', '巳'), ('午', '午'), ('未', '未'), ('申', '申'), ('酉', '酉'), ('戌', '戌'), ('亥', '亥')),
+                               initial="子",
+                               widget=forms.widgets.Select())  
     gender = forms.ChoiceField(label='性別',
                                required=False,
                                choices=(('male', '男'), ('female', '女')),
                                initial="男",
                                widget=forms.widgets.Select())
+
+class fix_peopleform(forms.Form):
+    x_name = forms.CharField(required=False, label="輸入香客名稱",max_length=20)
+    x_birthday = forms.DateTimeField(
+        label="生日",
+        required=False,
+        widget=forms.TextInput(attrs={'type': 'date'}))
+    x_time = forms.ChoiceField(label='時辰',
+                               required=False,
+                               choices=(('子', '子'), ('丑', '丑'), ('寅', '寅'), ('卯', '卯'), ('辰', '辰'), ('巳', '巳'), ('午', '午'), ('未', '未'), ('申', '申'), ('酉', '酉'), ('戌', '戌'), ('亥', '亥')),
+                               initial="子",
+                               widget=forms.widgets.Select())  
+    x_gender = forms.ChoiceField(label='性別',
+                               required=False,
+                               choices=(('male', '男'), ('female', '女')),
+                               initial="男",
+                               widget=forms.widgets.Select())
+
     # homephone = forms.CharField(
     #     label="輸入家庭電話"
     # )

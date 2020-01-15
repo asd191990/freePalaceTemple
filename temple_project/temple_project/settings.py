@@ -128,3 +128,5 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "files")
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers' + '.PickleSerializer'
+MEDIA_URL = '/upload/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'upload')
