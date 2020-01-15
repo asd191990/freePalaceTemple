@@ -16,7 +16,6 @@ import os
 import json
 from django.contrib.auth.decorators import login_required
 
-import os
 import comtypes.client
 
 from docxtpl import DocxTemplate
@@ -24,6 +23,7 @@ from docx.enum.section import WD_ORIENT
 from docx import Document
 
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 @login_required
@@ -59,9 +59,6 @@ def x_try(request):
         
     return render(request, "try.html", locals())
 
-
-
-
 import csv
 def csv_add(request):
     use_form = UploadFileForm(request.POST or None)
@@ -69,7 +66,7 @@ def csv_add(request):
         obj = request.FILES.get('upload')
         #uploaddir = os.path.join(settings.MEDIA_ROOT, 'p_w_picpaths/')
 
-        fobj = open(obj.name, 'wb')
+        fobj = open(os.path.join(BASE_DIR,"people",obj.name), 'wb')
         for line in obj.chunks():  # 分塊拿上傳資料
             fobj.write(line)
         fobj.close()
