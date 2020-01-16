@@ -7,8 +7,6 @@ from django.db import models
 # from django.forms import ModelChoiceField
 from django.core import validators
 
-class UploadFileForm(forms.Form):
-    file = forms.FileField()
 
 class login_form(forms.Form):
 

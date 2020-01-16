@@ -11,10 +11,14 @@
     上傳檔案 <br><br>
     <form method="post" enctype="multipart/form-data">
         {%csrf_token%}
-        <p><input type="file" name="upload"></p>
-        <p><input type="submit" value="submit"></p>
+        請輸入家庭檔案
+        <p><input type="file" name="home"></p>
+        請輸入人員檔案
+        <p><input type="file" name="people"></p>        
+        <p><input type="submit" value="送出"></p>
     </form>
 
+    <span style="color:red">{{error}}</span>
 </div>
 
 {% endblock  %}

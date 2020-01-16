@@ -2,7 +2,7 @@ from datetime import date
 import datetime
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect, render_to_response, redirect
 from django.http import JsonResponse
-from .forms import homeform, peopleform, activity_form, choose_form, login_form,fix_peopleform,UploadFileForm
+from .forms import homeform, peopleform, activity_form, choose_form, login_form,fix_peopleform
 
 from .models import Home, People_data, activity_data
 
@@ -17,6 +17,7 @@ import json
 from django.contrib.auth.decorators import login_required
 
 import comtypes.client
+import time
 
 from docxtpl import DocxTemplate
 from docx.enum.section import WD_ORIENT
@@ -61,25 +62,64 @@ def x_try(request):
 
 import csv
 def csv_add(request):
-    use_form = UploadFileForm(request.POST or None)
+   
     if(request.method == "POST"):
-        obj = request.FILES.get('upload')
-        #uploaddir = os.path.join(settings.MEDIA_ROOT, 'p_w_picpaths/')
+        homes = request.FILES.get('home')
+        people = request.FILES.get('people')
 
-        fobj = open(os.path.join(BASE_DIR,"people",obj.name), 'wb')
-        for line in obj.chunks():  # 分塊拿上傳資料
+        if homes =="" or people =="":
+            error = "請一次輸入兩個檔案"
+            return render(request,"up_date.html",locals())
+
+        if homes.name.split(".")[-1] != "csv" and people.name.split(".")[-1] != "csv" :
+            error = "請輸入csv檔"
+            return render(request,"up_date.html",locals())
+
+
+        fobj = open(os.path.join(BASE_DIR,"people",homes.name), 'wb')
+        for line in homes.chunks():
             fobj.write(line)
         fobj.close()
-        with open(obj.name, newline='') as csvfile:
 
-        # 讀取 CSV 檔案內容   
-            rows = csv.reader(csvfile)
-
-        # 以迴圈輸出每一列
-            for row in rows:
-                print(row)
+        fobj = open(os.path.join(BASE_DIR,"people",people.name), 'wb')
+        for line in people.chunks():
+            fobj.write(line)
+        fobj.close()
+        
+        use_path = os.path.join(BASE_DIR,"people")
+        home_path=os.path.join(use_path, homes.name)
+        people_path = os.path.join(use_path, people.name)
+        with open(home_path, newline='') as csvfile:
+            
+            homes = csv.reader(csvfile)
+               
+            one = 0
+               
+            for row in homes:
+                    
+                if one != 0:
+                    if not Home.objects.filter(home_phone=row[0]).exists():
+                        Home.objects.create(home_phone=row[0],address=row[1])                        
+                    
+                    home_id = Home.objects.get(home_phone=row[0]).pk                        
+                    with open(people_path, newline='') as peoplefile:
+                        peoples = csv.reader(peoplefile)
+                        for people in peoples:                                               
+                            if people[0] !="信眾名字" :
+                                print("e")                         
+                                if row[0] == people[4]:
+                                    people[1] = people[1].replace("/", "-")
+                                    if people[3] == "男":
+                                        people[3]= "male"
+                                    else:
+                                        people[3]="female"
+                                    if not People_data.objects.filter(home_id = home_id,name=people[0]).exists():                                       
+                                        People_data.objects.create(name=people[0],birthday= people[1],time=people[2],gender=people[3],home_id=home_id)
+                one = 1
+                    
 
     return render(request,"up_date.html",locals())
+
 
 def home_page(request,pk):
 
