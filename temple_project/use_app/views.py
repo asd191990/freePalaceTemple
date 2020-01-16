@@ -22,45 +22,36 @@ import time
 from docxtpl import DocxTemplate
 from docx.enum.section import WD_ORIENT
 from docx import Document
-
+import csv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 @login_required
 def x_try(request):
-    file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    find_folder = os.path.join(file_location, "output")
-
-    x={'bye': [[[{'table_name': '點光明燈者'}, [{'table_data': '陳閔致、曹美雲'}]], [{'table_name': '安奉太歲星君者'}, [{'table_data': '楊逸凡 ── 2017年10月27號18時'}, {'table_data': '劉美惠 ── 2012年01月28號04時'}, {'table_data': '蕭孟勳 ── 2019年01月01號10時'}, {'table_data': '曹美雲 ── 2019年12月09號05時'}]]], [[{'table_name': '安奉太歲星君者'}, [{'table_data': '張珊財 ── 1989年03月15號22時'}, {'table_data': '謝純鑫 ── 2013年04月15號14時'}]], [{'table_name': '安奉財神燈者'}, [{'table_data': '曹志嘉 ── 2011年07月04號20時'}, {'table_data': '陳依光 ── 2007年09月11號06時'}, {'table_data': '陳恭宜 ── 2020年10月27號18時'}]]], [[{'table_name': '點光明燈者'}, [{'table_data': '李雅婷、雅文、陳家銘'}]], [{'table_name': '安奉文昌燈者'}, [{'table_data': '雅文 ── 2020年10月28號21時'}, {'table_data': '李雅婷 ── 2016年12月29號04時'}, {'table_data': '許雅喜 ── 2017年02月18號17時'}]]]], 'title': '各種燈', 'today': '2019-12-23'}
+    x={}
+    x["z"]=[{'people': ['柯星雯本命年月日生行庚歲', '楊逸凡本命年月日生行庚歲', '測試名本命年月日生行庚歲'], 'address': '048544412', 'one_people': '測試名'}, {'people': ['羅弘寧本命年月日生行庚歲', '李冰茜本命年月日生行庚歲', '蔣原杰本命年月日生行庚歲'], 'address': '048548888', 'one_people': '蔣原杰'}, {'people': ['李雅婷本命年月日生行庚歲', '雅文本命年月日生行庚歲'], 'address': '077632214', 'one_people': '雅文'}]
     #{"bye":[[[{"table_name":"點光明燈者"},[{"table_data":"陳閔致、曹美雲、蕭孟勳、劉美惠、柯星雯、楊逸凡、楊雅嵐"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"陳恭宜、陳依光、曹志嘉、謝純鑫"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"許雅喜、李雅婷、雅文"}]]]]}
     try:
-        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\廟口案子\祈安植福文疏.docx")
-        y = x
-        day = str(date.today())
-        y["today"] = day        
-        d=y["bye"][2][1][0]
-        for w in range(len(y["bye"])):
-            
-            for t in range(len(y["bye"][w])):
-                num = 0 
-                for m in range(len(y["bye"][w][t][1])):
-                    get_string =y["bye"][w][t][1][m]["table_data"]
-                    num += len(get_string.split("、"))
-                y["bye"][w][t].insert(1,{"people":num})
-                                            
-      #      y["bye"][w][0].insert(1,{"people":num})
-
-   #     d = y
-  #      d=y["bye"][2][1][1]
-        tpl.render(y)
-        tpl.save(r"C:\Users\asd19\Downloads\廟口案子\tryw.docx")
+        for c in x["z"]:
+            c["address"] = Home.objects.get(home_phone=c["address"]).address
+    
+        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode1.docx")
+        x["year"] = "當年未處理"
+        x["title"] = "標題 未處理"
+        tpl.render(x)
+        tpl.save(r"C:\Users\asd19\Downloads\tryw.docx")
+        os.system(r"C:\Users\asd19\Downloads\tryw.docx")
     except Exception as e:
-        x = e
+        cc = e
         
     return render(request, "try.html", locals())
 
-import csv
+def new(request):
+    x_form = choose_form(request.POST or None)
+    x_max = Home.objects.all().count()
+    return render(request,"join_activity.html", locals())
+
 def csv_add(request):
    
     if(request.method == "POST"):
@@ -150,11 +141,9 @@ def validate_people_all_date(request):
     Get_home_id = Home.objects.get(home_phone=get_phone).id
     the_data = People_data.objects.filter(home_id=Get_home_id)
     get_allname_array = []
-    for i in range(the_data.count()):        
-        set_birthday = the_data[i].birthday.strftime('%Y年%m月%d號')
-        set_hour =  the_data[i].birthday.hour
-        set_birthday +="　" + str(hour_string(int(set_hour))) 
-        get_allname_array.append(the_data[i].name + "|" + set_birthday)
+    for i in range(len(the_data)):
+        output = the_data[i].name + "本命" + "年" + "月"+"日" + "生行庚"+"歲"
+        get_allname_array.append(the_data[i].name + "|" + output + "|" + "F")
 
     data = {"reslut": '㊣'.join(get_allname_array)}
     return JsonResponse(data)
@@ -252,8 +241,9 @@ def validate_date(request):
         home_phone__contains=request.GET.get("find_value", None))
     find_format = []
     for i in range(len(find_data)):
+       
         find_format.append(find_data[i].home_phone + "/" +
-                           find_data[i].address)
+                           find_data[i].address + "/" +str(find_data[i].pk))
     date = {"find_format": find_format}
     return JsonResponse(date)
 
@@ -428,10 +418,9 @@ def index(request):
 
 @login_required(login_url='/use_login')
 def join_activity(request):
-    x_form = choose_form(request.POST or None)
-    x_max = Home.objects.all().count()
+ 
     context = locals()
-    return render(request, "join_activity.html", context)
+    return render(request, "choose.html", context)
 
 
 import docx
@@ -534,59 +523,49 @@ def people_form(request,pk):
 import uuid
 def validate_submit(request):
 
-    use_file = request.GET.get("use_file", None)
 
-    get_activity_ID = ""
-    get_activity_ID = activity_data.objects.get(id=use_file)
 
-    # data = {"result": request.GET.get("all_data", None)}
-    # return JsonResponse(data)
     try:
-        tpl = DocxTemplate(get_activity_ID.use_file)
-        #tpl = DocxTemplate(r'C:\Users\asd19\Downloads\one.docx')
-        x = request.GET.get("all_data", None)
-        x = json.loads(x)
-        x["title"] = request.GET.get("title", None)
-        day = str(date.today())
-        x["today"] = day    
-        #data = {"result": str(x)}
-        #return JsonResponse(data)
-
-        for w in range(len(x["bye"])):
-            for t in range(len(x["bye"][w])):
-                num = 0 
-                for m in range(len(x["bye"][w][t][1])):
-                    get_string =x["bye"][w][t][1][m]["table_data"]
-                    num += len(get_string.split("、"))
-                x["bye"][w][t].insert(1,{"people":num})
-        tpl.render(x)
+        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode1.docx")
+        x = json.loads(request.GET.get("all_data", None))
+       # x["title"] = request.GET.get("title", None)
+       # x["year"] = "未處理"
+        print(x)
+        # for w in range(len(x["bye"])):
+        #     for t in range(len(x["bye"][w])):
+        #         num = 0 
+        #         for m in range(len(x["bye"][w][t][1])):
+        #             get_string =x["bye"][w][t][1][m]["table_data"]
+        #             num += len(get_string.split("、"))
+        #         x["bye"][w][t].insert(1,{"people":num})
+        # tpl.render(x)
        
 
 
-        comtypes.CoInitialize()  #轉pdf
-        word = comtypes.client.CreateObject('Word.Application')
+        # comtypes.CoInitialize()  #轉pdf
+        # word = comtypes.client.CreateObject('Word.Application')
 
-        file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        find_folder = os.path.join(file_location, "output")
-        find_yes_no = os.path.exists(find_folder)
+        # file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # find_folder = os.path.join(file_location, "output")
+        # find_yes_no = os.path.exists(find_folder)
 
-        if not find_yes_no:
-            os.makedirs(find_folder) 
+        # if not find_yes_no:
+        #     os.makedirs(find_folder) 
 
-        while(True):
-            random_string =str(uuid.uuid4())
-            find_x =  os.path.join(find_folder,random_string +".docx") 
-            if not os.path.exists(find_x):
-                tpl.save(find_x)
-                doc = word.Documents.Open(find_x)
-                find_y = os.path.join(find_folder,  str(uuid.uuid4()) +"_to_pdf")
-                doc.SaveAs(find_y,FileFormat=17)
-                os.system(find_y +".pdf")
-                break
+        # while(True):
+        #     random_string =str(uuid.uuid4())
+        #     find_x =  os.path.join(find_folder,random_string +".docx") 
+        #     if not os.path.exists(find_x):
+        #         tpl.save(find_x)
+        #         doc = word.Documents.Open(find_x)
+        #         find_y = os.path.join(find_folder,  str(uuid.uuid4()) +"_to_pdf")
+        #         doc.SaveAs(find_y,FileFormat=17)
+        #         os.system(find_y +".pdf")
+        #         break
           
         
-        doc.Close()
-        word.Quit()
+        # doc.Close()
+        # word.Quit()
         data = {"result": "已經送出"}
 
 

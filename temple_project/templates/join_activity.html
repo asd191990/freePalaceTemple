@@ -15,8 +15,9 @@
     <script>
         let use_page = 0;
         let page_array = []
-        let table_set_array = []
+
         let all_people_list = []
+
         $(document).ready(function () {
             let start = 1;
             let max_end = "{{x_max}}";
@@ -26,64 +27,27 @@
             $("#id_people_open").val("1")
             $("#id_people_end").val("{{x_max}}")
 
-            $("#id_activity_ID").change(function () {
-
-                use_page = 0
-                show_page_text()
-                initialization()
-                switch_file()
-                $("#page_use_phone").text("當前使用的是" + page_array[0] + "的電話")
-            })
-
-            class people_value {
-                constructor(name, age) {
-                    this.name = name
-                    this.age = age === null ? "" : age
-                    this.input = [] //把表單名字放進去 用名字查詢                    
-                }
-                name() {
-                    return this.name
-                }
-
-                output() {
-                    return this.input
-                }
-            }
-
 
             $("#determine,#left,#rigth,#submit").click(function () { //用名字找陣列的資料
-                let have_up_date = false
-                for (let i = 0; i < table_set_array.length; i++) {  //判斷表格 
+                $("input[name=people" + 1 + "]").each(function () { // 顯示value 用 for迴圈找
 
-                    $("input[name=people" + i + "]").each(function () { // 顯示value 用 for迴圈找
+                    for (let j = 0; j < all_people_list[use_page].length; j++) { //迴圈一個一個對比 value 跟人名
 
-                        for (let j = 0; j < all_people_list[use_page].length; j++) { //迴圈一個一個對比 value 跟人名
-
-                            if (all_people_list[use_page][j].name == $(this).attr("value")) {
-
-                                let find_index = all_people_list[use_page][j].input.indexOf(table_set_array[i][0])
-                                if ($(this).prop('checked')) {//先判斷有沒有勾選 有勾選時 判斷有沒有再input裡面了
-                                    if (find_index === -1) { //沒有找到時 新增進input                                    
-                                        all_people_list[use_page][j].input.push(table_set_array[i][0])
-                                        have_up_date = true
-                                        //  alert(all_people_list[use_page][j].name + " u " + all_people_list[use_page][j].output())
-                                    }
+                        if (all_people_list[use_page][j][0] == $(this).attr("value")) {
+                            let find_index = all_people_list[use_page][j][2]
+                            if ($(this).prop('checked')) {//先判斷有沒有勾選 有勾選時 判斷有沒有再input裡面了
+                                if (find_index === "F") { //沒有找到時 新增進input                                    
+                                    all_people_list[use_page][j][2] = "T"
                                 }
-                                else {// 如果沒有勾選判斷有沒有再input裡面 如果有要移除。 如果有就新增
-                                    if (find_index !== -1) {
-                                        have_up_date = true
-                                        all_people_list[use_page][j].input.splice(find_index, 1)
-                                        // alert(all_people_list[use_page][j].name + " u " + all_people_list[use_page][j].output())
-                                        // alert(all_people_list[use_page][j].name + " remove " + table_set_array[i][0])
-                                    }
+                            }
+                            else {// 如果沒有勾選判斷有沒有再input裡面 如果有要移除。 如果有就新增
+                                if (find_index === "T") {
+                                    all_people_list[use_page][j][2] = "F"
                                 }
                             }
                         }
-
-                    });
-                }
-                if (have_up_date)
-                    alert("已暫儲")
+                    }
+                });
             })
 
 
@@ -93,30 +57,11 @@
                 if (use_page < start || use_page > parseInt(end))
                     use_page = start - 1
                 $("#page").val(parseInt(use_page) + 1);
-                switch_file()
+
             }
 
             initialization()
             set_page_start_end()
-
-            function table_initialization() {
-                table_set_array = []
-                $.ajax({
-                    url: '{% url "validate_get_table" %}',
-                    async: false,
-                    data: {
-                        "use_file": $("#id_activity_ID").val() //傳給後臺檔案代碼
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        table_array = data.reslut.split("、") //得到所有欄位
-                        for (let i = 0; i < table_array.length; i++) {
-                            let set_array = table_array[i].split("_") //表格是否用生日用 T/F 判斷
-                            table_set_array.push(set_array)
-                        }
-                    }
-                });
-            }
 
             function initialization() {
 
@@ -132,35 +77,9 @@
                         page_array = data.reslut.split(" ")
                     }
                 });
-                table_initialization()
                 all_people_list = get_people_list()
                 $("#page_use_phone").text("當前使用的是" + page_array[0] + "的電話")
-            }
-            function switch_file() {
-                $("#table_list").empty();
                 show_people()
-            }
-
-            function show_people() {
-                for (let i = 0; i < table_set_array.length; i++) {  //把每個欄位都帶進去
-                    people_list = "" //得到一串香客點選的文字html                    
-                    if (all_people_list[use_page][0].name === "") {
-                        people_list = "無香客資料"
-                    } else {
-                        for (let j = 0; j < all_people_list[use_page].length; j++) {   //name用 people+i 分辨群組                           
-                            check_yes_no = " checked=checked"
-
-                            if (all_people_list[use_page][j].output().indexOf(table_set_array[i][0]) === -1) {
-                                check_yes_no = ""
-                            }
-                            people_list += '<input type="checkbox" ' + check_yes_no + ' name="people' + i + '"value=' + all_people_list[use_page][j].name + '>' + all_people_list[use_page][j].name + '<br>'
-                        }
-                    }
-                    var txt1 = '<div style=" background-color:#82FF82; margin: 10px ;width:flex;" id=' + table_set_array[i][0] + '>' + "<strong>" + table_set_array[i][0] + "</strong>"
-                        + "<br>" + people_list + '</div>';
-                    $("#table_list").append(txt1);
-                }
-
             }
 
             function get_people_list() { //家庭陣列回傳
@@ -177,94 +96,83 @@
                         success: function (data) {
                             one_home = []
                             people_array = data.reslut.split("㊣")
-
                             for (let i = 0; i < people_array.length; i++) {
-                                people_data = people_array[i].split("|")//人名與生日分開 
-                                new_people = new people_value(people_data[0], people_data[1])
-                                one_home.push(new_people)
+                                people_data = people_array[i].split("|")//人名與輸出資料分開
+                                if (people_data[0] != "")
+                                    one_home.push(people_data)
                             }
+
                             all_people.push(one_home);
                         }
                     });
                 }
-
+                // alert(all_people[3][1][1])
                 return all_people
             }
 
-            $("#submit").click(function () { //重整資料  
-                start = $("#id_people_open").val()
-                end = $("#id_people_end").val()
-                if (parseInt(start) > parseInt(end)) {
-                    alert("選取範圍出現錯誤")
+            function show_people() {
+                people_list = ""
+                for (let i = 0; i < all_people_list[use_page].length; i++) {   //name用 people+i 分辨群組
+                    check_yes_no = " checked=checked"
+                    if (all_people_list[use_page][i][2] === "F") {
+                        check_yes_no = ""
+                    }
+                    people_list += '<input type="checkbox" ' + check_yes_no + ' name="people' + 1 + '"value=' + all_people_list[use_page][i][0] + '>' + all_people_list[use_page][i][0] + "<br>"
                 }
-                else {
-                    let all_data = []
-                    for (let o = 0; o < page_array.length; o++) { //全部家庭
+                $("#table_list").empty()
+                if (people_list == "")
+                    people_list = "此家庭還未有信眾"
+                people_list = "<div>" + people_list + "</div>"
+                $("#table_list").append(people_list);
+                // alert(people_list)
+            }
 
-                        let a_home_all_data = [] //把一整頁資訊都放進裡面
-                        for (let i = 0; i < table_set_array.length; i++) { //先用for表格 
-                            let all_table_data = [{ "table_name": table_set_array[i][0] }]
-                            //                            let a_field_data = []
-                            //                            let add_num = 0 //新增生日時，最大格數需要跟著擴增所用的更正變數
-                            let people_data = []
-                            let find_people = ""
-                            let one = false
-                            for (let j = 0; j < all_people_list[o].length; j++) {   //尋找 成員中的input 有沒有table
-                                if (all_people_list[o][j].input.indexOf(table_set_array[i][0]) !== -1) {
-                                    one = true
-                                    if (table_set_array[i][1] === "T") {
-                                        people_data.unshift({ "table_data": all_people_list[o][j].name + " ── " + all_people_list[o][j].age })
+            $("#submit,#ex").click(function () { //重整資料 
 
-                                    }
-                                    else {
-                                        if (find_people.length + all_people_list[o][j].name.length >= 28) { //判斷欄位有沒有超過設定
-                                            find_people = find_people.substring(0, find_people.length - 1)
-                                            people_data.unshift({ "table_data": find_people })
-                                            find_people = ""
-                                        }
-                                        find_people += all_people_list[o][j].name + "、"
-                                    }
 
-                                }
-                            }
-                            if (one && find_people !== "") {
-                                find_people = find_people.substring(0, find_people.length - 1)
-                                people_data.unshift({ "table_data": find_people })
-                                all_table_data.push(people_data)
-                                a_home_all_data.push(all_table_data)
-                            }
-                            if (one && table_set_array[i][1] === "T") {
-                                all_table_data.push(people_data)
-                                a_home_all_data.push(all_table_data)
-                            }
-                        }
-                        if (a_home_all_data.length !== 0) {
-                            all_data.push(a_home_all_data)
+                let all_data = []
+                for (let i = 0; i < all_people_list.length; i++) { //全部家庭
+
+                    a_home_data = {}
+                    home_people = []
+                    let j = 0
+                    name = ""
+                    for (j = 0; j < all_people_list[i].length; j++) {
+                        if (all_people_list[i][j][2] == "T"){
+                            home_people.push(all_people_list[i][j][1])
+                            name =all_people_list[i][j][0]
                         }
                     }
-                    let go_data = { "bye": all_data }
-                    //  alert( $("#id_activity_ID").val())
-                    $.ajax({
-                        url: '{% url "validate_submit" %}',
-                        data: {
-                            "use_file": $("#id_activity_ID").val(),
-                            "all_data": JSON.stringify(go_data),
-                            "title": $("#id_activity_ID").find("option:selected").text()
-                        },
-                        traditional: true,
-                        async: false,
-                        dataType: 'json',
-                        success: function (data) {
-                            alert(data.result)
-                            $("#result").html(data.result)
-                        }
-                    });
+                    if (home_people.length != 0) { //JSON.stringify(a_home_data) != "{}"
+                        a_home_data["people"] = home_people
+                        a_home_data["address"] = page_array[i]
+                        a_home_data["one_people"] =name
+                        all_data.push(a_home_data)
+                    }
                 }
+                let title = $("#id_activity_ID").find("option:selected").text() == "祈求值年太歲星君解除沖剋文疏" ? "祈求值年太歲星君解除沖剋文疏" : $("#id_activity_ID").find("option:selected").text() + "祈安植福文疏"
+                $.ajax({
+                    url: '{% url "validate_submit" %}',
+                    data: {
+                        "all_data": JSON.stringify(all_data),
+                        "title": title
+                    },
+                    traditional: true,
+                    async: false,
+                    dataType: 'json',
+                    success: function (data) {
+                        alert(data.result)
+                        $("#result").html(data.result)
+                    }
+
+                })
             });
+
+
             $("#left").click(function () {
                 if (use_page >= start) {
                     use_page -= 1
-                    switch_file()
+
                     show_page_text()
                 }
                 else {
@@ -275,7 +183,7 @@
                 if (use_page + 1 < parseInt(end)) {
                     use_page += 1
                     show_page_text()
-                    switch_file()
+
                 }
                 else {
                     alert("已經到最後一頁了")
@@ -295,15 +203,16 @@
                     else {
                         use_page = parseInt($("#page").val() - 1)
                         $("#page").val(use_page + 1)
-                        switch_file()
+
                     }
                     $("#page_use_phone").text("當前使用的是" + page_array[use_page] + "的電話")
                 }
-
+                show_people()
             })
             function show_page_text() {
                 $("#page").val(parseInt(use_page) + 1);
                 $("#page_use_phone").text("當前使用的是" + page_array[use_page] + "的電話")
+                show_people()
             }
             $("#find_phone").change(function () {
                 get_find = page_array.indexOf($(this).val())
@@ -330,7 +239,14 @@
             <div style="margin-right:10px;">
                 <form method='POST'>
                     {% csrf_token %}
-                    {{x_form|crispy}}<br>
+                    <select name="activity_ID" class="select" id="id_activity_ID">
+                        <option value="光明燈" selected="">光明燈</option>
+                        <option value="財神燈">財神燈</option>
+                        <option value="文昌燈">文昌燈</option>
+                        <option value="太歲星君">太歲星君</option>
+                        <option value="not">祈求值年太歲星君解除沖剋文疏</option>
+                    </select>
+                    <br><br>
                     <input id="submit" type="submit" value="輸出以下儲存的資料" class="btn btn-outline-dark">
                 </form>
             </div>
@@ -345,14 +261,11 @@
         <div style="display:flex;">
             <h2>勾選輸出資料</h2>
 
-
-
-
             <h2 id="page_use_phone" style="margin-left: 40px;"> 55</h2>
         </div>
 
 
-        
+
         <div id="table_list" style="display:flex "> </div>
         <p id="people_list"></p>
         <span id="left">&larr;</span> <span id="page_start">ee</span> / <input id="page" style="width:60px"> / <span
@@ -362,7 +275,7 @@
 
         <h1>{{x_bug}}</h1>
         <h1>{{y_bug}}</h1>
-        <p id="ex" hidden> 測試用按鈕</p>
+        <!-- <p id="ex" > 測試用按鈕</p> -->
 
 
     </div>

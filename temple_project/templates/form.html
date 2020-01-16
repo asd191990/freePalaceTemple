@@ -29,7 +29,7 @@
 
                         for (let i = 0; i < data.find_format.length; i++) {
                             let split_data = data.find_format[i].split("/")
-                            $('#data_table').append("<tr><td id=" + split_data[0] + ">" + split_data[0] + "</td><td id=" + split_data[1] + ">" + split_data[1] + "</td><td><button class=\"btn btn-info fix\" value=\"" + split_data[1] + "/" + split_data[0] + "\">修改 </button>   <button class=\"btn btn-info del\" value=\"" + split_data[0] + "\">刪除 </button></td></tr>")
+                            $('#data_table').append("<tr><td id=" + split_data[0] + ">" + split_data[0] + "</td><td id=" + split_data[1] + ">" + split_data[1] + '<td><a href="home/'+split_data[2]+'" ><button class="btn btn-info fix" >新增此家庭的信眾</button></a>' + "</td><td><button class=\"btn btn-info fix\" value=\"" + split_data[1] + "/" + split_data[0] + "\">修改 </button>   <button class=\"btn btn-info del\" value=\"" + split_data[0] + "\">刪除 </button></td></tr>")
                         }
                     }
                 })

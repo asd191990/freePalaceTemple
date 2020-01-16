@@ -37,7 +37,7 @@ urlpatterns = [
     path('ajax/validate_get_people', views.validate_get_Home, name='validate_get_Home'),
     path('ajax/validate_people_all_date', views.validate_people_all_date, name='validate_people_all_date'),
     path('ajax/validate_submit', views.validate_submit, name='validate_submit'),
-  
+    path("new",views.new),
     path('ajax/validate_get_table', views.validate_get_table, name='validate_get_table'),
     path('csv_add',views.csv_add,name="csv_add"),
     re_path(r".",views.index)    

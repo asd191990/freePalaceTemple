@@ -10,54 +10,12 @@
 
     <script>
 
-
-        $(function () {
-            $("#w").keyup(function () {
-                $.ajax({
-
-                    url: '{% url "validate_date" %}',
-                    data: { "find_value": $("#w").val() },
-                    dataType: 'json',
-                    success: function (data) {
-                    }
-                })
-            })
-            $scope.OpenAnExternalFile = function (filename) {
-                //
-                //  Open an external file (i.e. a file which ISN'T in our IIS folder)
-                //  To do this, we get an ASP.Net Handler to manually load the file, 
-                //  then return it's contents in a Response.
-                //
-                var URL = '/Handlers/DownloadExternalFile.ashx?filename=' + encodeURIComponent(filename);
-                window.open(URL);
-            }
-        })
     </script>
 </head>
 
 <body>
-    <!-- {% lorem 2 p random%} <br> -->
-    <br>
-    {{x}} <br>
-
-    <br>
-    {{ccc}}<br>
-    <br>
-    {{ccz}} <br><br>
-    {{y}}<br>
-    <BR><Br>
-    <!-- <div class="col-md-4">
-        <a href="{% url 'download' %}" rel="external nofollow">
-            點我下載
-
-        </a>
-    </div> -->
-<!-- 
-    <br><br> <a href="C:\Users\asd19\temple_project\output\file0.docx">連接</a> -->
-
-    <br><br> {{c}}<br>
-    <br><br>
-    {{d}}
+    {{x}} <br><br><br><br>
+  {{cc}}
 </body>
 
 </html>
