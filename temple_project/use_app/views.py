@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from .forms import homeform, peopleform, activity_form, choose_form, login_form,fix_peopleform
 
 from .models import Home, People_data, activity_data
-
+#try
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import auth
 from django.urls import reverse
