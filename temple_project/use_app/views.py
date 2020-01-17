@@ -152,7 +152,7 @@ def validate_people_all_date(request):
     get_allname_array = []
     for i in range(len(the_data)):
         date = the_data[i].birthday
-        output = the_data[i].name + " 本命 " +twelve(date.year)  + " 年 " + time_chinese(date.month) + " 月 "  + time_chinese(date.day) +" 號 " + "  生行庚 " +year(date) +" 歲 "
+        output = the_data[i].name + " 本命 " +twelve(date.year)  + " 年 " + time_chinese(date.month) + " 月 "  + time_chinese(date.day) +" 號 " + "  生行庚 " +time_chinese(year(date)) +" 歲 "
         get_allname_array.append(the_data[i].name + "|" + output + "|" + "F")
 
     data = {"reslut": '㊣'.join(get_allname_array)}
@@ -170,8 +170,7 @@ def year(x):
         old +=1
     else:
         old -=1
-    print(old)
-    return str(old)
+    return abs(old)
 
 
 def time_chinese(x):
@@ -576,12 +575,10 @@ def validate_submit(request):
         else:
             x["year"] = twelve(date.today().year)
         x["title"] = request.GET.get("title", None)
-
-        if request.GET.get("title", None):
+        print(x["title"])
+        if request.GET.get("title", None) == "祈求值年太歲星君解除沖剋文疏":
             tpl = DocxTemplate(r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode1.docx")
         else:
-            data = {"result": "已經送出"}
-            return JsonResponse(data)
             tpl = DocxTemplate(r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode2.docx")
 
         tpl.render(x)

@@ -126,7 +126,18 @@
                 $("#table_list").append(people_list);
                 // alert(people_list)
             }
-
+            $("#all_ok").click(function () {
+                for (var i = 0; i < all_people_list[use_page].length; i++) {
+                    all_people_list[use_page][i][2] = "T"                    
+                }
+                show_people()
+            })
+            $("#all_no").click(function () {
+                for (var i = 0; i < all_people_list[use_page].length; i++) {
+                    all_people_list[use_page][i][2] = "F"                    
+                }
+                show_people()
+            })
             $("#submit,#ex").click(function () { //重整資料 
 
 
@@ -138,15 +149,15 @@
                     let j = 0
                     name = ""
                     for (j = 0; j < all_people_list[i].length; j++) {
-                        if (all_people_list[i][j][2] == "T"){
+                        if (all_people_list[i][j][2] == "T") {
                             home_people.push(all_people_list[i][j][1])
-                            name =all_people_list[i][j][0]
+                            name = all_people_list[i][j][0]
                         }
                     }
                     if (home_people.length != 0) { //JSON.stringify(a_home_data) != "{}"
                         a_home_data["people"] = home_people
                         a_home_data["address"] = page_array[i]
-                        a_home_data["one_people"] =name
+                        a_home_data["one_people"] = name
                         all_data.push(a_home_data)
                     }
                 }
@@ -256,17 +267,23 @@
                 <p> <input id="find_phone"></p>
                 <p id="find_phone_result">未搜尋</p>
             </div>
+
         </div>
         <hr>
         <div style="display:flex;">
             <h2>勾選輸出資料</h2>
-
             <h2 id="page_use_phone" style="margin-left: 40px;"> 55</h2>
+
+
+        </div>
+        <div style="display:flex;margin-left: 100px;padding:5px">
+            <button id="all_ok" class="btn btn-info">全選</button> <button id="all_no" style="margin-left:25px;"
+                class="btn btn-info">全不選</button>
         </div>
 
 
 
-        <div id="table_list" style="display:flex "> </div>
+        <div id="table_list" style="display:flex;margin-top:10px;margin-left: 10px;"> </div>
         <p id="people_list"></p>
         <span id="left">&larr;</span> <span id="page_start">ee</span> / <input id="page" style="width:60px"> / <span
             id="page_end">ee</span> <span id="rigth">&rarr;</span>
