@@ -14,6 +14,15 @@ class activity_data(models.Model):
     def __str__(self):
         return self.name
 
+class history_data(models.Model):
+    history = models.TextField(max_length =1000)
+    name = models.CharField(max_length = 20)
+    class Meta:
+        verbose_name_plural = '歷史紀錄'
+    def __str__(self):
+        return self.name
+
+
 
 class Home(models.Model):
     address = models.CharField(verbose_name='地址', max_length=100)

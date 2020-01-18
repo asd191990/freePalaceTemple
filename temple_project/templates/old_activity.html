@@ -61,7 +61,38 @@
             }
 
             initialization()
+            load()
             set_page_start_end()
+
+
+            function load() {
+                x = "&quot;"
+                string = JSON.parse("{{the_object}}".replace(/&quot;/g, '"'))
+
+
+                let phone = string.map(item => Object.keys(item)[0])
+                let nameList = string.map(item => Object.values(item)[0]);
+
+                for (let i = 0; i < phone.length; i++) {
+                    let location = page_array.indexOf(phone[i])
+                    if (location !== -1) {
+                        name_array = nameList[location].split(",")
+                        for (let j = 0; j < name_array.length; j++) {
+                            for (let k = 0; k < all_people_list[location].length; k++) {
+                                if (all_people_list[location][k][0] == name_array[j]) {
+                                    all_people_list[location][k][2] = "T"
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                }
+                show_people()
+                // console.log(nameList[1])
+
+            }
+
 
             function initialization() {
 
@@ -232,6 +263,7 @@
                     $("#find_phone_result").text("請輸入完全符合的電話")
             })
 
+
             $("#save").click(function () {
                 let all_data = [] //電話對應點選的人名字串
                 for (let i = 0; i < all_people_list.length; i++) { //全部家庭
@@ -256,17 +288,16 @@
                 // console.log(nameList[1])   //x = JSON.parse(c)
                 data_string = JSON.stringify(all_data)
                 $.ajax({
-                    url: '{% url "data_save" %}',
+                    url: '{% url "data_up" %}',
                     data: {
-                        data: data_string
+                        data: data_string,
+                        id: "{{use_id}}"
                     },
                     traditional: true,
                     async: false,
                     dataType: 'json',
                     success: function (data) {
-                    
-                        window.location.href  ="http://127.0.0.1:8000/join_activity/old/" + data.id
-                   //     alert(data.ee)
+                        alert(data.OK)
                     }
                 })
 
@@ -314,7 +345,9 @@
                 <p> <input id="find_phone"></p>
                 <p id="find_phone_result">未搜尋</p>
             </div>
-            <button id="save" class="btn btn-outline-dark" style="margin-left:50px;color:blueviolet">新增歷史紀錄</button>
+            <button id="save" class="btn btn-outline-dark" style="margin-left:50px;color:blueviolet">
+                儲存歷史紀錄
+            </button>
         </div>
         <hr>
         <div style="display:flex;">

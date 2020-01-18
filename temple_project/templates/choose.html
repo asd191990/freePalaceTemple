@@ -17,6 +17,27 @@
     </p>
     <hr style="border: 5px solid rgba(155, 213, 228, 0.295);">
     <p>歷史紀錄</p>
+    <table id="mytable" class="table table-bordred table-striped">
+        <thead class="thead-light">
+            <tr>
+                <th>名稱</th>
+                <th>點選</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for history in historys  %}
+            <tr>
+                <td>{{history.name}}</td>
+                <td>
+                    <a href="{% url 'old' history.pk %}">
+                        <button class="btn btn-info">
+                            讀取
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
 </div>
 
 {% endblock  %}

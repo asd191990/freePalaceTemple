@@ -19,11 +19,14 @@ from django.urls import path, re_path
 #tryee
 from . import views
 urlpatterns = [
+    path("data_up",views.data_up,name="data_up"),
+    path("join_activity/old/<int:pk>",views.old,name="old"),
     path("home/home_del/<int:pk>/<int:people_id>",views.home_del),
     path('', views.index),
+    path("data_save",views.data_save,name='data_save'),
     path("home/<int:pk>",views.people_form,name= "home"),
     path('home_register', views.home_form),
-    path('join_activity', views.join_activity),
+    path('join_activity', views.join_activity,name="join_activity"),
     path("register",views.register),
     path("use_login",views.login),
     path("logout",views.logout),

@@ -2,9 +2,9 @@ from datetime import date
 import datetime
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect, render_to_response, redirect
 from django.http import JsonResponse
-from .forms import homeform, peopleform, activity_form, choose_form, login_form,fix_peopleform
+from .forms import homeform, peopleform, activity_form, choose_form, login_form, fix_peopleform
 
-from .models import Home, People_data, activity_data
+from .models import Home, People_data, activity_data, history_data
 #try
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import auth
@@ -26,23 +26,54 @@ import csv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+from use_app import LunarSolarConverter
 
-
-from use_app import LunarSolarConverter 
 
 @login_required
 def x_try(request):
-    x={}
-    x["z"]=[{'people': ['柯星雯 本命 己亥 年 一十 月 二八 號   生行庚 WAIT 歲 ', '楊逸凡 本命 丁酉 年 一十 月 二七 號   生行庚 WAIT 歲 ', '楊雅嵐 本命 戊戌 年 一十 月 二九 號   生行庚 WAIT 歲 '], 'address': '048544412', 'one_people': '楊雅嵐'}, {'people': ['羅弘寧 本命 戊寅 年 一十 月 二二 號   生行庚 WAIT 歲 ', '李冰茜 本命 庚寅 年 一十 月 四 號   生行庚 WAIT 歲 ', ' 蔣原杰 本命 乙酉 年 七 月 二八 號   生行庚 WAIT 歲 '], 'address': '048548888', 'one_people': '蔣原杰'}, {'people': ['許 雅喜 本命 丁酉 年 二 月 一八 號   生行庚 WAIT 歲 ', '雅文 本命 庚子 年 一十 月 二八 號   生行庚 WAIT 歲 ', '陳家銘 本命 癸巳 年 一十 月 二八 號   生行庚 WAIT 歲 '], 'address': '077632214', 'one_people': '陳家銘'}]
+    x = {}
+    x["z"] = [{
+        'people': [
+            '柯星雯 本命 己亥 年 一十 月 二八 號   生行庚 WAIT 歲 ',
+            '楊逸凡 本命 丁酉 年 一十 月 二七 號   生行庚 WAIT 歲 ',
+            '楊雅嵐 本命 戊戌 年 一十 月 二九 號   生行庚 WAIT 歲 '
+        ],
+        'address':
+        '048544412',
+        'one_people':
+        '楊雅嵐'
+    }, {
+        'people': [
+            '羅弘寧 本命 戊寅 年 一十 月 二二 號   生行庚 WAIT 歲 ',
+            '李冰茜 本命 庚寅 年 一十 月 四 號   生行庚 WAIT 歲 ',
+            ' 蔣原杰 本命 乙酉 年 七 月 二八 號   生行庚 WAIT 歲 '
+        ],
+        'address':
+        '048548888',
+        'one_people':
+        '蔣原杰'
+    }, {
+        'people': [
+            '許 雅喜 本命 丁酉 年 二 月 一八 號   生行庚 WAIT 歲 ',
+            '雅文 本命 庚子 年 一十 月 二八 號   生行庚 WAIT 歲 ',
+            '陳家銘 本命 癸巳 年 一十 月 二八 號   生行庚 WAIT 歲 '
+        ],
+        'address':
+        '077632214',
+        'one_people':
+        '陳家銘'
+    }]
     #{"bye":[[[{"table_name":"點光明燈者"},[{"table_data":"陳閔致、曹美雲、蕭孟勳、劉美惠、柯星雯、楊逸凡、楊雅嵐"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"陳恭宜、陳依光、曹志嘉、謝純鑫"}]]],[[{"table_name":"點光明燈者"},[{"table_data":"許雅喜、李雅婷、雅文"}]]]]}
     try:
-        
+
         for c in x["z"]:
             c["address"] = Home.objects.get(home_phone=c["address"]).address
-    
-        tpl = DocxTemplate(r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode1.docx")
 
-        if date.today().month >=10 :
+        tpl = DocxTemplate(
+            r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode1.docx"
+        )
+
+        if date.today().month >= 10:
             x["year"] = twelve(int(date.today().year) + 1)
         else:
             x["year"] = twelve(date.today().year)
@@ -52,77 +83,100 @@ def x_try(request):
         os.system(r"C:\Users\asd19\Downloads\tryw.docx")
     except Exception as e:
         cc = e
-        
+
     return render(request, "try.html", locals())
+
+
+
+def data_up(request):
+    get_id = request.GET.get("id", None)
+    history_data.objects.filter(id=get_id).update(history=request.GET.get("data",None))
+    data = {"OK":"已經更新"}
+    return JsonResponse(data)
+
+def old(request,pk):
+    x_form = choose_form(request.POST or None)
+    x_max = Home.objects.all().count()
+    use_id = pk
+    the_object = history_data.objects.get(pk=pk).history
+  #  [{&quot;048544412&quot;:&quot;柯星雯,楊逸凡,楊雅嵐,測試名,第煙火&quot;},{&quot;048548888&quot;:&quot;陳政姍,羅弘寧,李冰茜,蔣原杰,測試2,測試1,測試3&quot;},{&quot;077632214&quot;:&quot;雅文,陳家銘&quot;},{&quot;048789301&quot;:&quot;葉宇軒,郭靜怡&quot;}]
+    return render(request, "old_activity.html", locals())
 
 def new(request):
     x_form = choose_form(request.POST or None)
     x_max = Home.objects.all().count()
-    return render(request,"join_activity.html", locals())
+    return render(request, "join_activity.html", locals())
+
 
 def csv_add(request):
-   
-    if(request.method == "POST"):
+
+    if (request.method == "POST"):
         homes = request.FILES.get('home')
         people = request.FILES.get('people')
 
-        if homes =="" or people =="":
+        if homes == "" or people == "":
             error = "請一次輸入兩個檔案"
-            return render(request,"up_date.html",locals())
+            return render(request, "up_date.html", locals())
 
-        if homes.name.split(".")[-1] != "csv" and people.name.split(".")[-1] != "csv" :
+        if homes.name.split(".")[-1] != "csv" and people.name.split(
+                ".")[-1] != "csv":
             error = "請輸入csv檔"
-            return render(request,"up_date.html",locals())
+            return render(request, "up_date.html", locals())
 
-
-        fobj = open(os.path.join(BASE_DIR,"people",homes.name), 'wb')
+        fobj = open(os.path.join(BASE_DIR, "people", homes.name), 'wb')
         for line in homes.chunks():
             fobj.write(line)
         fobj.close()
 
-        fobj = open(os.path.join(BASE_DIR,"people",people.name), 'wb')
+        fobj = open(os.path.join(BASE_DIR, "people", people.name), 'wb')
         for line in people.chunks():
             fobj.write(line)
         fobj.close()
-        
-        use_path = os.path.join(BASE_DIR,"people")
-        home_path=os.path.join(use_path, homes.name)
+
+        use_path = os.path.join(BASE_DIR, "people")
+        home_path = os.path.join(use_path, homes.name)
         people_path = os.path.join(use_path, people.name)
         with open(home_path, newline='') as csvfile:
-            
+
             homes = csv.reader(csvfile)
-               
+
             one = 0
-               
+
             for row in homes:
-                    
+
                 if one != 0:
                     if not Home.objects.filter(home_phone=row[0]).exists():
-                        Home.objects.create(home_phone=row[0],address=row[1])                        
-                    
-                    home_id = Home.objects.get(home_phone=row[0]).pk                        
+                        Home.objects.create(home_phone=row[0], address=row[1])
+
+                    home_id = Home.objects.get(home_phone=row[0]).pk
                     with open(people_path, newline='') as peoplefile:
                         peoples = csv.reader(peoplefile)
-                        for people in peoples:                                               
-                            if people[0] !="信眾名字" :
-                                print("e")                         
+                        for people in peoples:
+                            if people[0] != "信眾名字":
+                                print("e")
                                 if row[0] == people[4]:
                                     people[1] = people[1].replace("/", "-")
                                     if people[3] == "男":
-                                        people[3]= "male"
+                                        people[3] = "male"
                                     else:
-                                        people[3]="female"
-                                    if not People_data.objects.filter(home_id = home_id,name=people[0]).exists():                                       
-                                        People_data.objects.create(name=people[0],birthday= people[1],time=people[2],gender=people[3],home_id=home_id)
+                                        people[3] = "female"
+                                    if not People_data.objects.filter(
+                                            home_id=home_id,
+                                            name=people[0]).exists():
+                                        People_data.objects.create(
+                                            name=people[0],
+                                            birthday=people[1],
+                                            time=people[2],
+                                            gender=people[3],
+                                            home_id=home_id)
                 one = 1
-                    
 
-    return render(request,"up_date.html",locals())
+    return render(request, "up_date.html", locals())
 
 
-def home_page(request,pk):
+def home_page(request, pk):
 
-    return render(request,"index.html",locals())
+    return render(request, "index.html", locals())
 
 
 def validate_get_table(request):
@@ -144,7 +198,6 @@ def validate_get_Home(request):
     return JsonResponse(data)
 
 
-
 def validate_people_all_date(request):
     get_phone = request.GET.get("phone", None)
     Get_home_id = Home.objects.get(home_phone=get_phone).id
@@ -152,7 +205,11 @@ def validate_people_all_date(request):
     get_allname_array = []
     for i in range(len(the_data)):
         date = the_data[i].birthday
-        output = the_data[i].name + " 本命 " +twelve(date.year)  + " 年 " + time_chinese(date.month) + " 月 "  + time_chinese(date.day) +" 號 " + "  生行庚 " +time_chinese(year(date)) +" 歲 "
+        output = the_data[i].name + " 本命 " + twelve(
+            date.year) + " 年 " + time_chinese(
+                date.month) + " 月 " + time_chinese(
+                    date.day) + " 號 " + "  生行庚 " + time_chinese(
+                        year(date)) + " 歲 "
         get_allname_array.append(the_data[i].name + "|" + output + "|" + "F")
 
     data = {"reslut": '㊣'.join(get_allname_array)}
@@ -162,59 +219,63 @@ def validate_people_all_date(request):
 def year(x):
 
     time = date.today()
-    ex = LunarSolarConverter.Solar(time.year,time.month,time.day)
-    true_time =LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex,ex)
+    ex = LunarSolarConverter.Solar(time.year, time.month, time.day)
+    true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
 
-    old =int( true_time.lunarYear) -  int(x.year)
-    if x.month > true_time.lunarMonth and x.day >true_time.lunarDay:
-        old +=1
+    old = int(true_time.lunarYear) - int(x.year)
+    if x.month > true_time.lunarMonth and x.day > true_time.lunarDay:
+        old += 1
     else:
-        old -=1
+        old -= 1
     return abs(old)
 
 
 def time_chinese(x):
-    use = "一 二 三 四 五 六 七 八 九 十".split(" ")    
+    use = "一 二 三 四 五 六 七 八 九 十".split(" ")
     answer = ""
-    if x >=10:            
-        y =x//10-1
+    if x >= 10:
+        y = x // 10 - 1
         answer = use[y]
-        x = x % 10   
-#    print(answer + use[x-1])
-    return answer + use[x-1]
+        x = x % 10
 
-def twelve (x):
-    sky="甲、乙、丙、丁、戊、己、庚、辛、壬、癸".split("、")
+
+#    print(answer + use[x-1])
+    return answer + use[x - 1]
+
+
+def twelve(x):
+    sky = "甲、乙、丙、丁、戊、己、庚、辛、壬、癸".split("、")
     land = "子、丑、寅、卯、辰、巳、午、未、申、酉、戌、亥".split("、")
     x = x - 1911
-    the_land =land[(x % 12)-1]
-    the_sky =sky[(x-2) % 10-1]
+    the_land = land[(x % 12) - 1]
+    the_sky = sky[(x - 2) % 10 - 1]
     return the_sky + the_land
 
+
 def hour_string(x):
-    if x > 23 or x<=1:
+    if x > 23 or x <= 1:
         return "子時"
-    elif x > 1 and x<=3:
+    elif x > 1 and x <= 3:
         return "丑時"
-    elif x > 3 and x<=5:
+    elif x > 3 and x <= 5:
         return "寅時"
-    elif x > 5 and x<=7:
+    elif x > 5 and x <= 7:
         return "卯時"
-    elif x > 7 and x<=9:
+    elif x > 7 and x <= 9:
         return "辰時"
-    elif x > 9 and x<=11:
+    elif x > 9 and x <= 11:
         return "巳時"
-    elif x > 11 and x<=13:
+    elif x > 11 and x <= 13:
         return "午時"
-    elif x > 13 and x<=15:
+    elif x > 13 and x <= 15:
         return "未時"
-    elif x > 15 and x<= 17:
+    elif x > 15 and x <= 17:
         return "申時"
-    elif x > 17 and x<= 19:
+    elif x > 17 and x <= 19:
         return "酉時"
-    elif x > 19 and x<=21:
+    elif x > 19 and x <= 21:
         return "戌時"
-    elif x > 21 and x<=23:
+    elif x > 21 and x <= 23:
         return "亥時"
 
     return "wait"
@@ -267,13 +328,19 @@ def validate_people_data(request):
     home_id = request.GET.get("home_id", None)
     time = request.GET.get("time", None)
     if old_name != new_name:
-        data = {"is_taken": False, "error_message": "要更改的名字已經被註冊過了"}  
+        data = {"is_taken": False, "error_message": "要更改的名字已經被註冊過了"}
     else:
         if new_birthday == "":
-            People_data.objects.filter(home_id=home_id,name=old_name).update(name=new_name, gender=new_gender,time=time)
+            People_data.objects.filter(home_id=home_id,
+                                       name=old_name).update(name=new_name,
+                                                             gender=new_gender,
+                                                             time=time)
         else:
             People_data.objects.filter(home_id=home_id, name=old_name).update(
-                name=new_name, birthday=new_birthday, gender=new_gender,time=time)
+                name=new_name,
+                birthday=new_birthday,
+                gender=new_gender,
+                time=time)
         data = {'is_taken': True, "result": "更改成功"}
 
     return JsonResponse(data)
@@ -284,9 +351,9 @@ def validate_date(request):
         home_phone__contains=request.GET.get("find_value", None))
     find_format = []
     for i in range(len(find_data)):
-       
+
         find_format.append(find_data[i].home_phone + "/" +
-                           find_data[i].address + "/" +str(find_data[i].pk))
+                           find_data[i].address + "/" + str(find_data[i].pk))
     date = {"find_format": find_format}
     return JsonResponse(date)
 
@@ -310,6 +377,19 @@ def validate_del(request):
     date = {'is_taken': True, "result": "刪除成功"}
     return JsonResponse(date)
 
+
+def data_save(request):
+
+    data= {"ee":"成功"}
+    try:
+        get = str(request.GET.get("data", None))
+        use_time_name =str( time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        history_data.objects.create(history=get,name=use_time_name)
+        data["id"] = history_data.objects.get(name=use_time_name).pk
+    except Exception as e:
+        data= {"ee":e}
+   
+    return JsonResponse(data)
 
 def validate_username(request):
     old_phone = request.GET.get('old_phone', None)
@@ -373,7 +453,6 @@ def validate_file_other(request):
 
 from django.views.decorators.csrf import csrf_exempt
 
-    
 
 @csrf_exempt
 def validate_file(request):
@@ -456,13 +535,10 @@ def activityform(request):
     return render(request, "word_form.html", context)
 
 
-
-
 @login_required(login_url='/use_login')
 def join_activity(request):
- 
-    context = locals()
-    return render(request, "choose.html", context)
+    historys = history_data.objects.all().order_by("-id")
+    return render(request, "choose.html", locals())
 
 
 import docx
@@ -512,14 +588,13 @@ def process_haveno_blank(get_list):
     return True
 
 
-def home_del(request,pk,people_id):
-    People_data.objects.filter(home_id=pk,pk=people_id).delete()
-    return HttpResponseRedirect(reverse('home',  kwargs={'pk':pk}));
+def home_del(request, pk, people_id):
+    People_data.objects.filter(home_id=pk, pk=people_id).delete()
+    return HttpResponseRedirect(reverse('home', kwargs={'pk': pk}))
 
-    
 
 @login_required(login_url='/use_login')
-def people_form(request,pk):
+def people_form(request, pk):
     form = peopleform(request.POST or None)
     fix_form = fix_peopleform(None)
 
@@ -539,72 +614,83 @@ def people_form(request,pk):
         get_all_gender = request.POST.getlist('gender')
         get_all_time = request.POST.getlist('time')
 
-        if process_haveno_blank(get_all_birthday) and process_haveno_blank(get_all_name):
+        if process_haveno_blank(get_all_birthday) and process_haveno_blank(
+                get_all_name):
             use_bug = ""
             for i in range(len(get_all_name)):
-          
+
                 x_bug = ""
 
-                if (People_data.objects.filter(home_id=pk).filter(name=get_all_name[i]).count() == 0):
-                    People_data.objects.create(
-                            name=get_all_name[i].replace(" ", ""),
-                            birthday=get_all_birthday[i],
-                            gender=get_all_gender[i],time = get_all_time[i],
-                            home_id=pk)
+                if (People_data.objects.filter(home_id=pk).filter(
+                        name=get_all_name[i]).count() == 0):
+                    People_data.objects.create(name=get_all_name[i].replace(
+                        " ", ""),
+                                               birthday=get_all_birthday[i],
+                                               gender=get_all_gender[i],
+                                               time=get_all_time[i],
+                                               home_id=pk)
                 else:
                     use_bug += get_all_name[i] + " "
             form = peopleform(None)
-            if use_bug !="":
-                use_bug = "名字重複的名單有:" + use_bug 
+            if use_bug != "":
+                use_bug = "名字重複的名單有:" + use_bug
         else:
             x_bug = "請輸入全部欄位"
 
     context = locals()
     return render(request, "people_add.html", context)
 
+
 import uuid
+
+
 def validate_submit(request):
-    
+
     try:
-        x ={}
-        x["z"]= json.loads(request.GET.get("all_data", None))   
+        x = {}
+        x["z"] = json.loads(request.GET.get("all_data", None))
         for c in x["z"]:
             c["address"] = Home.objects.get(home_phone=c["address"]).address
-        if date.today().month >=10 :
+        if date.today().month >= 10:
             x["year"] = twelve(int(date.today().year) + 1)
         else:
             x["year"] = twelve(date.today().year)
         x["title"] = request.GET.get("title", None)
         print(x["title"])
         if request.GET.get("title", None) == "祈求值年太歲星君解除沖剋文疏":
-            tpl = DocxTemplate(r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode1.docx")
+            tpl = DocxTemplate(
+                r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode1.docx"
+            )
         else:
-            tpl = DocxTemplate(r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode2.docx")
+            tpl = DocxTemplate(
+                r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode2.docx"
+            )
 
         tpl.render(x)
-       
+
         comtypes.CoInitialize()  #轉pdf
         word = comtypes.client.CreateObject('Word.Application')
 
-        file_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        file_location = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))
         find_folder = os.path.join(file_location, "output")
         find_yes_no = os.path.exists(find_folder)
 
         if not find_yes_no:
-            os.makedirs(find_folder) 
+            os.makedirs(find_folder)
 
-        while(True):
-            random_string =str(uuid.uuid4())
-            find_x =  os.path.join(find_folder,random_string +".docx") 
+        while (True):
+            random_string = str(uuid.uuid4())
+            find_x = os.path.join(find_folder, random_string + ".docx")
             if not os.path.exists(find_x):
                 tpl.save(find_x)
                 doc = word.Documents.Open(find_x)
-                find_y = os.path.join(find_folder,  str(uuid.uuid4()) +"_to_pdf")
-                doc.SaveAs(find_y,FileFormat=17)
-                os.system(find_y +".pdf")
+                find_y = os.path.join(find_folder,
+                                      str(uuid.uuid4()) + "_to_pdf")
+                doc.SaveAs(find_y, FileFormat=17)
+                os.system(find_y + ".pdf")
                 break
-          
-        
+
         doc.Close()
         word.Quit()
         data = {"result": "已經送出"}
@@ -612,6 +698,7 @@ def validate_submit(request):
     except Exception as e:
         data = {"result": e}
     return JsonResponse(data)
+
 
 def index(request):
 
