@@ -115,8 +115,8 @@ def csv_add(request):
     if (request.method == "POST"):
         homes = request.FILES.get('home')
         people = request.FILES.get('people')
-
-        if homes == "" or people == "":
+        
+        if homes == None or people == None:           
             error = "請一次輸入兩個檔案"
             return render(request, "up_date.html", locals())
 
