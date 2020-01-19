@@ -69,14 +69,18 @@
                 x = "&quot;"
                 string = JSON.parse("{{the_object}}".replace(/&quot;/g, '"'))
 
+                console.log("{{choose}}")
+                $("#id_activity_ID").val("{{choose}}")//find("option[text='{{choose}}']").attr("selected",true);
+
 
                 let phone = string.map(item => Object.keys(item)[0])
                 let nameList = string.map(item => Object.values(item)[0]);
 
                 for (let i = 0; i < phone.length; i++) {
-                    let location = page_array.indexOf(phone[i])
+                    let location = page_array.indexOf(phone[i]) //判斷有沒有存在 並指向該all_peopole_list家庭index
                     if (location !== -1) {
-                        name_array = nameList[location].split(",")
+                        name_array = nameList[i].split(",")
+
                         for (let j = 0; j < name_array.length; j++) {
                             for (let k = 0; k < all_people_list[location].length; k++) {
                                 if (all_people_list[location][k][0] == name_array[j]) {
@@ -88,6 +92,7 @@
                     }
 
                 }
+                 $("#activity_ID").val(2)
                 show_people()
                 // console.log(nameList[1])
 
@@ -291,7 +296,8 @@
                     url: '{% url "data_up" %}',
                     data: {
                         data: data_string,
-                        id: "{{use_id}}"
+                        id: "{{use_id}}",
+                        title: $("#id_activity_ID").val()
                     },
                     traditional: true,
                     async: false,
@@ -327,7 +333,7 @@
                         <option value="財神燈">財神燈</option>
                         <option value="文昌燈">文昌燈</option>
                         <option value="太歲星君">太歲星君</option>
-                        <option value="not">祈求值年太歲星君解除沖剋文疏</option>
+                        <option value="祈求值年太歲星君解除沖剋文疏">祈求值年太歲星君解除沖剋文疏</option>
                     </select>
                     <br><br>
                     <div style="display:flex;">

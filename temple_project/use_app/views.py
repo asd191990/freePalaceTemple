@@ -90,7 +90,9 @@ def x_try(request):
 
 def data_up(request):
     get_id = request.GET.get("id", None)
-    history_data.objects.filter(id=get_id).update(history=request.GET.get("data",None))
+    title = request.GET.get("title", None) +"　"
+    the_time = title +   history_data.objects.get(id=get_id).name.split("　")[1]
+    history_data.objects.filter(id=get_id).update(history=request.GET.get("data",None),name = the_time)
     data = {"OK":"已經更新"}
     return JsonResponse(data)
 
@@ -98,8 +100,8 @@ def old(request,pk):
     x_form = choose_form(request.POST or None)
     x_max = Home.objects.all().count()
     use_id = pk
+    choose =history_data.objects.get(pk=pk).name.split("　")[0]
     the_object = history_data.objects.get(pk=pk).history
-  #  [{&quot;048544412&quot;:&quot;柯星雯,楊逸凡,楊雅嵐,測試名,第煙火&quot;},{&quot;048548888&quot;:&quot;陳政姍,羅弘寧,李冰茜,蔣原杰,測試2,測試1,測試3&quot;},{&quot;077632214&quot;:&quot;雅文,陳家銘&quot;},{&quot;048789301&quot;:&quot;葉宇軒,郭靜怡&quot;}]
     return render(request, "old_activity.html", locals())
 
 def new(request):
@@ -233,14 +235,17 @@ def year(x):
 def time_chinese(x):
     use = "一 二 三 四 五 六 七 八 九 十".split(" ")
     answer = ""
-    if x >= 10:
-        y = x // 10 - 1
+    if x == 10:
+      return "十"
+    if x > 10:
+        y = x // 10 -1
         answer = use[y]
         x = x % 10
-
-
-#    print(answer + use[x-1])
-    return answer + use[x - 1]
+        if x==0:
+          return answer + "十"
+        else:
+          return answer + use[x - 1]
+    return use[x - 1]
 
 
 def twelve(x):
@@ -383,7 +388,7 @@ def data_save(request):
     data= {"ee":"成功"}
     try:
         get = str(request.GET.get("data", None))
-        use_time_name =str( time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        use_time_name = request.GET.get("title", None)+"　" + str( time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         history_data.objects.create(history=get,name=use_time_name)
         data["id"] = history_data.objects.get(name=use_time_name).pk
     except Exception as e:
@@ -656,14 +661,15 @@ def validate_submit(request):
         else:
             x["year"] = twelve(date.today().year)
         x["title"] = request.GET.get("title", None)
-        print(x["title"])
+       # print(os.path.join(BASE_DIR, "files" ,"files","mode1.docx"))
         if request.GET.get("title", None) == "祈求值年太歲星君解除沖剋文疏":
+            
             tpl = DocxTemplate(
-                r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode1.docx"
+               os.path.join(BASE_DIR, "files" ,"files","mode1.docx")
             )
         else:
             tpl = DocxTemplate(
-                r"C:\Users\asd19\Downloads\try_git\temple_project\files\files\mode2.docx"
+               os.path.join(BASE_DIR, "files" ,"files","mode2.docx")
             )
 
         tpl.render(x)

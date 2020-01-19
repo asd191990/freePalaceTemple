@@ -254,19 +254,21 @@
                 // let nameList = all_data.map(item => Object.values(item)[0]);            
                 // console.log(ok)                
                 // console.log(nameList[1])   //x = JSON.parse(c)
+
                 data_string = JSON.stringify(all_data)
                 $.ajax({
                     url: '{% url "data_save" %}',
                     data: {
-                        data: data_string
+                        data: data_string,
+                        title: $("#id_activity_ID").val()
                     },
                     traditional: true,
                     async: false,
                     dataType: 'json',
                     success: function (data) {
-                    
-                        window.location.href  ="http://127.0.0.1:8000/join_activity/old/" + data.id
-                   //     alert(data.ee)
+
+                        window.location.href = "http://127.0.0.1:8000/join_activity/old/" + data.id
+                        //     alert(data.ee)
                     }
                 })
 
