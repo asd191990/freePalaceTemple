@@ -19,6 +19,7 @@
         let all_people_list = []
 
         $(document).ready(function () {
+
             let start = 1;
             let max_end = "{{x_max}}";
             let end = "{{x_max}}";
@@ -28,7 +29,7 @@
             $("#id_people_end").val("{{x_max}}")
 
 
-            $("#determine,#left,#rigth,#submit,#save").click(function () { //用名字找陣列的資料
+            $("#determine,#left,#rigth,#ex,#save").click(function () { //用名字找陣列的資料
                 $("input[name=people" + 1 + "]").each(function () { // 顯示value 用 for迴圈找
 
                     for (let j = 0; j < all_people_list[use_page].length; j++) { //迴圈一個一個對比 value 跟人名
@@ -138,6 +139,40 @@
                 }
                 show_people()
             })
+            function fq() {
+                
+                let all_data = [] //電話對應點選的人名字串
+                for (let i = 0; i < all_people_list.length; i++) { //全部家庭
+                    home_people = ""
+                    for (let j = 0; j < all_people_list[i].length; j++) {
+                        if (all_people_list[i][j][2] == "T") {
+                            if (home_people != "")
+                                home_people += ","
+                            home_people += all_people_list[i][j][0]
+                        }
+                    }
+                    if (home_people != "") {
+                        let a = {}
+                        a[page_array[i]] = home_people
+                        all_data.push(a)
+                    }
+                }
+
+                data_string = JSON.stringify(all_data)
+                $.ajax({
+                    url: '{% url "data_save" %}',
+                    data: {
+                        data: data_string,
+                        title: $("#id_activity_ID").val()
+                    },
+                    traditional: true,
+                    async: false,
+                    dataType: 'json',
+                    success: function (data) {
+                        window.location.href = "http://127.0.0.1:8000/join_activity/old/" + data.id
+                    }
+                })
+            }
             $("#submit,#ex").click(function () { //重整資料
 
                 let all_data = []
@@ -171,11 +206,11 @@
                     async: false,
                     dataType: 'json',
                     success: function (data) {
-                        alert(data.result)
-                        $("#result").html(data.result)
+                       
                     }
 
                 })
+                fq()
             });
 
 
@@ -302,7 +337,7 @@
                     </select>
                     <br><br>
                     <div style="display:flex;">
-                        <input id="submit" type="submit" value="輸出檔案" class="btn btn-outline-dark">
+                        <button type="button" id = "ex"  class="btn btn-outline-dark" >輸出檔案</button>
 
                     </div>
 
