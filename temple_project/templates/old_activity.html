@@ -213,7 +213,7 @@
                 }
                 show_people()
             })
-            function fq(){
+            function fq() {
                 let all_data = [] //電話對應點選的人名字串
                 for (let i = 0; i < all_people_list.length; i++) { //全部家庭
                     home_people = ""
@@ -236,6 +236,7 @@
                 // console.log(ok)
                 // console.log(nameList[1])   //x = JSON.parse(c)
                 data_string = JSON.stringify(all_data)
+                console.log(data_string)
                 $.ajax({
                     url: '{% url "data_up" %}',
                     data: {
@@ -253,7 +254,7 @@
             }
             $("#ex").click(function () { //重整資料
                 fq()
-                let page_num = 5
+                let page_num = 8
                 let all_data = []
                 for (let i = 0; i < all_people_list.length; i++) { //全部家庭
 
@@ -374,16 +375,46 @@
 
 <body>
     <div style="margin-left:50px;">
+        <div style="margin-left: 0px;">
+            <p> 查詢家庭電話在下方的頁數</p>
+            <p> <input id="find_phone"></p>
+            <p id="find_phone_result">未搜尋</p>
+        </div>
+        <hr>
         填寫下方資料 <span id="message"></span>
-        <br><br>
+
         <p id="file"></p>
         <p id="result"></p>
 
 
+
+
+        <div style="display:flex;">
+            <h2>勾選輸出資料</h2>
+            <h2 id="page_use_phone" style="margin-left: 40px;"> 55</h2>
+
+
+        </div>
+        <div style="display:flex;margin-left: 0px;padding:5px">
+            <button id="all_ok" class="btn btn-info">全選</button> <button id="all_no" style="margin-left:25px;"
+                class="btn btn-info">全不選</button>
+        </div>
+
+
+
+        <div id="table_list" style="display:flex;margin-top:10px;margin-left: 10px;"> </div>
+        <p id="people_list"></p>
+        <span id="left">&larr;</span> <span id="page_start">ee</span> / <input id="page" style="width:60px"> / <span
+            id="page_end">ee</span> <span id="rigth">&rarr;</span>
+        <button class="btn btn-info" id="determine">確定當頁資料</button>
+
+
+        <hr>
         <div style="display:flex;">
             <div style="margin-right:10px;">
                 <form method='POST'>
                     {% csrf_token %}
+                    選擇列印標題
                     <select name="activity_ID" class="select" id="id_activity_ID">
                         <option value="光明燈" selected="">光明燈</option>
                         <option value="財神燈">財神燈</option>
@@ -402,40 +433,11 @@
 
             </div>
 
-            <div style="margin-left: 100px;">
-                <p> 查詢家庭電話在下方的頁數</p>
-                <p> <input id="find_phone"></p>
-                <p id="find_phone_result">未搜尋</p>
-            </div>
+
             <button id="save" class="btn btn-outline-dark" style="margin-left:50px;color:blueviolet">
-                儲存歷史紀錄
+                儲存紀錄
             </button>
         </div>
-        <hr>
-        <div style="display:flex;">
-            <h2>勾選輸出資料</h2>
-            <h2 id="page_use_phone" style="margin-left: 40px;"> 55</h2>
-
-
-        </div>
-        <div style="display:flex;margin-left: 100px;padding:5px">
-            <button id="all_ok" class="btn btn-info">全選</button> <button id="all_no" style="margin-left:25px;"
-                class="btn btn-info">全不選</button>
-        </div>
-
-
-
-        <div id="table_list" style="display:flex;margin-top:10px;margin-left: 10px;"> </div>
-        <p id="people_list"></p>
-        <span id="left">&larr;</span> <span id="page_start">ee</span> / <input id="page" style="width:60px"> / <span
-            id="page_end">ee</span> <span id="rigth">&rarr;</span>
-        <button class="btn btn-info" id="determine">確定當頁資料</button>
-
-
-        <h1>{{x_bug}}</h1>
-        <h1>{{y_bug}}</h1>
-        <!-- <p id="ex" > 測試用按鈕</pe> -->
-
 
     </div>
     <hr>

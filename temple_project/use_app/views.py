@@ -87,22 +87,25 @@ def x_try(request):
     return render(request, "try.html", locals())
 
 
-
 def data_up(request):
     get_id = request.GET.get("id", None)
-    title = request.GET.get("title", None) +"　"
-    the_time = title +   history_data.objects.get(id=get_id).name.split("　")[1]
-    history_data.objects.filter(id=get_id).update(history=request.GET.get("data",None),name = the_time)
-    data = {"OK":"已經更新"}
+    title = request.GET.get("title", None) + "　"
+    the_time = title + history_data.objects.get(id=get_id).name.split("　")[1]
+    history_data.objects.filter(id=get_id).update(history=request.GET.get(
+        "data", None),
+                                                  name=the_time)
+    data = {"OK": "已經更新"}
     return JsonResponse(data)
 
-def old(request,pk):
+
+def old(request, pk):
     x_form = choose_form(request.POST or None)
     x_max = Home.objects.all().count()
     use_id = pk
-    choose =history_data.objects.get(pk=pk).name.split("　")[0]
+    choose = history_data.objects.get(pk=pk).name.split("　")[0]
     the_object = history_data.objects.get(pk=pk).history
     return render(request, "old_activity.html", locals())
+
 
 def new(request):
     x_form = choose_form(request.POST or None)
@@ -236,15 +239,15 @@ def time_chinese(x):
     use = "一 二 三 四 五 六 七 八 九 十".split(" ")
     answer = ""
     if x == 10:
-      return "十"
+        return "十"
     if x > 10:
-        y = x // 10 -1
+        y = x // 10 - 1
         answer = use[y]
         x = x % 10
-        if x==0:
-          return answer + "十"
+        if x == 0:
+            return answer + "十"
         else:
-          return answer + use[x - 1]
+            return answer + use[x - 1]
     return use[x - 1]
 
 
@@ -328,7 +331,7 @@ def register(request):
 def validate_people_data(request):
     old_name = request.GET.get("old_name", None)
     new_name = request.GET.get("new_name", None)  # 只判斷有沒有重複名字
-    new_birthday = request.GET.get("new_birthday", None)
+    new_birthday = request.GET.get("new_birthday", None)    
     new_gender = request.GET.get("new_gender", None)
     home_id = request.GET.get("home_id", None)
     time = request.GET.get("time", None)
@@ -385,16 +388,18 @@ def validate_del(request):
 
 def data_save(request):
 
-    data= {"ee":"成功"}
+    data = {"ee": "成功"}
     try:
         get = str(request.GET.get("data", None))
-        use_time_name = request.GET.get("title", None)+"　" + str( time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        history_data.objects.create(history=get,name=use_time_name)
+        use_time_name = request.GET.get("title", None) + "　" + str(
+            time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        history_data.objects.create(history=get, name=use_time_name)
         data["id"] = history_data.objects.get(name=use_time_name).pk
     except Exception as e:
-        data= {"ee":e}
+        data = {"ee": e}
 
     return JsonResponse(data)
+
 
 def validate_username(request):
     old_phone = request.GET.get('old_phone', None)
@@ -491,8 +496,14 @@ def home_form(request):
     get_all_data = Home.objects.all()  # 表單資料
     load_js = "home"
 
-    if request.method == "POST" and request.POST['phone'].replace("-", "")  and request.POST['address'] =="":
-        return HttpResponseRedirect(reverse('home', kwargs={'pk': Home.objects.get(home_phone=request.POST["phone"]).pk}))
+    if request.method == "POST" and request.POST['phone'].replace(
+            "-", "") and request.POST['address'] == "":
+        return HttpResponseRedirect(
+            reverse('home',
+                    kwargs={
+                        'pk':
+                        Home.objects.get(home_phone=request.POST["phone"]).pk
+                    }))
 
     if form.is_valid():
         process_string = request.POST['phone'].replace("-", "")
@@ -606,8 +617,7 @@ def people_form(request, pk):
     form = peopleform(request.POST or None)
     fix_form = fix_peopleform(None)
 
-    people_all = People_data.objects.filter(home_id=pk)
-
+    
     x_try = Home.objects.get(pk=pk).home_phone
 
     title_one = "信眾名字"
@@ -618,12 +628,15 @@ def people_form(request, pk):
     if request.method == "POST" and request.POST.getlist('name'):
 
         get_all_name = request.POST.getlist('name')
-        get_all_birthday = request.POST.getlist('birthday')
+        get_all_birthday_y = request.POST.getlist('birthday_y')
+        get_all_birthday_m = request.POST.getlist('birthday_m')
+        get_all_birthday_d = request.POST.getlist('birthday_d')
         get_all_gender = request.POST.getlist('gender')
         get_all_time = request.POST.getlist('time')
 
-        if process_haveno_blank(get_all_birthday) and process_haveno_blank(
-                get_all_name):
+        if process_haveno_blank(get_all_birthday_d) and process_haveno_blank(
+                get_all_birthday_y) and process_haveno_blank(
+                    get_all_birthday_m) and process_haveno_blank(get_all_name):
             use_bug = ""
             for i in range(len(get_all_name)):
 
@@ -631,9 +644,13 @@ def people_form(request, pk):
 
                 if (People_data.objects.filter(home_id=pk).filter(
                         name=get_all_name[i]).count() == 0):
+                    get_all_birthday_y[i] = str(int(get_all_birthday_y[i] )+1911)
+                   
+                    x = "{y}-{m}-{d} 09:08:04".format(y = get_all_birthday_y[i],m= get_all_birthday_m[i],d= get_all_birthday_d[i])
+
                     People_data.objects.create(name=get_all_name[i].replace(
                         " ", ""),
-                                               birthday=get_all_birthday[i],
+                                               birthday=x,
                                                gender=get_all_gender[i],
                                                time=get_all_time[i],
                                                home_id=pk)
@@ -644,6 +661,16 @@ def people_form(request, pk):
                 use_bug = "名字重複的名單有:" + use_bug
         else:
             x_bug = "請輸入全部欄位"
+
+    people_all = People_data.objects.filter(home_id=pk)
+    use_peoples = []
+    for x in people_all:
+        c= {}
+        c["name"] = x.name
+        c["gender"] = x.gender
+        c["time"] = x.time
+        c["birthday"] =str( x.birthday.year-1911)+" 年 "+ str( x.birthday.month) +" 日 "+str( x.birthday.day) +" 號"        
+        use_peoples.append(c)
 
     context = locals()
     return render(request, "people_add.html", context)
@@ -656,7 +683,7 @@ def validate_submit(request):
 
     try:
         x = {}
-       # print(json.loads(request.GET.get("all_data", None)))
+        # print(json.loads(request.GET.get("all_data", None)))
         x["z"] = json.loads(request.GET.get("all_data", None))
         for c in x["z"]:
             c["address"] = Home.objects.get(home_phone=c["address"]).address
@@ -665,16 +692,14 @@ def validate_submit(request):
         else:
             x["year"] = twelve(date.today().year)
         x["title"] = request.GET.get("title", None)
-       # print(os.path.join(BASE_DIR, "files" ,"files","mode1.docx"))
+        # print(os.path.join(BASE_DIR, "files" ,"files","mode1.docx"))
         if request.GET.get("title", None) == "祈求值年太歲星君解除沖剋文疏":
 
             tpl = DocxTemplate(
-               os.path.join(BASE_DIR, "files" ,"files","mode1.docx")
-            )
+                os.path.join(BASE_DIR, "files", "files", "mode1.docx"))
         else:
             tpl = DocxTemplate(
-               os.path.join(BASE_DIR, "files" ,"files","mode2.docx")
-            )
+                os.path.join(BASE_DIR, "files", "files", "mode2.docx"))
 
         tpl.render(x)
 

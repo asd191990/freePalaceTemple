@@ -122,10 +122,10 @@
                     <th scope="col">功能</th>
             </thead>
             <tbody>
-                {% for c in people_all %}
+                {% for c in use_peoples %}
                 <tr>
                     <td id={{c.name}}> {{ c.name }} </td>
-                    <td id={{c.name}}{{c.birthday}}> {{ c.birthday|date:"Y 年 / m 月 / d 日 / H 時" }} </td>
+                    <td id={{c.name}}{{c.birthday}}>{{c.birthday}}</td>
                     <td>{{c.time}}</td>
                     {% if c.gender == "female" %}
                     <td id={{c.name}}{{c.gender}}> 女 </td>

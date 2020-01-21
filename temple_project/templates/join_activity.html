@@ -174,7 +174,7 @@
                 })
             }
             $("#submit,#ex").click(function () { //重整資料
-                let page_num = 5
+                let page_num = 8
                 let all_data = []
                 for (let i = 0; i < all_people_list.length; i++) { //全部家庭
 
@@ -342,30 +342,12 @@
             <p id="find_phone_result">未搜尋</p>
         </div>
 
-        填寫下方資料 <span id="message"></span>
-        <div style="display:flex;">
-            <div style="margin-right:10px;">
-                <form method='POST'>
-                    {% csrf_token %}
-                    <select name="activity_ID" class="select" id="id_activity_ID">
-                        <option value="光明燈" selected="">光明燈</option>
-                        <option value="財神燈">財神燈</option>
-                        <option value="文昌燈">文昌燈</option>
-                        <option value="太歲星君">太歲星君</option>
-                        <option value="not">祈求值年太歲星君解除沖剋文疏</option>
-                    </select>
-                    <br><br>
-                    <div style="display:flex;">
-                        <button type="button" id="ex" class="btn btn-outline-dark">匯出檔案</button>
-                    </div>
-                </form>
-            </div>
-        </div>
         <hr>
+        填寫下方資料 <span id="message"></span>
+
         <div style="display:flex;">
             <h2>勾選輸出資料</h2>
             <h2 id="page_use_phone" style="margin-left: 40px;"> 55</h2>
-            <button id="save" class="btn btn-outline-dark" style="margin-left:50px;color:blueviolet">新增歷史紀錄</button>
 
         </div>
         <div style="display:flex;margin-left: 0px;padding:5px">
@@ -381,7 +363,29 @@
             id="page_end">ee</span> <span id="rigth">&rarr;</span>
         <button class="btn btn-info" id="determine">確定當頁資料</button>
 
+        <hr>
+        <div style="display:flex;">
+            <div style="margin-right:10px;">
+                <form method='POST'>
+                    {% csrf_token %}
+                    選擇列印標題
+                    <select name="activity_ID" class="select" id="id_activity_ID">
+                        <option value="光明燈" selected="">光明燈</option>
+                        <option value="財神燈">財神燈</option>
+                        <option value="文昌燈">文昌燈</option>
+                        <option value="太歲星君">太歲星君</option>
+                        <option value="祈求值年太歲星君解除沖剋文疏">祈求值年太歲星君解除沖剋文疏</option>
+                    </select>
+                    <br><br>
+                    <div style="display:flex;">
+                        <button type="button" id="ex" class="btn btn-outline-dark">匯出檔案</button>
+                    </div>
+                </form>
+            </div>
+            <button id="save" class="btn btn-outline-dark"
+                style="margin-left:50px;margin-top: 0px;color:blueviolet">儲存紀錄</button>
 
+        </div>
 
 
     </div>
