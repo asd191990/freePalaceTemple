@@ -9,7 +9,7 @@
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    <script >
+    <script>
         $(document).ready(function () {
             let old_phone = "";
             let old_address = "";
@@ -29,7 +29,7 @@
 
                         for (let i = 0; i < data.find_format.length; i++) {
                             let split_data = data.find_format[i].split("/")
-                            $('#data_table').append("<tr><td id=" + split_data[0] + ">" + split_data[0] + "</td><td id=" + split_data[1] + ">" + split_data[1] + '<td><a href="home/'+split_data[2]+'" ><button class="btn btn-info fix" >新增此家庭的信眾</button></a>' + "</td><td><button class=\"btn btn-info fix\" value=\"" + split_data[1] + "/" + split_data[0] + "\">修改 </button>   <button class=\"btn btn-info del\" value=\"" + split_data[0] + "\">刪除 </button></td></tr>")
+                            $('#data_table').append("<tr><td id=" + split_data[0] + ">" + split_data[0] + "</td><td id=" + split_data[1] + ">" + split_data[1] + '<td><a href="home/' + split_data[2] + '" ><button class="btn btn-info fix" >新增此家庭的信眾</button></a>' + "</td><td><button class=\"btn btn-info fix\" value=\"" + split_data[1] + "/" + split_data[0] + "\">修改 </button>   <button class=\"btn btn-info del\" value=\"" + split_data[0] + "\">刪除 </button></td></tr>")
                         }
                     }
                 })
@@ -77,37 +77,37 @@
 
             var check_login = function () {
                 let new_phone = $("#phone").val()
-                // let re = /^\d{2}-?\d{3}-?\d{4}$/
-                // if( re.test(new_phone))
-                // {}
-                let new_address = $("#address").val()                
-                $.ajax({
-                    url: '{% url "validate_username" %}',
+                let re = /(^\d{2}-?\d{3}-?\d{4}$)|(^\d{10}$)/
+                if (re.test(new_phone)) {
+                    let new_address = $("#address").val()
+                    $.ajax({
+                        url: '{% url "validate_username" %}',
 
-                    data: {
-                        "old_phone": old_phone,
-                        "old_address": old_address,
-                        "new_phone": new_phone,
-                        "new_address": new_address
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.is_taken) {
-                            alert(data.result);
-                            document.getElementById(old_address).innerHTML = new_address;
-                            document.getElementById(old_address).id = new_address;
-                            document.getElementById(old_phone).innerHTML = new_phone;
-                            document.getElementById(old_phone).id = new_phone;
-                            set_button.value = new_address + "/" + new_phone
-                        } else {
-                            alert(data.error_message)
+                        data: {
+                            "old_phone": old_phone,
+                            "old_address": old_address,
+                            "new_phone": new_phone,
+                            "new_address": new_address
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.is_taken) {
+                                alert(data.result);
+                                document.getElementById(old_address).innerHTML = new_address;
+                                document.getElementById(old_address).id = new_address;
+                                document.getElementById(old_phone).innerHTML = new_phone;
+                                document.getElementById(old_phone).id = new_phone;
+                                set_button.value = new_address + "/" + new_phone
+                            } else {
+                                alert(data.error_message)
+                            }
                         }
-                    }
-                })                
-                $(this).dialog("close");
-                // else{
-                //     alert("家庭電話錯誤")
-                // }
+                    })
+                    $(this).dialog("close");
+                }
+                else {
+                    alert("電話格式錯誤")
+                }
 
             }
 
@@ -190,7 +190,7 @@
                     {% endif %} {% if c.name_id %}
                     <td> {{ c.name_id }} </td>
                     {% endif %}
-                    <td><a href="home/{{c.pk}}" ><button class="btn btn-info fix" >新增此家庭的信眾</button></a>
+                    <td><a href="home/{{c.pk}}"><button class="btn btn-info fix">更新此家庭的信眾</button></a>
                         <button class="btn btn-info fix" value="{{c.address}}/{{c.home_phone }}">修改此家庭資訊 </button>
                         <button class="btn btn-info del" value="{{c.home_phone}}">刪除此家庭 </button> </td>
                 </tr>

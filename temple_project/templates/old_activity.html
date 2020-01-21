@@ -28,7 +28,7 @@
             $("#id_people_end").val("{{x_max}}")
 
 
-            $("#determine,#left,#rigth,#submit,#save").click(function () { //用名字找陣列的資料
+            $("#determine,#left,#rigth,#ex,#save").click(function () { //用名字找陣列的資料
                 $("input[name=people" + 1 + "]").each(function () { // 顯示value 用 for迴圈找
 
                     for (let j = 0; j < all_people_list[use_page].length; j++) { //迴圈一個一個對比 value 跟人名
@@ -49,7 +49,45 @@
                     }
                 });
             })
+            $("#save", "#ex").click(function () {
+                let all_data = [] //電話對應點選的人名字串
+                for (let i = 0; i < all_people_list.length; i++) { //全部家庭
+                    home_people = ""
+                    for (let j = 0; j < all_people_list[i].length; j++) {
+                        if (all_people_list[i][j][2] == "T") {
+                            if (home_people != "")
+                                home_people += ","
+                            home_people += all_people_list[i][j][0]
+                        }
+                    }
+                    if (home_people != "") {
+                        let a = {}
+                        a[page_array[i]] = home_people
+                        all_data.push(a)
+                    }
+                }
 
+                // let ok =  ( all_data.map(item => Object.keys(item)[0]))
+                // let nameList = all_data.map(item => Object.values(item)[0]);
+                // console.log(ok)
+                // console.log(nameList[1])   //x = JSON.parse(c)
+                data_string = JSON.stringify(all_data)
+                $.ajax({
+                    url: '{% url "data_up" %}',
+                    data: {
+                        data: data_string,
+                        id: "{{use_id}}",
+                        title: $("#id_activity_ID").val()
+                    },
+                    traditional: true,
+                    async: false,
+                    dataType: 'json',
+                    success: function (data) {
+                        // alert(data.OK)
+                    }
+                })
+
+            })
 
             function set_page_start_end() {
                 $("#page_end").html(end)
@@ -69,7 +107,6 @@
                 x = "&quot;"
                 string = JSON.parse("{{the_object}}".replace(/&quot;/g, '"'))
 
-                console.log("{{choose}}")
                 $("#id_activity_ID").val("{{choose}}")//find("option[text='{{choose}}']").attr("selected",true);
 
 
@@ -92,11 +129,13 @@
                     }
 
                 }
-                 $("#activity_ID").val(2)
+                $("#activity_ID").val(2)
                 show_people()
                 // console.log(nameList[1])
 
             }
+
+
 
 
             function initialization() {
@@ -174,8 +213,47 @@
                 }
                 show_people()
             })
-            $("#submit,#ex").click(function () { //重整資料
+            function fq(){
+                let all_data = [] //電話對應點選的人名字串
+                for (let i = 0; i < all_people_list.length; i++) { //全部家庭
+                    home_people = ""
+                    for (let j = 0; j < all_people_list[i].length; j++) {
+                        if (all_people_list[i][j][2] == "T") {
+                            if (home_people != "")
+                                home_people += ","
+                            home_people += all_people_list[i][j][0]
+                        }
+                    }
+                    if (home_people != "") {
+                        let a = {}
+                        a[page_array[i]] = home_people
+                        all_data.push(a)
+                    }
+                }
 
+                // let ok =  ( all_data.map(item => Object.keys(item)[0]))
+                // let nameList = all_data.map(item => Object.values(item)[0]);
+                // console.log(ok)
+                // console.log(nameList[1])   //x = JSON.parse(c)
+                data_string = JSON.stringify(all_data)
+                $.ajax({
+                    url: '{% url "data_up" %}',
+                    data: {
+                        data: data_string,
+                        id: "{{use_id}}",
+                        title: $("#id_activity_ID").val()
+                    },
+                    traditional: true,
+                    async: false,
+                    dataType: 'json',
+                    success: function (data) {
+                        // alert(data.OK)
+                    }
+                })
+            }
+            $("#ex").click(function () { //重整資料
+                fq()
+                let page_num = 5
                 let all_data = []
                 for (let i = 0; i < all_people_list.length; i++) { //全部家庭
 
@@ -183,19 +261,35 @@
                     home_people = []
                     let j = 0
                     name = ""
+                    let have_people = 0
+
                     for (j = 0; j < all_people_list[i].length; j++) {
                         if (all_people_list[i][j][2] == "T") {
                             home_people.push(all_people_list[i][j][1])
                             name = all_people_list[i][j][0]
+                            have_people += 1
+                        }
+
+                        if (have_people == page_num) {
+                            a_home_data["people"] = home_people
+                            a_home_data["address"] = page_array[i]
+                            a_home_data["one_people"] = name
+                            all_data.unshift(a_home_data)
+                            a_home_data = {}
+                            home_people = []
+                            have_people = 0
                         }
                     }
-                    if (home_people.length != 0) { //JSON.stringify(a_home_data) != "{}"
+
+                    if (have_people != 0) { //JSON.stringify(a_home_data) != "{}"
                         a_home_data["people"] = home_people
                         a_home_data["address"] = page_array[i]
                         a_home_data["one_people"] = name
-                        all_data.push(a_home_data)
+                        all_data.unshift(a_home_data)
                     }
+
                 }
+                all_data = all_data.reverse()
                 let title = $("#id_activity_ID").find("option:selected").text() == "祈求值年太歲星君解除沖剋文疏" ? "祈求值年太歲星君解除沖剋文疏" : $("#id_activity_ID").find("option:selected").text() + "祈安植福文疏"
                 $.ajax({
                     url: '{% url "validate_submit" %}',
@@ -269,45 +363,7 @@
             })
 
 
-            $("#save").click(function () {
-                let all_data = [] //電話對應點選的人名字串
-                for (let i = 0; i < all_people_list.length; i++) { //全部家庭
-                    home_people = ""
-                    for (let j = 0; j < all_people_list[i].length; j++) {
-                        if (all_people_list[i][j][2] == "T") {
-                            if (home_people != "")
-                                home_people += ","
-                            home_people += all_people_list[i][j][0]
-                        }
-                    }
-                    if (home_people != "") {
-                        let a = {}
-                        a[page_array[i]] = home_people
-                        all_data.push(a)
-                    }
-                }
 
-                // let ok =  ( all_data.map(item => Object.keys(item)[0]))
-                // let nameList = all_data.map(item => Object.values(item)[0]);            
-                // console.log(ok)                
-                // console.log(nameList[1])   //x = JSON.parse(c)
-                data_string = JSON.stringify(all_data)
-                $.ajax({
-                    url: '{% url "data_up" %}',
-                    data: {
-                        data: data_string,
-                        id: "{{use_id}}",
-                        title: $("#id_activity_ID").val()
-                    },
-                    traditional: true,
-                    async: false,
-                    dataType: 'json',
-                    success: function (data) {
-                        alert(data.OK)
-                    }
-                })
-
-            })
         });
 
 
@@ -337,7 +393,7 @@
                     </select>
                     <br><br>
                     <div style="display:flex;">
-                        <input id="submit" type="submit" value="輸出檔案" class="btn btn-outline-dark">
+                        <button type="button" id="ex" class="btn btn-outline-dark">匯出檔案</button>
 
                     </div>
 

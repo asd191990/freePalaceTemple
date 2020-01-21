@@ -115,8 +115,8 @@ def csv_add(request):
     if (request.method == "POST"):
         homes = request.FILES.get('home')
         people = request.FILES.get('people')
-        
-        if homes == None or people == None:           
+
+        if homes == None or people == None:
             error = "請一次輸入兩個檔案"
             return render(request, "up_date.html", locals())
 
@@ -393,7 +393,7 @@ def data_save(request):
         data["id"] = history_data.objects.get(name=use_time_name).pk
     except Exception as e:
         data= {"ee":e}
-   
+
     return JsonResponse(data)
 
 def validate_username(request):
@@ -490,6 +490,9 @@ def home_form(request):
     get_x = "家庭資料"
     get_all_data = Home.objects.all()  # 表單資料
     load_js = "home"
+
+    if request.method == "POST" and request.POST['phone'].replace("-", "")  and request.POST['address'] =="":
+        return HttpResponseRedirect(reverse('home', kwargs={'pk': Home.objects.get(home_phone=request.POST["phone"]).pk}))
 
     if form.is_valid():
         process_string = request.POST['phone'].replace("-", "")
@@ -607,10 +610,10 @@ def people_form(request, pk):
 
     x_try = Home.objects.get(pk=pk).home_phone
 
-    title_one = "香客名字"
-    title_two = "香客生日"
-    title_three = "香客性別"
-    get_x = "此家庭香客"
+    title_one = "信眾名字"
+    title_two = "信眾生日"
+    title_three = "信眾性別"
+    get_x = "此家庭信眾"
 
     if request.method == "POST" and request.POST.getlist('name'):
 
@@ -653,6 +656,7 @@ def validate_submit(request):
 
     try:
         x = {}
+       # print(json.loads(request.GET.get("all_data", None)))
         x["z"] = json.loads(request.GET.get("all_data", None))
         for c in x["z"]:
             c["address"] = Home.objects.get(home_phone=c["address"]).address
@@ -663,7 +667,7 @@ def validate_submit(request):
         x["title"] = request.GET.get("title", None)
        # print(os.path.join(BASE_DIR, "files" ,"files","mode1.docx"))
         if request.GET.get("title", None) == "祈求值年太歲星君解除沖剋文疏":
-            
+
             tpl = DocxTemplate(
                os.path.join(BASE_DIR, "files" ,"files","mode1.docx")
             )
