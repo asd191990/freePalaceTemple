@@ -114,67 +114,91 @@ def new(request):
 
 
 def csv_add(request):
+    import pandas as pd
 
     if (request.method == "POST"):
         homes = request.FILES.get('home')
         people = request.FILES.get('people')
+        use_path = os.path.join(BASE_DIR, "people");
 
-        if homes == None or people == None:
-            error = "請一次輸入兩個檔案"
-            return render(request, "up_date.html", locals())
+        #用陣列儲存檔案，以供往後遍歷使用
+        files=[];
+        if(homes!=None):
+            files.append(homes);
+        if(people!=None):
+            files.append(people);
 
-        if homes.name.split(".")[-1] != "csv" and people.name.split(
-                ".")[-1] != "csv":
-            error = "請輸入csv檔"
-            return render(request, "up_date.html", locals())
+        #遍歷處理有上傳的檔案
+        for file in files:
+            #確認檔案是否為xlsx檔
+            if(file.name.split(".")[-1] != "xlsx"):
+                error = "請輸入xlsx檔"
+                return render(request, "up_date.html", locals())
 
-        fobj = open(os.path.join(BASE_DIR, "people", homes.name), 'wb')
-        for line in homes.chunks():
-            fobj.write(line)
-        fobj.close()
+            #將上傳的檔案寫到伺服器端
+            fobj = open(os.path.join(BASE_DIR, "people", file.name), 'wb')
+            for line in file.chunks():
+                fobj.write(line)
+            fobj.close()
 
-        fobj = open(os.path.join(BASE_DIR, "people", people.name), 'wb')
-        for line in people.chunks():
-            fobj.write(line)
-        fobj.close()
+            #開始讀檔，並檢測是否有存在任何一筆錯誤資料
+            file_path = os.path.join(use_path, file.name);
+            df = pd.read_excel(file_path,converters={'電話':str,"家庭電話":str})
+            append_arr=[];
 
-        use_path = os.path.join(BASE_DIR, "people")
-        home_path = os.path.join(use_path, homes.name)
-        people_path = os.path.join(use_path, people.name)
-        with open(home_path, newline='') as csvfile:
+            #分為家庭檔案跟信眾檔案兩種處理途徑
+            if(file==homes):
+                for index, row in df.iterrows():
+                    #取得該列資料
+                    family_phone_number=row['電話'];
+                    address=row['地址'];
 
-            homes = csv.reader(csvfile)
+                    if(not Home.objects.filter(home_phone=family_phone_number).exists()):
+                        #此筆資料沒有與資料庫中資料衝突，先暫存
+                        append_arr.append([family_phone_number,address]);
+                    else:
+                        #此筆資料與資料庫中資料衝突，匯入失敗
+                        error = "匯入失敗，家庭電話號碼重複（重複家庭之電話號碼：{0})".format(family_phone_number);
+                        return render(request, "up_date.html", locals());
 
-            one = 0
+                #讀擋完畢，並確認無錯誤。將暫存資料存入資料庫
+                for family_data in append_arr:
+                    print(Home.objects.create(home_phone=family_data[0], address=family_data[1]));
 
-            for row in homes:
+            elif(file==people):
+                for index, row in df.iterrows():
+                    #取得該列資料
+                    name=row['信眾名字'];
+                    birthday=row['生日'];
+                    time=row['時辰'];
+                    gender=row['性別'];
+                    home_id=row['家庭電話'];
 
-                if one != 0:
-                    if not Home.objects.filter(home_phone=row[0]).exists():
-                        Home.objects.create(home_phone=row[0], address=row[1])
 
-                    home_id = Home.objects.get(home_phone=row[0]).pk
-                    with open(people_path, newline='') as peoplefile:
-                        peoples = csv.reader(peoplefile)
-                        for people in peoples:
-                            if people[0] != "信眾名字":
-                                print("e")
-                                if row[0] == people[4]:
-                                    people[1] = people[1].replace("/", "-")
-                                    if people[3] == "男":
-                                        people[3] = "male"
-                                    else:
-                                        people[3] = "female"
-                                    if not People_data.objects.filter(
-                                            home_id=home_id,
-                                            name=people[0]).exists():
-                                        People_data.objects.create(
-                                            name=people[0],
-                                            birthday=people[1],
-                                            time=people[2],
-                                            gender=people[3],
-                                            home_id=home_id)
-                one = 1
+                    if(Home.objects.filter(home_phone=home_id).exists()):
+                        if(not People_data.objects.filter(home_id=home_id,name=name).exists()):
+                            #此筆資料沒有與資料庫中資料衝突，先暫存
+                            append_arr.append([name,birthday,time,gender,home_id]);
+                        else:
+                            #此筆資料與資料庫中資料衝突，匯入失敗
+                            error = "匯入失敗，成員重複（重複家庭成員：{0}家庭之〝{1}〞信眾)".format(home_id,name);
+                            return render(request, "up_date.html", locals());  
+                    else:
+                        #此筆資料的家庭不存在，匯入失敗
+                        error = "匯入失敗，並沒有電話號碼為{0}的家庭".format(home_id,name);
+                        return render(request, "up_date.html", locals());  
+                #讀擋完畢，並確認無錯誤。將暫存資料存入資料庫
+                for person_data in append_arr:
+                    print(person_data);
+                    print(People_data.objects.create(
+                        name=person_data[0],
+                        birthday=person_data[1],
+                        time=person_data[2],
+                        gender=person_data[3],
+                        home_id=person_data[4]));
+
+        if(len(files)>0):
+            error="寫入成功！";
 
     return render(request, "up_date.html", locals())
 
