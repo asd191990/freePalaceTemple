@@ -19,7 +19,7 @@
             let old_bithday
             let get_home_id
             let set_button
-            let old_time 
+            let old_time
 
             $(".fix").click(function (e) {
                 get_value = $(this).attr("value").split("/")
@@ -99,13 +99,24 @@
             {% csrf_token %} 選擇家庭為: {{x_try}} <br>
             <br>
             <div id="use">
-                {{ form.as_table }}
-                <br>
+                <label for="id_name">輸入香客姓名:</label>
+                {{ form.name }}
+                <br><br>
+                <label for="id_birthday_y">民國農曆出生年: </label>
+                {{form.birthday_y}}
+                <label for="id_birthday_m">月:</label>
+                {{form.birthday_m}}
+                <label for="id_birthday_d">日</label>
+                {{form.birthday_d}}
+                <label for="id_time">時辰:</label>
+                {{form.time}}
+                <label for="id_x_gender">性別</label>
+                {{form.gender}}
             </div>
-            
+
             <div><input class="btn btn-outline-dark" type="submit" value="送出" /> <button type="button"
                     class="btn btn-outline-dark" onclick="ShowMeDate()">增加欄位</button> </div>
-                    {{use_bug}}
+            {{use_bug}}
         </form>
         <br>
         <hr>
@@ -135,7 +146,8 @@
                     <td>
                         <button class="btn btn-success fix"
                             value="{{c.name}}/{{c.gender}}/{{c.birthday}}/{{c.home_id}}/{{c.time}}"> 修改</button>
-                      <a href="home_del/{{c.home_id}}/{{c.pk}}">  <button class="btn btn-success del" value="{{c.home_id}}▲{{c.name}}"> 刪除</button> </a> 
+                        <a href="home_del/{{c.home_id}}/{{c.pk}}"> <button class="btn btn-success del"
+                                value="{{c.home_id}}▲{{c.name}}"> 刪除</button> </a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -143,8 +155,8 @@
         </table>
         {% else %}
         <p>無資料</p>
-        {% endif %} 
-     
+        {% endif %}
+
     </div>
     {{bug_bug}}
     <p>{{x_bug}}</p>
