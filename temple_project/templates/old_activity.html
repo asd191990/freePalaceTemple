@@ -357,8 +357,12 @@
             }
             $("#find_phone").change(function () {
                 get_find = page_array.indexOf($(this).val())
-                if (get_find >= 0)
+                if (get_find >= 0) {
                     $("#find_phone_result").text(page_array[get_find] + "的電話在第" + (1 + parseInt(get_find)) + "頁")
+                    use_page = get_find
+                    show_page_text()
+                    
+                }
                 else
                     $("#find_phone_result").text("請輸入完全符合的電話")
             })
