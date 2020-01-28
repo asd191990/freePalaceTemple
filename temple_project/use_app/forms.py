@@ -66,10 +66,9 @@ class peopleform(forms.Form):
 
 class fix_peopleform(forms.Form):
     x_name = forms.CharField(required=False, label="輸入香客名稱", max_length=20)
-    x_birthday = forms.DateTimeField(
-        label="生日",
-        required=False,
-        widget=forms.TextInput(attrs={'type': 'date'}))
+    x_birthday = forms.CharField(required=False, label="輸入民國年", max_length=20)
+    x_month = forms.CharField(required=False, label="輸入月", max_length=20)
+    x_day = forms.CharField(required=False, label="輸入日", max_length=20)
     x_time = forms.ChoiceField(label='時辰',
                                required=False,
                                choices=(('子', '子'), ('丑', '丑'), ('寅', '寅'),

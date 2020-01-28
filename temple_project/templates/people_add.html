@@ -4,7 +4,6 @@
     <div id="fix_box" hidden>
         <p>請輸入改動資料</p>
         {{ fix_form.as_p}}
-        <p>如沒有要改生日就不用輸入</p>
     </div>
 
     <meta charset="utf-8">
@@ -25,13 +24,16 @@
                 get_value = $(this).attr("value").split("/")
                 old_name = get_value[0];
                 old_gender = get_value[1];
-                old_bithday = get_value[2];
+                old_bithday = get_value[2].split("-");
                 get_home_id = get_value[3]
                 old_time = get_value[4]
                 set_button = this
                 $("#id_x_name").val(old_name);
                 $("#id_x_gender").val(old_gender);
-                $("#id_x_birthday").val(old_bithday);
+
+                $("#id_x_birthday").val(old_bithday[0]);
+                $("#id_x_month").val(old_bithday[1]);
+                $("#id_x_day").val(old_bithday[2]);
                 $("#id_x_time").val(old_time.toString());
                 $("#fix_box").dialog("open");
                 e.preventDefault();
@@ -40,34 +42,41 @@
 
 
             var check_login = function () {
-                let new_name = $("#id_x_name").val()
-                let new_birthday = $("#id_x_birthday").val().toString()
-                let new_gender = $("#id_x_gender").val()
-                let new_time = $("#id_x_time").val()
-                $.ajax({
-                    url: '{% url "validate_people_data" %}',
+                the_year = parseFloat($("#id_x_birthday").val())
+                if (the_year <= 200 && parseFloat($("#id_x_day").val()) <= 31 && parseFloat($("#id_x_day").val()) >= 1 && parseFloat($("#id_x_month").val()) >= 1 && parseFloat($("#id_x_month").val()) <= 12) {
+                    let new_name = $("#id_x_name").val()
+                    let new_birthday = $("#id_x_birthday").val().toString() +"-"+ $("#id_x_month").val().toString()  +"-" + $("#id_x_day").val().toString() 
+                 
+                    let new_gender = $("#id_x_gender").val()
+                    let new_time = $("#id_x_time").val()
+                    $.ajax({
+                        url: '{% url "validate_people_data" %}',
 
-                    data: {
-                        "old_name": old_name,
-                        "new_name": new_name,
-                        "new_birthday": new_birthday,
-                        "new_gender": new_gender,
-                        "home_id": get_home_id,
-                        "time": new_time
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.is_taken) {
-                            alert(data.result);
-                            $("#fix_box").dialog("close");
-                            window.location.reload()
-                        }
-                        else {
-                            alert(data.error_message)
-                        }
+                        data: {
+                            "old_name": old_name,
+                            "new_name": new_name,
+                            "new_birthday": new_birthday,
+                            "new_gender": new_gender,
+                            "home_id": get_home_id,
+                            "time": new_time
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.is_taken) {
+                              
+                                $("#fix_box").dialog("close");
+                                window.location.reload()
+                            }
+                            else {
+                              
+                            }
 
-                    }
-                })
+                        }
+                    })
+                }
+                else{
+                    alert("日期輸入錯誤")
+                }
 
             };
 
@@ -117,6 +126,7 @@
             <div><input class="btn btn-outline-dark" type="submit" value="送出" /> <button type="button"
                     class="btn btn-outline-dark" onclick="ShowMeDate()">增加欄位</button> </div>
             {{use_bug}}
+            {{y_bug}}
         </form>
         <br>
         <hr>
@@ -133,7 +143,7 @@
                     <th scope="col">功能</th>
             </thead>
             <tbody>
-                {% for c in use_peoples %}
+                {% for c in people_all %}
                 <tr>
                     <td id={{c.name}}> {{ c.name }} </td>
                     <td id={{c.name}}{{c.birthday}}>{{c.birthday}}</td>

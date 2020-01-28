@@ -120,19 +120,19 @@ def csv_add(request):
     if (request.method == "POST"):
         homes = request.FILES.get('home')
         people = request.FILES.get('people')
-        use_path = os.path.join(BASE_DIR, "people");
+        use_path = os.path.join(BASE_DIR, "people")
 
         #用陣列儲存檔案，以供往後遍歷使用
-        files=[];
-        if(homes!=None):
-            files.append(homes);
-        if(people!=None):
-            files.append(people);
+        files = []
+        if (homes != None):
+            files.append(homes)
+        if (people != None):
+            files.append(people)
 
         #遍歷處理有上傳的檔案
         for file in files:
             #確認檔案是否為xlsx檔
-            if(file.name.split(".")[-1] != "xlsx"):
+            if (file.name.split(".")[-1] != "xlsx"):
                 error = "請輸入xlsx檔"
                 return render(request, "up_date.html", locals())
 
@@ -143,68 +143,77 @@ def csv_add(request):
             fobj.close()
 
             #開始讀檔，並檢測是否有存在任何一筆錯誤資料
-            file_path = os.path.join(use_path, file.name);
-            df = pd.read_excel(file_path,converters={'電話':str,"家庭電話":str})
-            append_arr=[];
+            file_path = os.path.join(use_path, file.name)
+            df = pd.read_excel(file_path, converters={'電話': str, "家庭電話": str})
+            append_arr = []
 
             #分為家庭檔案跟信眾檔案兩種處理途徑
-            if(file==homes):
+            if (file == homes):
                 for index, row in df.iterrows():
                     #取得該列資料
-                    family_phone_number=row['電話'];
-                    address=row['地址'];
+                    family_phone_number = row['電話']
+                    address = row['地址']
 
-                    if(not Home.objects.filter(home_phone=family_phone_number).exists()):
+                    if (not Home.objects.filter(
+                            home_phone=family_phone_number).exists()):
                         #此筆資料沒有與資料庫中資料衝突，先暫存
-                        append_arr.append([family_phone_number,address]);
+                        append_arr.append([family_phone_number, address])
                     else:
                         #此筆資料與資料庫中資料衝突，匯入失敗
-                        error = "匯入失敗，家庭電話號碼重複（重複家庭之電話號碼：{0})".format(family_phone_number);
-                        return render(request, "up_date.html", locals());
+                        error = "匯入失敗，家庭電話號碼重複（重複家庭之電話號碼：{0})".format(
+                            family_phone_number)
+                        return render(request, "up_date.html", locals())
 
                 #讀擋完畢，並確認無錯誤。將暫存資料存入資料庫
                 for family_data in append_arr:
-                    print(Home.objects.create(home_phone=family_data[0], address=family_data[1]));
+                    print(
+                        Home.objects.create(home_phone=family_data[0],
+                                            address=family_data[1]))
 
-            elif(file==people):
+            elif (file == people):
                 for index, row in df.iterrows():
                     #取得該列資料
-                    name=row['信眾名字'];
+                    name = row['信眾名字']
 
-                    birthday=row['生日'];
-                    date_arr=birthday.split("-");
-                    dt=datetime.date(int(date_arr[0])+1911, int(date_arr[1]), int(date_arr[2]))
-                    birthday=dt.strftime("%Y-%m-%d");
+                    birthday = row['生日']
+                    date_arr = birthday.split("-")
+                    dt = datetime.date(
+                        int(date_arr[0]) + 1911, int(date_arr[1]),
+                        int(date_arr[2]))
+                    birthday = dt.strftime("%Y-%m-%d")
 
-                    time=row['時辰'];
-                    gender=row['性別'];
-                    home_id=row['家庭電話'];
+                    time = row['時辰']
+                    gender = row['性別']
+                    home_id = row['家庭電話']
 
-                    home=Home.objects.filter(home_phone=home_id);
-                    if(home.exists()):
-                        if(not People_data.objects.filter(home_id=home_id,name=name).exists()):
+                    home = Home.objects.filter(home_phone=home_id)
+                    if (home.exists()):
+                        if (not People_data.objects.filter(
+                                home_id=home_id, name=name).exists()):
                             #此筆資料沒有與資料庫中資料衝突，先暫存
-                            append_arr.append([name,birthday,time,gender,home[0].pk]);
+                            append_arr.append(
+                                [name, birthday, time, gender, home[0].pk])
                         else:
                             #此筆資料與資料庫中資料衝突，匯入失敗
-                            error = "匯入失敗，成員重複（重複家庭成員：{0}家庭之〝{1}〞信眾)".format(home_id,name);
-                            return render(request, "up_date.html", locals());
+                            error = "匯入失敗，成員重複（重複家庭成員：{0}家庭之〝{1}〞信眾)".format(
+                                home_id, name)
+                            return render(request, "up_date.html", locals())
                     else:
                         #此筆資料的家庭不存在，匯入失敗
-                        error = "匯入失敗，並沒有電話號碼為{0}的家庭".format(home_id,name);
-                        return render(request, "up_date.html", locals());
+                        error = "匯入失敗，並沒有電話號碼為{0}的家庭".format(home_id, name)
+                        return render(request, "up_date.html", locals())
                 #讀擋完畢，並確認無錯誤。將暫存資料存入資料庫
                 for person_data in append_arr:
-                    print(person_data);
-                    print(People_data.objects.create(
-                        name=person_data[0],
-                        birthday=person_data[1],
-                        time=person_data[2],
-                        gender=person_data[3],
-                        home_id=person_data[4]));
+                    print(person_data)
+                    print(
+                        People_data.objects.create(name=person_data[0],
+                                                   birthday=person_data[1],
+                                                   time=person_data[2],
+                                                   gender=person_data[3],
+                                                   home_id=person_data[4]))
 
-        if(len(files)>0):
-            error="寫入成功！";
+        if (len(files) > 0):
+            error = "寫入成功！"
 
     return render(request, "up_date.html", locals())
 
@@ -240,45 +249,35 @@ def validate_people_all_date(request):
     get_allname_array = []
     try:
         for i in range(len(the_data)):
-            date = the_data[i].birthday
-            ex = LunarSolarConverter.Solar(int(the_data[i].birthday.year),int(the_data[i].birthday.month),int(the_data[i].birthday.day))
-            true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
-
-            output = the_data[i].name + " 本命 " + twelve(
-            date.year) + " 年 " + time_chinese(
-               int( true_time.lunarMonth)) + " 月 " + time_chinese(
-                  int(true_time.lunarDay)) + " 號 " +"  生行庚 " + time_chinese(
-                        year(date)) + " 歲 "
-            print(output)                    
-            get_allname_array.append(the_data[i].name + "|" + output + "|" + "F")
+            date = the_data[i].birthday.split("-")
+         
+            output = the_data[i].name + " 本命 " + twelve(int(
+                date[0])) + " 年 " + time_chinese(int(
+                    date[1])) + " 月 " + time_chinese(
+                        int(date[2])) + " 號 " + "  生行庚 " + time_chinese(
+                            year(date)) + " 歲 "
+            
+            get_allname_array.append(the_data[i].name + "|" + output + "|" +
+                                     "F")
     except Exception as e:
         print(e)
-     
-    # for i in range(len(the_data)):
-    #     date = the_data[i].birthday
-
-    #     ex = LunarSolarConverter.Solar(the_data[i].birthday.year,the_data[i].birthday.month,the_data[i].birthday.day)
-    #     true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
-
-    #     output = the_data[i].name + " 本命 " + twelve(
-    #         date.year) + " 年 " + time_chinese(
-    #             true_time.lunarMonth) + " 月 " + time_chinese(
-    #                 true_time.lunarDay) + " 號 " +"  生行庚 " + time_chinese(
-    #                     year(date)) + " 歲 "
-    #     get_allname_array.append(the_data[i].name + "|" + output + "|" + "F")
 
     data = {"reslut": '㊣'.join(get_allname_array)}
     return JsonResponse(data)
 
 
 def year(x):
+    print(x)
     time = date.today()
-
-    old = int(time.year) - int(x.year)
-    if  x.month > time.month and x.day > time.day:
-        old += 1
-    else:
+    fix = 0
+    if time.month >= 10:
+        fix = 1
+   
+    old =(int(time.year) - 1911 + fix) - int(x[0])
+    if not int(x[1]) >= 2 and int(x[2]) >= 30:
         old -= 1
+
+    print(old)
     return abs(old)
 
 
@@ -301,7 +300,6 @@ def time_chinese(x):
 def twelve(x):
     sky = "甲、乙、丙、丁、戊、己、庚、辛、壬、癸".split("、")
     land = "子、丑、寅、卯、辰、巳、午、未、申、酉、戌、亥".split("、")
-    x = x - 1911
     the_land = land[(x % 12) - 1]
     the_sky = sky[(x - 2) % 10 - 1]
     return the_sky + the_land
@@ -385,17 +383,12 @@ def validate_people_data(request):
     if old_name != new_name:
         data = {"is_taken": False, "error_message": "要更改的名字已經被註冊過了"}
     else:
-        if new_birthday == "":
-            People_data.objects.filter(home_id=home_id,
-                                       name=old_name).update(name=new_name,
-                                                             gender=new_gender,
-                                                             time=time)
-        else:
-            People_data.objects.filter(home_id=home_id, name=old_name).update(
-                name=new_name,
-                birthday=new_birthday,
-                gender=new_gender,
-                time=time)
+
+        People_data.objects.filter(home_id=home_id,
+                                   name=old_name).update(name=new_name,
+                                                         birthday=new_birthday,
+                                                         gender=new_gender,
+                                                         time=time)
         data = {'is_taken': True, "result": "更改成功"}
 
     return JsonResponse(data)
@@ -659,42 +652,48 @@ def home_del(request, pk, people_id):
     return HttpResponseRedirect(reverse('home', kwargs={'pk': pk}))
 
 
-def reture_lunar(x,y,z):
+def reture_lunar(x, y, z):
     x = int(x)
     y = int(y)
     z = int(z)
-    ex = LunarSolarConverter.Solar(x,y,z)
+    ex = LunarSolarConverter.Solar(x, y, z)
     true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
-    x = "{y}年{m}月{d}號".format(y = (true_time.lunarYear-1911) ,m= true_time.lunarMonth ,d= true_time.lunarDay)
+    x = "{y}年{m}月{d}號".format(y=(true_time.lunarYear - 1911),
+                              m=true_time.lunarMonth,
+                              d=true_time.lunarDay)
     return x
 
-def reture_solar(x,y,z):
+
+def reture_solar(x, y, z):
     x = int(x)
     y = int(y)
     z = int(z)
-    yes_no = False ##是否閏年 是=yes 否=false
+    yes_no = False  ##是否閏年 是=yes 否=false
     year = int(x)
+    print(year)
     if (year % 4) == 0:
         if (year % 100) == 0:
             if (year % 400) == 0:
-               yes_no = True   # 整百年能被400整除的是闰年
+                yes_no = True  # 整百年能被400整除的是闰年
             else:
-               yes_no = False
+                yes_no = False
         else:
-           yes_no = True     # 非整百年能被4整除的为闰年
+            yes_no = True  # 非整百年能被4整除的为闰年
     else:
-       yes_no = False
+        yes_no = False
 
-    ex = LunarSolarConverter.Lunar(x,y,z,yes_no)
+    ex = LunarSolarConverter.Lunar(x, y, z, False)
     true_time = LunarSolarConverter.LunarSolarConverter.LunarToSolar(ex, ex)
-    x = "{y}-{m}-{d} 09:08:04".format(y = true_time.solarYear ,m= true_time.solarMonth,d= true_time.solarDay)
+    x = "{y}-{m}-{d} 09:08:04".format(y=(true_time.solarYear),
+                                      m=true_time.solarMonth,
+                                      d=true_time.solarDay)
     return x
+
 
 @login_required(login_url='/use_login')
 def people_form(request, pk):
     form = peopleform(request.POST or None)
     fix_form = fix_peopleform(None)
-
 
     x_try = Home.objects.get(pk=pk).home_phone
 
@@ -716,40 +715,40 @@ def people_form(request, pk):
                 get_all_birthday_y) and process_haveno_blank(
                     get_all_birthday_m) and process_haveno_blank(get_all_name):
             use_bug = ""
+            y_bug = ""
             for i in range(len(get_all_name)):
 
                 x_bug = ""
 
                 if (People_data.objects.filter(home_id=pk).filter(
                         name=get_all_name[i]).count() == 0):
-                    get_all_birthday_y[i] = str(int(get_all_birthday_y[i] )+1911)
+                    if int(get_all_birthday_y[i]) <= 250 and int(
+                            get_all_birthday_m[i]) <= 12 and int(
+                                get_all_birthday_m[i]) >= 1 and int(
+                                    get_all_birthday_d[i]) <= 31 and int(
+                                        get_all_birthday_d[i]) >= 31:
+                        x = get_all_birthday_y[i] + "-" + get_all_birthday_m[
+                            i] + "-" + get_all_birthday_d[i]
 
-                    x = reture_solar(get_all_birthday_y[i],get_all_birthday_m[i],get_all_birthday_d[i])
-
-                    People_data.objects.create(name=get_all_name[i].replace(
-                        " ", ""),
-                                               birthday=x,
-                                               gender=get_all_gender[i],
-                                               time=get_all_time[i],
-                                               home_id=pk)
+                        People_data.objects.create(
+                            name=get_all_name[i].replace(" ", ""),
+                            birthday=x,
+                            gender=get_all_gender[i],
+                            time=get_all_time[i],
+                            home_id=pk)
+                    else:
+                        y_bug += get_all_name[i] + " "
                 else:
                     use_bug += get_all_name[i] + " "
             form = peopleform(None)
             if use_bug != "":
-                use_bug = "名字重複的名單有:" + use_bug
+                use_bug = "名字重複的名單有:" + use_bug  
+            if y_bug != "":
+                y_bug = "日期錯誤的名單有:" + y_bug 
         else:
             x_bug = "請輸入全部欄位"
 
     people_all = People_data.objects.filter(home_id=pk)
-    use_peoples = []
-    for x in people_all:
-        c= {}
-        c["name"] = x.name
-        c["gender"] = x.gender
-        c["time"] = x.time
-
-        c["birthday"] =reture_lunar(x.birthday.year,x.birthday.month,x.birthday.day) #str( x.birthday.year-1911)+" 年 "+ str( x.birthday.month) +" 日 "+str( x.birthday.day) +" 號"
-        use_peoples.append(c)
 
     context = locals()
     return render(request, "people_add.html", context)
@@ -759,8 +758,9 @@ import uuid
 import pythoncom
 from win32com.client import Dispatch
 
+
 def validate_submit(request):
-    data={}
+    data = {}
     try:
         x = {}
 
@@ -771,7 +771,7 @@ def validate_submit(request):
             x["year"] = twelve(int(date.today().year) + 1)
         else:
             x["year"] = twelve(date.today().year)
-                        
+
         x["title"] = request.GET.get("title", None)
         # print(os.path.join(BASE_DIR, "files" ,"files","mode1.docx"))
         if request.GET.get("title", None) == "祈求值年太歲星君解除沖剋文疏":
@@ -798,7 +798,7 @@ def validate_submit(request):
             random_string = str(uuid.uuid4())
             find_x = os.path.join(find_folder, random_string + ".docx")
             if not os.path.exists(find_x):
-                find_y =  os.path.join(find_folder, random_string + ".pdf")
+                find_y = os.path.join(find_folder, random_string + ".pdf")
                 break
         tpl.save(find_x)
 
@@ -809,12 +809,11 @@ def validate_submit(request):
         doc.Close()
         word.Quit()
         os.system(find_y)
-    
 
         data = {"result": "已經送出"}
 
     except Exception as e:
-        data={"result" :str(e)}
+        data = {"result": str(e)}
         print("錯誤" + str(e))
     return JsonResponse(data)
 
