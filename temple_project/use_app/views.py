@@ -674,6 +674,7 @@ def reture_solar(x,y,z):
     z = int(z)
     yes_no = False ##是否閏年 是=yes 否=false
     year = int(x)
+    print(year)
     if (year % 4) == 0:
         if (year % 100) == 0:
             if (year % 400) == 0:
@@ -684,10 +685,10 @@ def reture_solar(x,y,z):
            yes_no = True     # 非整百年能被4整除的为闰年
     else:
        yes_no = False
-
-    ex = LunarSolarConverter.Lunar(x,y,z,yes_no)
+    
+    ex = LunarSolarConverter.Lunar(x,y,z,False)
     true_time = LunarSolarConverter.LunarSolarConverter.LunarToSolar(ex, ex)
-    x = "{y}-{m}-{d} 09:08:04".format(y = true_time.solarYear ,m= true_time.solarMonth,d= true_time.solarDay)
+    x = "{y}-{m}-{d} 09:08:04".format(y =(true_time.solarYear) ,m= true_time.solarMonth,d= true_time.solarDay)
     return x
 
 @login_required(login_url='/use_login')
@@ -724,7 +725,7 @@ def people_form(request, pk):
                         name=get_all_name[i]).count() == 0):
                     get_all_birthday_y[i] = str(int(get_all_birthday_y[i] )+1911)
 
-                    x = reture_solar(get_all_birthday_y[i],get_all_birthday_m[i],get_all_birthday_d[i])
+                    x = reture_solar((int(get_all_birthday_y[i])),get_all_birthday_m[i],get_all_birthday_d[i])
 
                     People_data.objects.create(name=get_all_name[i].replace(
                         " ", ""),
@@ -742,12 +743,15 @@ def people_form(request, pk):
 
     people_all = People_data.objects.filter(home_id=pk)
     use_peoples = []
+    
     for x in people_all:
+       
         c= {}
         c["name"] = x.name
         c["gender"] = x.gender
         c["time"] = x.time
-
+        c["home_id"] = x.home_id
+        c["pk"] = x.pk
         c["birthday"] =reture_lunar(x.birthday.year,x.birthday.month,x.birthday.day) #str( x.birthday.year-1911)+" 年 "+ str( x.birthday.month) +" 日 "+str( x.birthday.day) +" 號"
         use_peoples.append(c)
 
