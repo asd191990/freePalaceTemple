@@ -230,13 +230,9 @@
                         all_data.push(a)
                     }
                 }
-
-                // let ok =  ( all_data.map(item => Object.keys(item)[0]))
-                // let nameList = all_data.map(item => Object.values(item)[0]);
-                // console.log(ok)
-                // console.log(nameList[1])   //x = JSON.parse(c)
+          
                 data_string = JSON.stringify(all_data)
-                console.log(data_string)
+
                 $.ajax({
                     url: '{% url "data_up" %}',
                     data: {
@@ -290,6 +286,7 @@
                     }
 
                 }
+              //  console.log(all_data)
                 all_data = all_data.reverse()
                 let title = $("#id_activity_ID").find("option:selected").text() == "祈求值年太歲星君解除沖剋文疏" ? "祈求值年太歲星君解除沖剋文疏" : $("#id_activity_ID").find("option:selected").text() + "祈安植福文疏"
                 $.ajax({

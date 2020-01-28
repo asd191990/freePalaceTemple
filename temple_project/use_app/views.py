@@ -238,25 +238,44 @@ def validate_people_all_date(request):
     Get_home_id = Home.objects.get(home_phone=get_phone).id
     the_data = People_data.objects.filter(home_id=Get_home_id)
     get_allname_array = []
-    for i in range(len(the_data)):
-        date = the_data[i].birthday
-        output = the_data[i].name + " 本命 " + twelve(
+    try:
+        for i in range(len(the_data)):
+            date = the_data[i].birthday
+            ex = LunarSolarConverter.Solar(int(the_data[i].birthday.year),int(the_data[i].birthday.month),int(the_data[i].birthday.day))
+            true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
+
+            output = the_data[i].name + " 本命 " + twelve(
             date.year) + " 年 " + time_chinese(
-                date.month) + " 月 " + time_chinese(
-                    date.day) + " 號 " + "  生行庚 " + time_chinese(
+               int( true_time.lunarMonth)) + " 月 " + time_chinese(
+                  int(true_time.lunarDay)) + " 號 " +"  生行庚 " + time_chinese(
                         year(date)) + " 歲 "
-        get_allname_array.append(the_data[i].name + "|" + output + "|" + "F")
+            print(output)                    
+            get_allname_array.append(the_data[i].name + "|" + output + "|" + "F")
+    except Exception as e:
+        print(e)
+     
+    # for i in range(len(the_data)):
+    #     date = the_data[i].birthday
+
+    #     ex = LunarSolarConverter.Solar(the_data[i].birthday.year,the_data[i].birthday.month,the_data[i].birthday.day)
+    #     true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
+
+    #     output = the_data[i].name + " 本命 " + twelve(
+    #         date.year) + " 年 " + time_chinese(
+    #             true_time.lunarMonth) + " 月 " + time_chinese(
+    #                 true_time.lunarDay) + " 號 " +"  生行庚 " + time_chinese(
+    #                     year(date)) + " 歲 "
+    #     get_allname_array.append(the_data[i].name + "|" + output + "|" + "F")
 
     data = {"reslut": '㊣'.join(get_allname_array)}
     return JsonResponse(data)
 
 
 def year(x):
-
     time = date.today()
 
     old = int(time.year) - int(x.year)
-    if x.month > time.month and x.day > time:
+    if  x.month > time.month and x.day > time.day:
         old += 1
     else:
         old -= 1
@@ -644,7 +663,7 @@ def reture_lunar(x,y,z):
     x = int(x)
     y = int(y)
     z = int(z)
-    ex = LunarSolarConverter.Solar(x,y,z)    
+    ex = LunarSolarConverter.Solar(x,y,z)
     true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
     x = "{y}年{m}月{d}號".format(y = (true_time.lunarYear-1911) ,m= true_time.lunarMonth ,d= true_time.lunarDay)
     return x
@@ -737,13 +756,14 @@ def people_form(request, pk):
 
 
 import uuid
-
+import pythoncom
+from win32com.client import Dispatch
 
 def validate_submit(request):
-
+    data={}
     try:
         x = {}
-        # print(json.loads(request.GET.get("all_data", None)))
+
         x["z"] = json.loads(request.GET.get("all_data", None))
         for c in x["z"]:
             c["address"] = Home.objects.get(home_phone=c["address"]).address
@@ -751,6 +771,7 @@ def validate_submit(request):
             x["year"] = twelve(int(date.today().year) + 1)
         else:
             x["year"] = twelve(date.today().year)
+                        
         x["title"] = request.GET.get("title", None)
         # print(os.path.join(BASE_DIR, "files" ,"files","mode1.docx"))
         if request.GET.get("title", None) == "祈求值年太歲星君解除沖剋文疏":
@@ -763,9 +784,6 @@ def validate_submit(request):
 
         tpl.render(x)
 
-        comtypes.CoInitialize()  #轉pdf
-        word = comtypes.client.CreateObject('Word.Application')
-
         file_location = os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)))
         find_folder = os.path.join(file_location, "output")
@@ -774,24 +792,30 @@ def validate_submit(request):
         if not find_yes_no:
             os.makedirs(find_folder)
 
+        find_x = ""
+        find_y = ""
         while (True):
             random_string = str(uuid.uuid4())
             find_x = os.path.join(find_folder, random_string + ".docx")
             if not os.path.exists(find_x):
-                tpl.save(find_x)
-                doc = word.Documents.Open(find_x)
-                find_y = os.path.join(find_folder,
-                                      str(uuid.uuid4()) + "_to_pdf")
-                doc.SaveAs(find_y, FileFormat=17)
-                os.system(find_y + ".pdf")
+                find_y =  os.path.join(find_folder, random_string + ".pdf")
                 break
+        tpl.save(find_x)
 
+        pythoncom.CoInitialize()
+        word = Dispatch('Word.Application')
+        doc = word.Documents.Open(find_x)
+        doc.SaveAs(find_y, FileFormat=17)
         doc.Close()
         word.Quit()
+        os.system(find_y)
+    
+
         data = {"result": "已經送出"}
 
     except Exception as e:
-        data = {"result": e}
+        data={"result" :str(e)}
+        print("錯誤" + str(e))
     return JsonResponse(data)
 
 
