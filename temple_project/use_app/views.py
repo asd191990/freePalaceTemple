@@ -1,5 +1,6 @@
 from datetime import date
 import datetime
+from dateutil.relativedelta import relativedelta
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect, render_to_response, redirect
 from django.http import JsonResponse
 from .forms import homeform, peopleform, activity_form, choose_form, login_form, fix_peopleform
@@ -169,16 +170,21 @@ def csv_add(request):
                 for index, row in df.iterrows():
                     #取得該列資料
                     name=row['信眾名字'];
+                    
                     birthday=row['生日'];
+                    date_arr=birthday.split("-");
+                    dt=datetime.date(int(date_arr[0])+1911, int(date_arr[1]), int(date_arr[2]))
+                    birthday=dt.strftime("%Y-%m-%d");
+
                     time=row['時辰'];
                     gender=row['性別'];
                     home_id=row['家庭電話'];
 
-
-                    if(Home.objects.filter(home_phone=home_id).exists()):
+                    home=Home.objects.filter(home_phone=home_id);
+                    if(home.exists()):
                         if(not People_data.objects.filter(home_id=home_id,name=name).exists()):
                             #此筆資料沒有與資料庫中資料衝突，先暫存
-                            append_arr.append([name,birthday,time,gender,home_id]);
+                            append_arr.append([name,birthday,time,gender,home[0].pk]);
                         else:
                             #此筆資料與資料庫中資料衝突，匯入失敗
                             error = "匯入失敗，成員重複（重複家庭成員：{0}家庭之〝{1}〞信眾)".format(home_id,name);
