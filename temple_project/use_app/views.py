@@ -170,7 +170,7 @@ def csv_add(request):
                 for index, row in df.iterrows():
                     #取得該列資料
                     name=row['信眾名字'];
-                    
+
                     birthday=row['生日'];
                     date_arr=birthday.split("-");
                     dt=datetime.date(int(date_arr[0])+1911, int(date_arr[1]), int(date_arr[2]))
@@ -188,11 +188,11 @@ def csv_add(request):
                         else:
                             #此筆資料與資料庫中資料衝突，匯入失敗
                             error = "匯入失敗，成員重複（重複家庭成員：{0}家庭之〝{1}〞信眾)".format(home_id,name);
-                            return render(request, "up_date.html", locals());  
+                            return render(request, "up_date.html", locals());
                     else:
                         #此筆資料的家庭不存在，匯入失敗
                         error = "匯入失敗，並沒有電話號碼為{0}的家庭".format(home_id,name);
-                        return render(request, "up_date.html", locals());  
+                        return render(request, "up_date.html", locals());
                 #讀擋完畢，並確認無錯誤。將暫存資料存入資料庫
                 for person_data in append_arr:
                     print(person_data);
@@ -254,11 +254,9 @@ def validate_people_all_date(request):
 def year(x):
 
     time = date.today()
-    ex = LunarSolarConverter.Solar(time.year, time.month, time.day)
-    true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
 
-    old = int(true_time.lunarYear) - int(x.year)
-    if x.month > true_time.lunarMonth and x.day > true_time.lunarDay:
+    old = int(time.year) - int(x.year)
+    if x.month > time.month and x.day > time:
         old += 1
     else:
         old -= 1
@@ -361,7 +359,7 @@ def register(request):
 def validate_people_data(request):
     old_name = request.GET.get("old_name", None)
     new_name = request.GET.get("new_name", None)  # 只判斷有沒有重複名字
-    new_birthday = request.GET.get("new_birthday", None)    
+    new_birthday = request.GET.get("new_birthday", None)
     new_gender = request.GET.get("new_gender", None)
     home_id = request.GET.get("home_id", None)
     time = request.GET.get("time", None)
@@ -642,12 +640,43 @@ def home_del(request, pk, people_id):
     return HttpResponseRedirect(reverse('home', kwargs={'pk': pk}))
 
 
+def reture_lunar(x,y,z):
+    x = int(x)
+    y = int(y)
+    z = int(z)
+    ex = LunarSolarConverter.Solar(x,y,z)    
+    true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
+    x = "{y}年{m}月{d}號".format(y = (true_time.lunarYear-1911) ,m= true_time.lunarMonth ,d= true_time.lunarDay)
+    return x
+
+def reture_solar(x,y,z):
+    x = int(x)
+    y = int(y)
+    z = int(z)
+    yes_no = False ##是否閏年 是=yes 否=false
+    year = int(x)
+    if (year % 4) == 0:
+        if (year % 100) == 0:
+            if (year % 400) == 0:
+               yes_no = True   # 整百年能被400整除的是闰年
+            else:
+               yes_no = False
+        else:
+           yes_no = True     # 非整百年能被4整除的为闰年
+    else:
+       yes_no = False
+
+    ex = LunarSolarConverter.Lunar(x,y,z,yes_no)
+    true_time = LunarSolarConverter.LunarSolarConverter.LunarToSolar(ex, ex)
+    x = "{y}-{m}-{d} 09:08:04".format(y = true_time.solarYear ,m= true_time.solarMonth,d= true_time.solarDay)
+    return x
+
 @login_required(login_url='/use_login')
 def people_form(request, pk):
     form = peopleform(request.POST or None)
     fix_form = fix_peopleform(None)
 
-    
+
     x_try = Home.objects.get(pk=pk).home_phone
 
     title_one = "信眾名字"
@@ -675,8 +704,8 @@ def people_form(request, pk):
                 if (People_data.objects.filter(home_id=pk).filter(
                         name=get_all_name[i]).count() == 0):
                     get_all_birthday_y[i] = str(int(get_all_birthday_y[i] )+1911)
-                   
-                    x = "{y}-{m}-{d} 09:08:04".format(y = get_all_birthday_y[i],m= get_all_birthday_m[i],d= get_all_birthday_d[i])
+
+                    x = reture_solar(get_all_birthday_y[i],get_all_birthday_m[i],get_all_birthday_d[i])
 
                     People_data.objects.create(name=get_all_name[i].replace(
                         " ", ""),
@@ -699,7 +728,8 @@ def people_form(request, pk):
         c["name"] = x.name
         c["gender"] = x.gender
         c["time"] = x.time
-        c["birthday"] =str( x.birthday.year-1911)+" 年 "+ str( x.birthday.month) +" 日 "+str( x.birthday.day) +" 號"        
+
+        c["birthday"] =reture_lunar(x.birthday.year,x.birthday.month,x.birthday.day) #str( x.birthday.year-1911)+" 年 "+ str( x.birthday.month) +" 日 "+str( x.birthday.day) +" 號"
         use_peoples.append(c)
 
     context = locals()
