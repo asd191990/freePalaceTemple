@@ -21,6 +21,7 @@ from . import views
 urlpatterns = [
     path("data_up",views.data_up,name="data_up"),
     path("join_activity/old/<int:pk>",views.old,name="old"),
+    path('remove_record/old/<int:pk>',views.remove_record,name="remove_record"),
     path("home/home_del/<int:pk>/<int:people_id>",views.home_del),
     path('', views.index),
     path("data_save",views.data_save,name='data_save'),

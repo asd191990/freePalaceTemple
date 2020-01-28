@@ -21,7 +21,8 @@
         <thead class="thead-light">
             <tr>
                 <th>名稱</th>
-                <th>點選</th>
+                <th>選取</th>
+                <th>刪除</th>
             </tr>
         </thead>
         <tbody>
@@ -32,6 +33,13 @@
                     <a href="{% url 'old' history.pk %}">
                         <button class="btn btn-info">
                             讀取
+                        </button>
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'remove_record' history.pk %}">
+                        <button class="btn btn-info">
+                            刪除
                         </button>
                     </a>
                 </td>

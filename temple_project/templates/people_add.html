@@ -1,5 +1,4 @@
 {% extends "base.html" %} {% block title %} 表單 {% endblock %} {% block form %}
-
 <head>
     <div id="fix_box" hidden>
         <p>請輸入改動資料</p>
@@ -108,7 +107,7 @@
             {% csrf_token %} 選擇家庭為: {{x_try}} <br>
             <br>
             <div id="use">
-                <label for="id_name">輸入香客姓名:</label>
+                <label for="id_name">輸入信眾姓名:</label>
                 {{ form.name }}
                 <br><br>
                 <label for="id_birthday_y">民國農曆出生年: </label>
@@ -146,7 +145,7 @@
                 {% for c in people_all %}
                 <tr>
                     <td id={{c.name}}> {{ c.name }} </td>
-                    <td id={{c.name}}{{c.birthday}}>{{c.birthday}}</td>
+                    <td id={{c.name}}{{c.birthday}}>{{c.birthday|BeautifyDateStr}}</td>
                     <td>{{c.time}}</td>
                     {% if c.gender == "female" %}
                     <td id={{c.name}}{{c.gender}}> 女 </td>
