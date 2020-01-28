@@ -36,8 +36,8 @@ class People_data(models.Model):
 
     name = models.CharField(verbose_name='輸入姓名', max_length=10)
 
-    birthday = models.DateTimeField(
-        verbose_name='西元生日(ex:2012-01-01)')  # default = timezone.now
+    birthday = models.CharField(
+        verbose_name='西元生日',max_length=20)  # default = timezone.now
     time = models.CharField(max_length=5)
     gender = models.CharField(verbose_name='性別', max_length=32, choices=(
         ('male', '男'), ('female', '女')), default="男")
