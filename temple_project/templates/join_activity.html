@@ -174,8 +174,8 @@
                 })
             }
             $("#submit,#ex").click(function () { //重整資料
-                
-                let page_num = 8
+
+                let page_num = 5
                 let all_data = []
                 for (let i = 0; i < all_people_list.length; i++) { //全部家庭
 
@@ -209,15 +209,44 @@
                         a_home_data["one_people"] = name
                         all_data.unshift(a_home_data)
                     }
-                    
+
                 }
+
+                //純名字名單
+                name_list = []
+                a_people_data = {}
+                time = 0
+                for (let i = 0; i < all_people_list.length; i++) { //全部家庭
+                    
+                    for (let j = 0; j < all_people_list[i].length; j++) {
+                        if (all_people_list[i][j][2] == "T") {
+                            x = "name" + (time + 1)
+                            time += 1
+                            console.log( x +" -> " +all_people_list[i][j][0])
+                            a_people_data[x] = all_people_list[i][j][0]
+                            if (time === 10) {
+                                name_list.push(a_people_data)
+                                a_people_data = {}
+                                time = 0
+                                console.log("xx")
+                            }
+                        }
+                    }
+                }
+                if (a_people_data.length !== 0) {
+                    name_list.push(a_people_data)
+                    a_people_data = {}
+                }
+
+
                 all_data = all_data.reverse()
                 let title = $("#id_activity_ID").find("option:selected").text() == "祈求值年太歲星君解除沖剋文疏" ? "祈求值年太歲星君解除沖剋文疏" : $("#id_activity_ID").find("option:selected").text() + "祈安植福文疏"
                 $.ajax({
                     url: '{% url "validate_submit" %}',
                     data: {
                         "all_data": JSON.stringify(all_data),
-                        "title": title
+                        "title": title,
+                        "name": JSON.stringify(name_list)
                     },
                     traditional: true,
                     async: false,
@@ -282,7 +311,7 @@
                     $("#find_phone_result").text(page_array[get_find] + "的電話在第" + (1 + parseInt(get_find)) + "頁")
                     use_page = get_find
                     show_page_text()
-                    
+
                 }
                 else
                     $("#find_phone_result").text("請輸入完全符合的電話")

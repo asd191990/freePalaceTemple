@@ -6,3 +6,4 @@ comtypes==1.1.7
 docxtpl==0.6.3
 pandas==0.25.3
 xlrd==1.2.0
+pywin32==224

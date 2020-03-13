@@ -4,20 +4,16 @@ from dateutil.relativedelta import relativedelta
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect, render_to_response, redirect
 from django.http import JsonResponse
 from .forms import homeform, peopleform, activity_form, choose_form, login_form, fix_peopleform
-
 from .models import Home, People_data, activity_data, history_data
-#try
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import auth
 from django.urls import reverse
 from mailmerge import MailMerge
 from django.contrib.auth import logout
-from django.urls import reverse
 import os
 import json
 from django.contrib.auth.decorators import login_required
 from django.template.defaultfilters import stringfilter
-import comtypes.client
 import time
 
 from docxtpl import DocxTemplate
@@ -136,7 +132,7 @@ def csv_add(request):
         for file in files:
             #確認檔案是否為xlsx檔
             if (file.name.split(".")[-1] != "xlsx"):
-                error = "請輸入xlsx檔"
+                error += "請輸入xlsx檔"
                 return render(request, "up_date.html", locals())
 
             #將上傳的檔案寫到伺服器端
@@ -157,22 +153,32 @@ def csv_add(request):
                     family_phone_number = row['電話']
                     address = row['地址']
 
-                    if (not Home.objects.filter(
-                            home_phone=family_phone_number).exists()):
+                    home_object=Home.objects.filter(home_phone=family_phone_number);
+                    if (not home_object.exists()):
                         #此筆資料沒有與資料庫中資料衝突，先暫存
                         append_arr.append([family_phone_number, address])
                     else:
+                        #此筆資料與資料庫中資料衝突，進行覆寫的動作
+                        home_object[0].address=address;
+                        home_object[0].home_phone=family_phone_number;
+
+                        home_object[0].save();
+                        
+
+                        """    
                         #此筆資料與資料庫中資料衝突，匯入失敗
                         error = "匯入失敗，家庭電話號碼重複（重複家庭之電話號碼：{0})".format(
                             family_phone_number)
                         return render(request, "up_date.html", locals())
-
+                        """
                 #讀擋完畢，並確認無錯誤。將暫存資料存入資料庫
                 for family_data in append_arr:
                     print(
                         Home.objects.create(home_phone=family_data[0],
                                             address=family_data[1]))
-                error+="家庭檔案處理成功！";
+                    error+="--已新增家庭 "+ family_data[0] +" 之資料<br/>";
+
+                error+="家庭檔案處理成功！<br/>";
             elif (file == people):
                 for index, row in df.iterrows():
                     #取得該列資料
@@ -187,7 +193,7 @@ def csv_add(request):
                     	if(not(year<=250 and month>=1 and month<=12 and day>=1 and day<=31)):
                     		raise Exception('')
                     except:
-                        error = "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
+                        error += "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
                         return render(request, "up_date.html", locals())
 
                     time = row['時辰']
@@ -197,7 +203,7 @@ def csv_add(request):
                     elif(gender=="女"):
                     	gender="female";
                     else:
-                        error = "匯入失敗，性別輸入錯誤（成員：{0}）".format(name)
+                        error += "匯入失敗，性別輸入錯誤（成員：{0}）".format(name)
                         return render(request, "up_date.html", locals())
 
                     phone = row['家庭電話']
@@ -206,30 +212,42 @@ def csv_add(request):
 
                     if (home.exists()):
                         home_id= home[0].pk;
-                        if (not People_data.objects.filter(
-                                home_id=home_id, name=name).exists()):
+                        people_object=People_data.objects.filter(home_id=home_id, name=name)
+                        if (not people_object.exists()):
                             #此筆資料沒有與資料庫中資料衝突，先暫存
                             append_arr.append(
                                 [name, birthday, time, gender, home_id])
                         else:
+                            #此筆資料與資料庫中資料衝突，進行覆寫之動作
+                            people_object[0].name=name;
+                            people_object[0].birthday=birthday;
+                            people_object[0].time=time;
+                            people_object[0].gender=gender;
+
+                            people_object[0].save();
+                            
+                            """
                             #此筆資料與資料庫中資料衝突，匯入失敗
                             error = "匯入失敗，成員重複（重複家庭成員：{0}家庭之〝{1}〞信眾)".format(
                                 phone, name)
                             return render(request, "up_date.html", locals())
+                            """
                     else:
                         #此筆資料的家庭不存在，匯入失敗
-                        error = "匯入失敗，並沒有電話號碼為{0}的家庭".format(phone, name)
+                        error += "匯入失敗，並沒有電話號碼為{0}的家庭".format(phone, name)
                         return render(request, "up_date.html", locals())
                 #讀擋完畢，並確認無錯誤。將暫存資料存入資料庫
                 for person_data in append_arr:
                     print(person_data)
+                    home_object=Home.objects.get(id=person_data[4]);
                     print(
                         People_data.objects.create(name=person_data[0],
                                                    birthday=person_data[1],
                                                    time=person_data[2],
                                                    gender=person_data[3],
                                                    home_id=person_data[4]))
-                error+="成員檔案處理成功！";
+                    error+="--已新增家庭 "+ home_object.home_phone + " 之成員 " + person_data[0] + " 之資料<br/>";
+                error+="成員檔案處理成功！<br/>";
 
     return render(request, "up_date.html", locals())
 
@@ -266,13 +284,13 @@ def validate_people_all_date(request):
     try:
         for i in range(len(the_data)):
             date = the_data[i].birthday.split("-")
-         
+
             output = the_data[i].name + " 本命 " + twelve(int(
                 date[0])) + " 年 " + time_chinese(int(
                     date[1])) + " 月 " + time_chinese(
                         int(date[2])) + " 號 " + "  生行庚 " + time_chinese(
                             year(date)) + " 歲 "
-            
+
             get_allname_array.append(the_data[i].name + "|" + output + "|" +
                                      "F")
     except Exception as e:
@@ -283,17 +301,18 @@ def validate_people_all_date(request):
 
 
 def year(x):
-    print(x)
     time = date.today()
     fix = 0
     if time.month >= 10:
         fix = 1
-   
+
     old =(int(time.year) - 1911 + fix) - int(x[0])
-    if not int(x[1]) >= 2 and int(x[2]) >= 30:
+    if int(x[1]) == 1:# 判斷1月有沒有過
+        if int(x[2]) > 12:
+            old -= 1
+    else:#其他月直接-1
         old -= 1
 
-    print(old)
     return abs(old)
 
 
@@ -704,6 +723,7 @@ def reture_solar(x, y, z):
                                       m=true_time.solarMonth,
                                       d=true_time.solarDay)
     return x
+
 @django.template.defaulttags.register.filter
 def BeautifyDateStr(value):
     arr=value.split("-")
@@ -768,9 +788,9 @@ def people_form(request, pk):
                     use_bug += get_all_name[i] + " "
             form = peopleform(None)
             if use_bug != "":
-                use_bug = "名字重複的名單有:" + use_bug  
+                use_bug = "名字重複的名單有:" + use_bug
             if y_bug != "":
-                y_bug = "日期錯誤的名單有:" + y_bug 
+                y_bug = "日期錯誤的名單有:" + y_bug
         else:
             x_bug = "請輸入全部欄位"
 
@@ -794,9 +814,9 @@ def validate_submit(request):
         for c in x["z"]:
             c["address"] = Home.objects.get(home_phone=c["address"]).address
         if date.today().month >= 10:
-            x["year"] = twelve(int(date.today().year) + 1)
+            x["year"] = twelve(int(date.today().year) + 1-1911)
         else:
-            x["year"] = twelve(date.today().year)
+            x["year"] = twelve(date.today().year-1911)
 
         x["title"] = request.GET.get("title", None)
         # print(os.path.join(BASE_DIR, "files" ,"files","mode1.docx"))
@@ -832,13 +852,43 @@ def validate_submit(request):
         word = Dispatch('Word.Application')
         doc = word.Documents.Open(find_x)
         doc.SaveAs(find_y, FileFormat=17)
-        doc.Close()
-        word.Quit()
+        # doc.Close()
+        # word.Quit()
         os.system(find_y)
 
+        #處理名字表
+        name_list = json.loads(request.GET.get("name", None))
+
+
+        use_word = MailMerge(os.path.join(BASE_DIR, "files", "files", "straight.docx"))
+        use_word.merge_rows('name1', name_list)        
+        use_word.write(os.path.join(BASE_DIR, "files", "files", "ok_straight.docx"))
+
+        use_word.close()
+
+
+        doc = word.Documents.Open(os.path.join(BASE_DIR, "files", "files", "ok_straight.docx"))
+        doc.SaveAs(os.path.join(BASE_DIR, "files", "files", "ok_straight.pdf"), FileFormat=17)
+        os.system(os.path.join(BASE_DIR, "files", "files", "ok_straight.pdf"))
+
+        use_word = MailMerge(os.path.join(BASE_DIR, "files", "files", "row.docx"))
+        use_word.merge_rows('name1', name_list)
+        use_word.write(os.path.join(BASE_DIR, "files", "files", "ok_row.docx"))
+
+        use_word.close()
+
+        doc = word.Documents.Open(os.path.join(BASE_DIR, "files", "files", "ok_row.docx"))
+        doc.SaveAs(os.path.join(BASE_DIR, "files", "files", "ok_row.pdf"), FileFormat=17)
+        os.system(os.path.join(BASE_DIR, "files", "files", "ok_row.pdf"))      
+        
+       
+        doc.Close()
+        word.Quit()
         data = {"result": "已經送出"}
 
     except Exception as e:
+        doc.Close()
+        word.Quit()
         data = {"result": str(e)}
         print("錯誤" + str(e))
     return JsonResponse(data)

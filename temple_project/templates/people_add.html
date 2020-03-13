@@ -19,6 +19,8 @@
             let set_button
             let old_time
 
+            $("input[name='x_name']").attr("disabled","disabled");
+
             $(".fix").click(function (e) {
                 get_value = $(this).attr("value").split("/")
                 old_name = get_value[0];
