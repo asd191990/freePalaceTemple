@@ -1,51 +1,41 @@
-{% extends "base.html" %}
-
-{% block title %}
-首頁
-
-{% endblock  %}
-
-{% block message %}
+{% extends "base.html" %} {% block title %} 首頁 {% endblock %} {% block message %}
 <div style="margin-left:50px;">
 
-    <p>
-        <a href="new">
-            <button class="btn btn-danger">
-                <h2 style="text-align:center;">新創</h2>
-            </button>
-        </a>
-    </p>
-    <hr style="border: 5px solid rgba(155, 213, 228, 0.295);">
-    <p>歷史紀錄</p>
-    <table id="mytable" class="table table-bordred table-striped">
-        <thead class="thead-light">
-            <tr>
-                <th>名稱</th>
-                <th>選取</th>
-                <th>刪除</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for history in historys  %}
-            <tr>
-                <td>{{history.name}}</td>
-                <td>
-                    <a href="{% url 'old' history.pk %}">
-                        <button class="btn btn-info">
-                            讀取
-                        </button>
-                    </a>
-                </td>
-                <td>
-                    <a href="{% url 'remove_record' history.pk %}">
-                        <button class="btn btn-info">
-                            刪除
-                        </button>
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-</div>
+    <form method="post">
+        {% csrf_token %}
+        輸入法會名稱
+        <input name="activity_name">
+        <button type="submit" class="btn btn-danger">
+            <h2 style="text-align:center;">新增法會</h2>
+        </button>
+    </form>
 
-{% endblock  %}
+    <h5 style="color:red;"> {{error}}</h5>
+
+
+
+    {% for Day in Days %}
+    <hr style="border: 5px solid rgba(155, 213, 228, 0.295);">
+
+    <h3>{{Day.date_name}}
+        <button class="btn btn-info">
+            新增一筆今日資料
+        </button>
+    </h3>
+
+    {%for every in every_days %}
+
+
+    {%if every.Day_date.id == Day.id %}
+    <button class="btn btn-info">
+        {{every.date}}
+    </button> <br><br>
+    {% endif %}
+
+    {%endfor %}
+
+    {%endfor %}
+
+
+
+    {% endblock %}

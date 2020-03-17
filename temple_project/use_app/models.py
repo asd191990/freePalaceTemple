@@ -3,6 +3,35 @@ from django.db import models
 # Create your models here.
 
 
+class Day(models.Model):
+    date_name = models.CharField(max_length=12)
+    class Meta:
+        verbose_name_plural = '法會日期'
+    def __str__(self):
+        return self.date_name       
+
+class every_day(models.Model):
+    Day_date = models.ForeignKey(
+		Day,
+		related_name='name',
+		null=True,
+		blank=True,
+		on_delete=models.CASCADE
+    )
+    date  = models.CharField(max_length=12)
+    one_lights = models.TextField()
+    two_lights = models.TextField()
+    three_lights = models.TextField()
+    four_lights = models.TextField()
+    five_lights = models.TextField()
+    class Meta:
+        verbose_name_plural = '燈的紀錄'
+    def __str__(self):
+        return self.date
+
+
+
+
 class activity_data(models.Model):
     name = models.CharField(verbose_name="活動名稱", max_length=50)
     use_file = models.FileField(verbose_name="上傳檔案", upload_to="files")
