@@ -19,6 +19,7 @@ from django.urls import path, re_path
 #tryee
 from . import views
 urlpatterns = [
+    path("updata",views.updata,name="updata"),
     path("join_activity/<int:pk>/<str:date>",views.activity_process,name="ok"),
     path("new_day",views.new_day,name="new_day"),
     path("data_up",views.data_up,name="data_up"),
@@ -33,7 +34,7 @@ urlpatterns = [
     path("register",views.register),
     path("use_login",views.login),
     path("logout",views.logout),
-    path('try',views.x_try), 
+    path('try',views.x_try),
     path('ajax/validate_username', views.validate_username, name='validate_username'),
     path('ajax/validate_del', views.validate_del, name='validate_del'),
     path('ajax/validate_date', views.validate_date, name='validate_date'),
@@ -46,5 +47,5 @@ urlpatterns = [
     path("new",views.new),
     path('ajax/validate_get_table', views.validate_get_table, name='validate_get_table'),
     path('csv_add',views.csv_add,name="csv_add"),
-    re_path(r".",views.index)    
+    re_path(r".",views.index)
 ]

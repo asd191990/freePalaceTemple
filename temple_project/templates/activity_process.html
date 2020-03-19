@@ -95,9 +95,9 @@
 
                 }
             }
-
+            five_array = ["one", "two", "three", "four", "five"]
             function show_people() {
-                five_array = ["one", "two", "three", "four", "five"]
+
 
                 for (let j = 0; j < 5; j++) {
                     people_list = ""
@@ -111,9 +111,9 @@
                         }
                         else {
                             all_people_list[use_page][i][3] += (all_people_list[use_page][i][3] === "") ? five_array[j] : "," + five_array[j]
-                          //  console.log(all_people_list[use_page][i][0]+ " "+ all_people_list[use_page][i][2]+"get "+five_array[j] +" >> " + all_people_list[use_page][i][3])
+                            // console.log(all_people_list[use_page][i][0]+ " "+ all_people_list[use_page][i][2]+"get "+five_array[j] +" >> " + all_people_list[use_page][i][3])
                         }
-                        people_list += '<input type="checkbox" ' + check_yes_no + ' name="people' + 1 + '"value=' + all_people_list[use_page][i][0] + '>' + all_people_list[use_page][i][0] + "<br>"
+                        people_list += '<input type="checkbox" ' + check_yes_no + ' name="people' + j + '"value=' + all_people_list[use_page][i][2] + '>' + all_people_list[use_page][i][0] + "<br>"
                     }
                     if (people_list == "")
                         people_list = "此家庭還未有信眾"
@@ -127,6 +127,47 @@
 
             initialization()
 
+            function fix_data() {//全部重建資料，只有有被勾都加進去
+                five_data=["","","","",""]
+                for (let i = 0; i < 5; i++) {
+                    let get_one = no_way(five_array[i])
+                    let new_data = ""
+
+                    $('input[name=people' + i + ']:checked').each(function () {
+                        new_data += new_data == "" ? $(this).val() : "," + $(this).val()
+                    })
+                    console.log(new_data)
+                    // console.log("沒選")
+                    // $('input[name=people' + i + ']').not("input:checked").each(function () {
+                    //     if (get_one.indexOf($(this).val())) {//在記錄出現過，所以把他移除進去
+                    //         new_data += new_data == "" ? $(this).val() : "," + $(this).val()
+                    //     }
+                    // })
+                    five_data[i]=new_data
+
+                }
+                console.log(five_data)
+                $.ajax({//把五筆資料送去後台
+                    type: "POST",
+                    url: '{% url "updata" %}',
+                    traditional: true,
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        "new_data": five_data,
+                        "activity": "{{use_activity}}",
+                        "use_date": "{{use_date}}"
+                    },
+                    dataType: 'json',
+                    async: false,
+                    success: function (data) {
+                    }
+                });
+
+            }
+
+            $("#determine").click(function () {
+                fix_data()
+            })
 
             function show_page_text() {
                 $("#page").val(parseInt(use_page) + 1);

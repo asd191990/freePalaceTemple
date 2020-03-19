@@ -163,7 +163,7 @@ def csv_add(request):
                         home_object[0].home_phone = family_phone_number
 
                         home_object[0].save()
-                        """    
+                        """
                         #此筆資料與資料庫中資料衝突，匯入失敗
                         error = "匯入失敗，家庭電話號碼重複（重複家庭之電話號碼：{0})".format(
                             family_phone_number)
@@ -298,7 +298,7 @@ def validate_people_all_date(request):
 
     except Exception as e:
         print(e)
-   
+
     data = {"reslut": '㊣'.join(get_allname_array)}
     return JsonResponse(data)
 
@@ -650,13 +650,31 @@ def join_activity(request):
 def activity_process(request, pk, date):
     x_form = choose_form(request.POST or None)
     x_max = Home.objects.all().count()
-    peoples = People_data.objects.all()
-    Homes = Home.objects.all()
+    use_date = date
+    use_activity = pk
     all_data = every_day.objects.get(Day_date=Day.objects.get(pk=pk),
                                      date=date)
 
+
     return render(request, "activity_process.html", locals())
 
+
+def updata(request):
+    data = {}
+    activity = request.POST.get('activity')
+
+    get_activity = Day.objects.get(id=activity)#得到活動的實體
+
+    use_date = request.POST.get('use_date') #得到日期
+    five_data = request.POST.getlist('new_data') #得到五筆燈的紀錄
+
+
+    try:
+        every_day.objects.filter(Day_date=get_activity,date=use_date).update(one_lights=five_data[0],two_lights=five_data[1],three_lights=five_data[2],four_lights=five_data[3],five_lights=five_data[4])
+    except Exception as e:
+        print("錯誤 ->   " + str(e))
+
+    return JsonResponse(data)
 
 def new_day(request):
     data = {}
