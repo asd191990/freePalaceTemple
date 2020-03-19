@@ -80,29 +80,15 @@
                 return all_people
             }
 
-            function no_way(num) {
-                switch (num) {
-                    case "one":
-                        return "{{all_data.one_lights}}".split(",")
-                    case "two":
-                        return "{{all_data.two_lights}}".split(",")
-                    case "three":
-                        return "{{all_data.three_lights}}".split(",")
-                    case "four":
-                        return "{{all_data.four_lights}}".split(",")
-                    case "five":
-                        return "{{all_data.five_lights}}".split(",")
 
-                }
-            }
+            five_data_array = ["{{all_data.one_lights}}".split(","), "{{all_data.two_lights}}".split(","), "{{all_data.three_lights}}".split(","), "{{all_data.four_lights}}".split(","), "{{all_data.five_lights}}".split(",")]
             five_array = ["one", "two", "three", "four", "five"]
             function show_people() {
-
 
                 for (let j = 0; j < 5; j++) {
                     people_list = ""
 
-                    let get_one = no_way(five_array[j])
+                    let get_one =five_data_array[j]
 
                     for (let i = 0; i < all_people_list[use_page].length; i++) {   //name用 people+i 分辨群組
                         check_yes_no = " checked=checked"
@@ -111,14 +97,15 @@
                         }
                         else {
                             all_people_list[use_page][i][3] += (all_people_list[use_page][i][3] === "") ? five_array[j] : "," + five_array[j]
-                            // console.log(all_people_list[use_page][i][0]+ " "+ all_people_list[use_page][i][2]+"get "+five_array[j] +" >> " + all_people_list[use_page][i][3])
                         }
                         people_list += '<input type="checkbox" ' + check_yes_no + ' name="people' + j + '"value=' + all_people_list[use_page][i][2] + '>' + all_people_list[use_page][i][0] + "<br>"
                     }
+
                     if (people_list == "")
                         people_list = "此家庭還未有信眾"
                     people_list = "<div>" + people_list + "</div>"
                     //  console.log(people_list)
+                    $("#" + five_array[j]).empty()
                     $("#" + five_array[j]).append(people_list);
                 }
 
@@ -127,26 +114,33 @@
 
             initialization()
 
-            function fix_data() {//全部重建資料，只有有被勾都加進去
-                five_data=["","","","",""]
-                for (let i = 0; i < 5; i++) {
-                    let get_one = no_way(five_array[i])
-                    let new_data = ""
+            function fix_data() {
 
-                    $('input[name=people' + i + ']:checked').each(function () {
-                        new_data += new_data == "" ? $(this).val() : "," + $(this).val()
+                for (let i = 0; i < 5; i++) {
+                    let get_id_array =five_data_array[i]
+
+
+                    $('input[name=people' + i + ']:checked').each(function () {//有打勾 但沒出現在裡面
+                        if (get_id_array.indexOf($(this).val()) == -1) { //->加入
+                            console.log(get_id_array)
+                            get_id_array.push($(this).val())
+                            console.log(get_id_array)
+                        }
                     })
-                    console.log(new_data)
+
                     // console.log("沒選")
-                    // $('input[name=people' + i + ']').not("input:checked").each(function () {
-                    //     if (get_one.indexOf($(this).val())) {//在記錄出現過，所以把他移除進去
-                    //         new_data += new_data == "" ? $(this).val() : "," + $(this).val()
-                    //     }
-                    // })
-                    five_data[i]=new_data
+                    $('input[name=people' + i + ']').not("input:checked").each(function () {
+                        let j = get_id_array.indexOf($(this).val())
+                        if (j != -1) {//沒打勾，但有出現在紀錄中 ->移除
+                            console.log(get_id_array)
+                            get_id_array.splice(j, 1)
+                            console.log(get_id_array)
+                        }
+                    })
+                    five_data_array[i] = get_id_array
 
                 }
-                console.log(five_data)
+                five_data = [five_data_array[0].join(","), five_data_array[1].join(","), five_data_array[2].join(","), five_data_array[3].join(","), five_data_array[4].join(",")]
                 $.ajax({//把五筆資料送去後台
                     type: "POST",
                     url: '{% url "updata" %}',
@@ -160,14 +154,18 @@
                     dataType: 'json',
                     async: false,
                     success: function (data) {
+
                     }
                 });
 
             }
 
-            $("#determine").click(function () {
+            $("#save,#rigth,#left").click(function () {
+
                 fix_data()
+
             })
+
 
             function show_page_text() {
                 $("#page").val(parseInt(use_page) + 1);
@@ -175,6 +173,7 @@
                 show_people()
             }
             $("#find_phone").change(function () {
+                fix_data()
                 get_find = page_array.indexOf($(this).val())
                 if (get_find >= 0) {
                     $("#find_phone_result").text(page_array[get_find] + "的電話在第" + (1 + parseInt(get_find)) + "頁")
@@ -186,7 +185,44 @@
                     $("#find_phone_result").text("請輸入完全符合的電話")
             })
 
+            $("#left").click(function () {
+                if (use_page >= start) {
+                    use_page -= 1
+                    show_page_text()
+                }
+                else {
+                    alert("已經到第一頁了")
+                }
+            })
+            $("#rigth").click(function () {
+                if (use_page + 1 < parseInt(end)) {
+                    use_page += 1
+                    show_page_text()
+                }
+                else {
+                    alert("已經到最後一頁了")
+                }
+            })
+            $("#page").change(function () {
 
+                if ($("#page").val() > parseInt(end)) {
+                    alert("輸入頁數超出範圍")
+                }
+                else {
+                    if (parseInt($("#page").val()) <= 0 || $("#page").val() == "") {
+                        alert("輸入頁數請大於0")
+                        $("#page").val(start)
+
+                    }
+                    else {
+                        use_page = parseInt($("#page").val() - 1)
+                        $("#page").val(use_page + 1)
+
+                    }
+                    $("#page_use_phone").text("當前使用的是" + page_array[use_page] + "的電話")
+                }
+                show_people()
+            })
 
         });
 
@@ -213,29 +249,51 @@
 
 
         </div>
-        <div style="display:flex;margin-left: 0px;padding:5px">
+        <!-- <div style="display:flex;margin-left: 0px;padding:5px">
             <button id="all_ok" class="btn btn-info">全選</button> <button id="all_no" style="margin-left:25px;"
                 class="btn btn-info">全不選</button>
-        </div>
+        </div> -->
+
+        <hr>
+
+        <div style=" display:flex;">
+
+            <div style="margin-left:50px">
+
+                光明燈 <br><br>
+
+                <div id="one">
+
+                </div>
+            </div>
 
 
+            <div style="margin-left:50px">
+                財神燈<br><br>
+                <div id="two">
 
-        <div style=" display:flex;margin-left:5px;padding-left:5px">
+                </div>
+            </div>
 
-            <div id="one" style="margin-left:20px">
+            <div style="margin-left:50px">
+                文昌燈<br><br>
+                <div id="three">
+
+                </div>
+            </div>
+
+            <div style="margin-left:50px">
+                太歲星君<br><br>
+                <div id="four">
+                </div>
 
             </div>
-            <div id="two" style="margin-left:20px">
 
-            </div>
-            <div id="three" style="margin-left:20px">
+            <div style="margin-left:50px">
+                祈求值年太歲星君解除沖剋文疏<br><br>
+                <div id="five">
 
-            </div>
-            <div id="four" style="margin-left:20px">
-
-            </div>
-            <div id="five" style="margin-left:20px">
-
+                </div>
             </div>
 
 
@@ -243,44 +301,17 @@
 
 
         <br><br>
-        <span id="left">&larr;</span> <span id="page_start">ee</span> / <input id="page" style="width:60px"> / <span
-            id="page_end">ee</span> <span id="rigth">&rarr;</span>
-        <button class="btn btn-info" id="determine">確定當頁資料</button>
-
+        <span id="left">&larr;</span> <span id="page_start">1</span> / <input id="page" style="width:60px"> / <span
+            id="page_end">{{x_max}}</span> <span id="rigth">&rarr;</span>
+        <button class="btn btn-info" id="save">確定當頁資料</button>
+        <button style=" margin-left:20px;" class="btn btn-info" id="x">輸出當天資料</button>
 
 
         <hr>
-        <div style="display:flex;">
-            <div style="margin-right:10px;">
-                <form method='POST'>
-                    {% csrf_token %}
-                    選擇列印標題
-                    <select name="activity_ID" class="select" id="id_activity_ID">
-                        <option value="光明燈" selected="">光明燈</option>
-                        <option value="財神燈">財神燈</option>
-                        <option value="文昌燈">文昌燈</option>
-                        <option value="太歲星君">太歲星君</option>
-                        <option value="祈求值年太歲星君解除沖剋文疏">祈求值年太歲星君解除沖剋文疏</option>
-                    </select>
-                    <br><br>
-                    <div style="display:flex;">
-                        <button type="button" id="ex" class="btn btn-outline-dark">匯出檔案</button>
 
-                    </div>
-
-                </form>
-
-
-            </div>
-
-
-            <button id="save" class="btn btn-outline-dark" style="margin-left:50px;color:blueviolet">
-                儲存紀錄
-            </button>
-        </div>
 
     </div>
-    <hr>
+
 
 </body>
 {% endblock  %}
