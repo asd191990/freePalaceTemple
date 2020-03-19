@@ -291,11 +291,14 @@ def validate_people_all_date(request):
                         int(date[2])) + " 號 " + "  生行庚 " + time_chinese(
                             year(date)) + " 歲 "
 
+            # get_allname_array.append(the_data[i].name + "|" + output + "|" +
+            #                          "F")
             get_allname_array.append(the_data[i].name + "|" + output + "|" +
-                                     "F")
+                                     str(the_data[i].id)+ "|" + " ")
+
     except Exception as e:
         print(e)
-
+   
     data = {"reslut": '㊣'.join(get_allname_array)}
     return JsonResponse(data)
 
@@ -632,14 +635,57 @@ def activityform(request):
 @login_required(login_url='/use_login')
 def join_activity(request):
 
-    if request.method == "POST" and  not Day.objects.filter(date_name=request.POST["activity_name"]).exists():
-        Day.objects.create(date_name=request.POST["activity_name"])
-    else:
-        error ="名字已經使用過了"
+    if request.method == "POST":
+        if not Day.objects.filter(
+                date_name=request.POST["activity_name"]).exists():
+            Day.objects.create(date_name=request.POST["activity_name"])
+        else:
+            error = "名字已經使用過了"
 
     Days = Day.objects.all().order_by("-id")
     every_days = every_day.objects.all()
     return render(request, "choose.html", locals())
+
+
+def activity_process(request, pk, date):
+    x_form = choose_form(request.POST or None)
+    x_max = Home.objects.all().count()
+    peoples = People_data.objects.all()
+    Homes = Home.objects.all()
+    all_data = every_day.objects.get(Day_date=Day.objects.get(pk=pk),
+                                     date=date)
+
+    return render(request, "activity_process.html", locals())
+
+
+def new_day(request):
+    data = {}
+    activity_id = request.GET.get('activity_ID', None)
+
+    get_activity = Day.objects.get(id=activity_id)
+
+    today = datetime.date.today()
+    month = str(today.month)
+    day = str(today.day)
+    if len(month) == 1:
+        month = "0" + month
+    if len(day) == 1:
+        day = "0" + day
+
+    month_day = month + day
+    print(month_day)
+
+    try:
+
+        if every_day.objects.filter(Day_date=get_activity,
+                                    date=month_day).exists():
+            data = {"error": "今天已經有資料了"}
+        else:
+            every_day.objects.create(Day_date=get_activity, date=month_day)
+    except Exception as e:
+        print("錯誤 ->   " + str(e))
+
+    return JsonResponse(data)
 
 
 import docx

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}
+文版輸出
+{% endblock  %}
+
+{% block  form %}
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% load crispy_forms_tags %}
+    <script>
+        let use_page = 0;
+        let page_array = []
+
+        let all_people_list = []
+
+        $(document).ready(function () {
+            let start = 1;
+            let max_end = "{{x_max}}";
+            let end = "{{x_max}}";
+
+            $("#page").val(1);
+            $("#id_people_open").val("1")
+            $("#id_people_end").val("{{x_max}}")
+
+
+            function initialization() {
+
+                $.ajax({
+                    url: '{% url "validate_get_Home" %}',//得到所有家庭陣列
+                    async: false,
+                    data: {
+                        "start": 0,
+                        "end": max_end
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        page_array = data.reslut.split(" ")
+
+                    }
+                });
+                all_people_list = get_people_list()
+                $("#page_use_phone").text("當前使用的是" + page_array[0] + "的電話")
+                show_people()
+            }
+
+            function get_people_list() { //人員陣列
+                all_people = []
+                for (let x = 0; x < page_array.length; x++) { //設定家庭的陣列 ，家庭的陣列放香客資料
+
+                    $.ajax({
+                        url: '{% url "validate_people_all_date" %}',
+                        traditional: true, //允許傳遞陣列
+                        data: {
+                            "phone": page_array[x], //把家庭陣列傳回去
+                        },
+                        dataType: 'json',
+                        async: false,
+                        success: function (data) {
+                            one_home = []
+                            people_array = data.reslut.split("㊣")
+
+                            for (let i = 0; i < people_array.length; i++) {
+                                people_data = people_array[i].split("|")//人名與輸出資料分開
+
+                                //   console.log(people_data)
+                                if (people_data[0] != "") {
+                                    people_data[3] = ""
+                                    one_home.push(people_data)
+                                }
+                            }
+                            all_people.push(one_home);
+                        }
+                    });
+                }
+                return all_people
+            }
+
+            function no_way(num) {
+                switch (num) {
+                    case "one":
+                        return "{{all_data.one_lights}}".split(",")
+                    case "two":
+                        return "{{all_data.two_lights}}".split(",")
+                    case "three":
+                        return "{{all_data.three_lights}}".split(",")
+                    case "four":
+                        return "{{all_data.four_lights}}".split(",")
+                    case "five":
+                        return "{{all_data.five_lights}}".split(",")
+
+                }
+            }
+
+            function show_people() {
+                five_array = ["one", "two", "three", "four", "five"]
+
+                for (let j = 0; j < 5; j++) {
+                    people_list = ""
+
+                    let get_one = no_way(five_array[j])
+
+                    for (let i = 0; i < all_people_list[use_page].length; i++) {   //name用 people+i 分辨群組
+                        check_yes_no = " checked=checked"
+                        if (get_one.indexOf(all_people_list[use_page][i][2]) == -1) {
+                            check_yes_no = ""
+                        }
+                        else {
+                            all_people_list[use_page][i][3] += (all_people_list[use_page][i][3] === "") ? five_array[j] : "," + five_array[j]
+                          //  console.log(all_people_list[use_page][i][0]+ " "+ all_people_list[use_page][i][2]+"get "+five_array[j] +" >> " + all_people_list[use_page][i][3])
+                        }
+                        people_list += '<input type="checkbox" ' + check_yes_no + ' name="people' + 1 + '"value=' + all_people_list[use_page][i][0] + '>' + all_people_list[use_page][i][0] + "<br>"
+                    }
+                    if (people_list == "")
+                        people_list = "此家庭還未有信眾"
+                    people_list = "<div>" + people_list + "</div>"
+                    //  console.log(people_list)
+                    $("#" + five_array[j]).append(people_list);
+                }
+
+            }
+            //$("#table_list").empty() 清除
+
+            initialization()
+
+
+            function show_page_text() {
+                $("#page").val(parseInt(use_page) + 1);
+                $("#page_use_phone").text("當前使用的是" + page_array[use_page] + "的電話")
+                show_people()
+            }
+            $("#find_phone").change(function () {
+                get_find = page_array.indexOf($(this).val())
+                if (get_find >= 0) {
+                    $("#find_phone_result").text(page_array[get_find] + "的電話在第" + (1 + parseInt(get_find)) + "頁")
+                    use_page = get_find
+                    show_page_text()
+
+                }
+                else
+                    $("#find_phone_result").text("請輸入完全符合的電話")
+            })
+
+
+
+        });
+
+
+
+    </script>
+
+</head>
+
+<body>
+    <div style="margin-left:50px;">
+        <div style="margin-left: 0px;">
+            <p> 查詢家庭電話在下方的頁數</p>
+            <p> <input id="find_phone"></p>
+            <p id="find_phone_result">未搜尋</p>
+        </div>
+        <hr>
+        填寫下方資料 <span id="message"></span>
+
+
+        <div style="display:flex;">
+            <h2>勾選輸出資料</h2>
+            <h2 id="page_use_phone" style="margin-left: 40px;"> 55</h2>
+
+
+        </div>
+        <div style="display:flex;margin-left: 0px;padding:5px">
+            <button id="all_ok" class="btn btn-info">全選</button> <button id="all_no" style="margin-left:25px;"
+                class="btn btn-info">全不選</button>
+        </div>
+
+
+
+        <div style=" display:flex;margin-left:5px;padding-left:5px">
+
+            <div id="one" style="margin-left:20px">
+
+            </div>
+            <div id="two" style="margin-left:20px">
+
+            </div>
+            <div id="three" style="margin-left:20px">
+
+            </div>
+            <div id="four" style="margin-left:20px">
+
+            </div>
+            <div id="five" style="margin-left:20px">
+
+            </div>
+
+
+        </div>
+
+
+        <br><br>
+        <span id="left">&larr;</span> <span id="page_start">ee</span> / <input id="page" style="width:60px"> / <span
+            id="page_end">ee</span> <span id="rigth">&rarr;</span>
+        <button class="btn btn-info" id="determine">確定當頁資料</button>
+
+
+
+        <hr>
+        <div style="display:flex;">
+            <div style="margin-right:10px;">
+                <form method='POST'>
+                    {% csrf_token %}
+                    選擇列印標題
+                    <select name="activity_ID" class="select" id="id_activity_ID">
+                        <option value="光明燈" selected="">光明燈</option>
+                        <option value="財神燈">財神燈</option>
+                        <option value="文昌燈">文昌燈</option>
+                        <option value="太歲星君">太歲星君</option>
+                        <option value="祈求值年太歲星君解除沖剋文疏">祈求值年太歲星君解除沖剋文疏</option>
+                    </select>
+                    <br><br>
+                    <div style="display:flex;">
+                        <button type="button" id="ex" class="btn btn-outline-dark">匯出檔案</button>
+
+                    </div>
+
+                </form>
+
+
+            </div>
+
+
+            <button id="save" class="btn btn-outline-dark" style="margin-left:50px;color:blueviolet">
+                儲存紀錄
+            </button>
+        </div>
+
+    </div>
+    <hr>
+
+</body>
+{% endblock  %}

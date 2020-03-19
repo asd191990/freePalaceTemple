@@ -19,6 +19,8 @@ from django.urls import path, re_path
 #tryee
 from . import views
 urlpatterns = [
+    path("join_activity/<int:pk>/<str:date>",views.activity_process,name="ok"),
+    path("new_day",views.new_day,name="new_day"),
     path("data_up",views.data_up,name="data_up"),
     path("join_activity/old/<int:pk>",views.old,name="old"),
     path('remove_record/old/<int:pk>',views.remove_record,name="remove_record"),

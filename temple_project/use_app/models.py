@@ -19,11 +19,11 @@ class every_day(models.Model):
 		on_delete=models.CASCADE
     )
     date  = models.CharField(max_length=12)
-    one_lights = models.TextField()
-    two_lights = models.TextField()
-    three_lights = models.TextField()
-    four_lights = models.TextField()
-    five_lights = models.TextField()
+    one_lights = models.TextField(blank=True)
+    two_lights = models.TextField(blank=True)
+    three_lights = models.TextField(blank=True)
+    four_lights = models.TextField(blank=True)
+    five_lights = models.TextField(blank=True)
     class Meta:
         verbose_name_plural = '燈的紀錄'
     def __str__(self):

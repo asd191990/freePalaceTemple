@@ -1,4 +1,41 @@
 {% extends "base.html" %} {% block title %} 首頁 {% endblock %} {% block message %}
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+</link>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+        $(".add_button").click(function () {
+            $.ajax({
+                url: '{% url "new_day" %}',
+                data: {
+                    activity_ID: $(this).attr("id")
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.error);
+                    }
+                    else {
+                        window.location.reload()
+                    }
+
+                }
+            })
+        })
+        $(".go").click(function () {
+            document.location.href="http://127.0.0.1:8000/join_activity/"+ $(this).attr("name") +"/" + $(this).attr("value");
+        })
+
+    })
+
+</script>
+
+
 <div style="margin-left:50px;">
 
     <form method="post">
@@ -13,12 +50,11 @@
     <h5 style="color:red;"> {{error}}</h5>
 
 
-
     {% for Day in Days %}
     <hr style="border: 5px solid rgba(155, 213, 228, 0.295);">
 
     <h3>{{Day.date_name}}
-        <button class="btn btn-info">
+        <button class="btn btn-info add_button" id="{{Day.id}}">
             新增一筆今日資料
         </button>
     </h3>
@@ -27,7 +63,7 @@
 
 
     {%if every.Day_date.id == Day.id %}
-    <button class="btn btn-info">
+    <button class="btn btn-info go" value="{{ every.date}}" name="{{Day.id}}" >
         {{every.date}}
     </button> <br><br>
     {% endif %}
