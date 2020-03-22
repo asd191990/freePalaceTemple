@@ -294,7 +294,7 @@ def validate_people_all_date(request):
             # get_allname_array.append(the_data[i].name + "|" + output + "|" +
             #                          "F")
             get_allname_array.append(the_data[i].name + "|" + output + "|" +
-                                     str(the_data[i].id)+ "|" + " ")
+                                     str(the_data[i].id) + "|" + " ")
 
     except Exception as e:
         print(e)
@@ -655,7 +655,6 @@ def activity_process(request, pk, date):
     all_data = every_day.objects.get(Day_date=Day.objects.get(pk=pk),
                                      date=date)
 
-
     return render(request, "activity_process.html", locals())
 
 
@@ -663,18 +662,23 @@ def updata(request):
     data = {}
     activity = request.POST.get('activity')
 
-    get_activity = Day.objects.get(id=activity)#得到活動的實體
+    get_activity = Day.objects.get(id=activity)  #得到活動的實體
 
-    use_date = request.POST.get('use_date') #得到日期
-    five_data = request.POST.getlist('new_data') #得到五筆燈的紀錄
-
+    use_date = request.POST.get('use_date')  #得到日期
+    five_data = request.POST.getlist('new_data')  #得到五筆燈的紀錄
 
     try:
-        every_day.objects.filter(Day_date=get_activity,date=use_date).update(one_lights=five_data[0],two_lights=five_data[1],three_lights=five_data[2],four_lights=five_data[3],five_lights=five_data[4])
+        every_day.objects.filter(Day_date=get_activity, date=use_date).update(
+            one_lights=five_data[0],
+            two_lights=five_data[1],
+            three_lights=five_data[2],
+            four_lights=five_data[3],
+            five_lights=five_data[4])
     except Exception as e:
         print("錯誤 ->   " + str(e))
 
     return JsonResponse(data)
+
 
 def new_day(request):
     data = {}
@@ -706,7 +710,118 @@ def new_day(request):
     return JsonResponse(data)
 
 
+def output_data(request):
+
+    data = {}
+    activity = request.POST.get('activity')
+
+    get_activity = Day.objects.get(id=activity)  #得到活動的實體
+
+    five_data = request.POST.getlist('new_data')  #得到五筆燈的紀錄
+
+
+
+    Homes = Home.objects.all()
+
+    for i in range(5):  #先用人名id 取得 家庭id 然後搜尋 在加入 該dict的地方
+
+        if i == 4:
+            use_word = MailMerge(
+            os.path.join(BASE_DIR, "files", "files", "new_mode2.docx"))
+        else :
+            use_word = MailMerge(
+        os.path.join(BASE_DIR, "files", "files", "new_mode1.docx"))
+
+        print("燈　－＞" + str(i))
+
+        if five_data[i]!="":
+            get_join_id = five_data[i].split(",")
+           # print(get_join_id)
+
+            Home_ids = {}
+
+
+            for k in range(len(get_join_id)):  #所有參加人員的id
+                get_people = People_data.objects.get(id=get_join_id[k])
+            #得到實體 後找家庭陣列的id
+                get_home_id = get_people.home_id
+
+                if not get_home_id in Home_ids:
+
+                    Home_ids[get_home_id] = ""
+
+                Home_ids[get_home_id] += ("" if Home_ids[get_home_id] == "" else
+                                      ",") + get_people.name
+            #print(get_people.name)
+
+            all_data = [] #一個燈的所有資料
+            #print("go->" + str(all_data))
+
+            # print(Home_ids)
+        #{"title":"0",},{"title":"1"},{"title":"2"}
+
+            for use_id, k in Home_ids.items():
+                peoples = k.split(",")
+                one_data = basic_data(i)
+
+                get_address= Home.objects.get(pk=int(use_id)).address
+
+                one_data["address"] =get_address #一個家庭的基本資料
+
+                use_num = 0
+
+                for j in range(len(peoples)):
+                    one_data[num_string(use_num)] = peoples[j]
+                    use_num += 1
+                    if use_num == 4:
+                        use_num = 0
+                        #print(one_data)
+                        all_data.append(one_data) #把家庭的資料塞進 all_data
+                        one_data = basic_data(i)
+
+                if use_num != 0:
+                   # print(one_data)
+                    all_data.append(one_data)
+
+#            print("okk")
+#            print(all_data)
+            use_word.merge_pages(all_data)
+            use_word.write(os.path.join(BASE_DIR, "output", "new_ok_"+ num_string(i)+".docx"))
+
+    print("all_ok")
+    os.startfile(os.path.join(BASE_DIR, "output"))
+    return JsonResponse(data)
+
+
 import docx
+
+
+def num_string(use_num):
+    if use_num == 0:
+        return "one"
+    if use_num == 1:
+        return "two"
+    if use_num == 2:
+        return "three"
+    if use_num == 3:
+        return "four"
+    if use_num == 4:
+        return "five"
+
+
+def basic_data(get_num):
+    #print(get_num)
+    if get_num == 0:
+        return {"title": "光明燈", "year": "之後用","one":"","two":"","three":"","four":""}
+    if get_num == 1:
+        return {"title": "財神燈", "year": "之後用","one":"","two":"","three":"","four":""}
+    if get_num == 2:
+        return {"title": "文昌燈", "year": "之後用","one":"","two":"","three":"","four":""}
+    if get_num == 3:
+        return {"title": "太歲星君", "year": "之後用","one":"","two":"","three":"","four":""}
+    if get_num == 4:
+        return {"title": "祈求值年太歲星君解除沖剋文疏","year":"之後用"}
+    return "x"
 
 
 def process_word(get_word_path, get_home_id):  # 現在只得到香客的名稱，要其他資料 要用查資料庫

@@ -88,7 +88,7 @@
                 for (let j = 0; j < 5; j++) {
                     people_list = ""
 
-                    let get_one =five_data_array[j]
+                    let get_one = five_data_array[j]
 
                     for (let i = 0; i < all_people_list[use_page].length; i++) {   //name用 people+i 分辨群組
                         check_yes_no = " checked=checked"
@@ -117,14 +117,14 @@
             function fix_data() {
 
                 for (let i = 0; i < 5; i++) {
-                    let get_id_array =five_data_array[i]
+                    let get_id_array = five_data_array[i]
 
 
                     $('input[name=people' + i + ']:checked').each(function () {//有打勾 但沒出現在裡面
                         if (get_id_array.indexOf($(this).val()) == -1) { //->加入
-                            console.log(get_id_array)
+                            // console.log(get_id_array)
                             get_id_array.push($(this).val())
-                            console.log(get_id_array)
+                            // console.log(get_id_array)
                         }
                     })
 
@@ -132,11 +132,13 @@
                     $('input[name=people' + i + ']').not("input:checked").each(function () {
                         let j = get_id_array.indexOf($(this).val())
                         if (j != -1) {//沒打勾，但有出現在紀錄中 ->移除
-                            console.log(get_id_array)
+                            // console.log(get_id_array)
                             get_id_array.splice(j, 1)
-                            console.log(get_id_array)
+                            //  console.log(get_id_array)
                         }
                     })
+                    if (get_id_array.join(",").substring(0, 1) == ",")
+                        get_id_array.splice(0, 1)
                     five_data_array[i] = get_id_array
 
                 }
@@ -160,7 +162,7 @@
 
             }
 
-            $("#save,#rigth,#left").click(function () {
+            $("#save,#rigth,#left,#output").click(function () {
 
                 fix_data()
 
@@ -223,6 +225,25 @@
                 }
                 show_people()
             })
+
+            $("#output").click(function () { //輸出資料
+                $.ajax({//把五筆資料送去後台
+                    type: "POST",
+                    url: '{% url "output_data" %}',
+                    traditional: true,
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        "new_data": five_data,
+                        "activity": "{{use_activity}}",
+                        "use_date": "{{use_date}}"
+                    },
+                    dataType: 'json',
+                    async: false,
+                    success: function (data) {
+
+                    }
+                });
+            });
 
         });
 
@@ -304,7 +325,7 @@
         <span id="left">&larr;</span> <span id="page_start">1</span> / <input id="page" style="width:60px"> / <span
             id="page_end">{{x_max}}</span> <span id="rigth">&rarr;</span>
         <button class="btn btn-info" id="save">確定當頁資料</button>
-        <button style=" margin-left:20px;" class="btn btn-info" id="x">輸出當天資料</button>
+        <button style=" margin-left:20px;" class="btn btn-info" id="output">輸出當天資料</button>
 
 
         <hr>

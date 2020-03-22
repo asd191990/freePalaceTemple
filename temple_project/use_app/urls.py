@@ -23,6 +23,7 @@ urlpatterns = [
     path("join_activity/<int:pk>/<str:date>",views.activity_process,name="ok"),
     path("new_day",views.new_day,name="new_day"),
     path("data_up",views.data_up,name="data_up"),
+    path("output_data",views.output_data,name="output_data"),
     path("join_activity/old/<int:pk>",views.old,name="old"),
     path('remove_record/old/<int:pk>',views.remove_record,name="remove_record"),
     path("home/home_del/<int:pk>/<int:people_id>",views.home_del),
