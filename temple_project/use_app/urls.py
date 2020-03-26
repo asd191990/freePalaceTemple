@@ -20,6 +20,7 @@ from django.urls import path, re_path
 from . import views
 urlpatterns = [
     path("updata",views.updata,name="updata"),
+    path("name_out",views.name_out,name="name_out"),
     path("join_activity/<int:pk>/<str:date>",views.activity_process,name="ok"),
     path("new_day",views.new_day,name="new_day"),
     path("data_up",views.data_up,name="data_up"),

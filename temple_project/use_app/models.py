@@ -8,7 +8,7 @@ class Day(models.Model):
     class Meta:
         verbose_name_plural = '法會日期'
     def __str__(self):
-        return self.date_name       
+        return self.date_name
 
 class every_day(models.Model):
     Day_date = models.ForeignKey(
@@ -36,7 +36,7 @@ class activity_data(models.Model):
     name = models.CharField(verbose_name="活動名稱", max_length=50)
     use_file = models.FileField(verbose_name="上傳檔案", upload_to="files")
     table_name= models.TextField(verbose_name="請輸入要使用的欄位名稱,並已、符號分隔")
-    
+
 
     class Meta:
         verbose_name_plural = '活動資料庫'

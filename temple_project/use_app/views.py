@@ -679,6 +679,57 @@ def updata(request):
 
     return JsonResponse(data)
 
+def name_out(request):
+    data={}
+    activity_id = request.GET.get('activity_ID', None)
+    get_activity = Day.objects.get(id=activity_id)
+    get_all_day =every_day.objects.filter(Day_date=get_activity)
+
+#{"name1": "1"},{"name1": "1","name2": "4"},{"name1": "19"} [[][]]
+    #for j in range(5): #五盞燈 get_people = People_data.objects.get(id=get_join_id[k])
+
+    all_data =[[],[],[],[],[]]
+
+
+    for i in range(len(get_all_day)): #所有資料彙整
+        if get_all_day[i].one_lights != "":
+            all_data[0]+=get_all_day[i].one_lights.split(",")
+        if get_all_day[i].two_lights != "":
+            all_data[1]+=get_all_day[i].two_lights.split(",")
+        if get_all_day[i].three_lights != "":
+            all_data[2]+=get_all_day[i].three_lights.split(",")
+        if get_all_day[i].four_lights != "":
+            all_data[3]+=get_all_day[i].four_lights.split(",")
+        if get_all_day[i].five_lights != "":
+            all_data[4]+=get_all_day[i].five_lights.split(",")
+
+    for i in range(5):
+        output_array=[]
+        name_list={"one":"","two":"","three":"","four":""}
+        use_num=0
+        for j in range(len(all_data[i])):
+
+            if  People_data.objects.filter(id=all_data[i][j]).exists():#如果被刪掉了 就不會被加入name_list裡面
+                name_list[num_string(use_num)] = People_data.objects.filter(id=all_data[i][j])[0].name #怕名字有重複用 所以用filter
+                use_num += 1
+                if use_num == 4:
+                    output_array.append(name_list)
+                    name_list={"one":"","two":"","three":"","four":""}
+                    use_num=0
+        if use_num != 0:
+            output_array.append(name_list)
+
+        # print(output_array)
+        use_word = MailMerge(os.path.join(BASE_DIR, "files", "files", "row.docx"))
+        use_word.merge_rows('one',output_array)
+        use_word.write(os.path.join(BASE_DIR, "output","名片檔案",get_activity.date_name+ "_行_全名_"+ chinese_string(i)+".docx"))
+        use_word = MailMerge(os.path.join(BASE_DIR, "files", "files", "straight.docx"))
+        use_word.merge_rows('one',output_array)
+        use_word.write(os.path.join(BASE_DIR, "output","名片檔案",get_activity.date_name+ "_直_全名_"+ chinese_string(i)+".docx"))
+
+    os.startfile(os.path.join(BASE_DIR, "output"))
+
+    return JsonResponse(data)
 
 def new_day(request):
     data = {}
@@ -771,13 +822,18 @@ def output_data(request):
                 use_num = 0
 
                 for j in range(len(peoples)):
-                    one_data[num_string(use_num)] = peoples[j]
+                    date =People_data.objects.get(home_id =use_id,name = peoples[j]).birthday.split("-")
+                    if use_num ==0:
+                        one_data["zero"] = peoples[j]
+                    one_data[num_string(use_num)] = peoples[j]+ " 本命 " + twelve(int(date[0])) + " 年 " + time_chinese(int(date[1])) + " 月 " + time_chinese(
+                        int(date[2])) + " 號 " + "  生行庚 " + time_chinese(year(date)) + " 歲 "
                     use_num += 1
-                    if use_num == 4:
+                    if use_num == 5:
                         use_num = 0
                         #print(one_data)
                         all_data.append(one_data) #把家庭的資料塞進 all_data
                         one_data = basic_data(i)
+                        one_data["address"] =get_address
 
                 if use_num != 0:
                    # print(one_data)
@@ -786,7 +842,7 @@ def output_data(request):
 #            print("okk")
 #            print(all_data)
             use_word.merge_pages(all_data)
-            use_word.write(os.path.join(BASE_DIR, "output", "new_ok_"+ num_string(i)+".docx"))
+            use_word.write(os.path.join(BASE_DIR, "output","文稿檔案",get_activity.date_name+"_"+  chinese_string(i)+"文稿.docx"))
 
     print("all_ok")
     os.startfile(os.path.join(BASE_DIR, "output"))
@@ -794,6 +850,19 @@ def output_data(request):
 
 
 import docx
+
+
+def chinese_string(use_num):
+    if use_num == 0:
+        return "光明燈"
+    if use_num == 1:
+        return "財神燈"
+    if use_num == 2:
+        return "文昌燈"
+    if use_num == 3:
+        return "太歲星君"
+    if use_num == 4:
+        return "祈求值年太歲星君解除沖剋文疏"
 
 
 def num_string(use_num):
@@ -811,16 +880,21 @@ def num_string(use_num):
 
 def basic_data(get_num):
     #print(get_num)
+    year_data = ""
+    if date.today().month >= 10:
+        year_data = twelve(int(date.today().year) + 1 - 1911)
+    else:
+        year_data = twelve(int(date.today().year) - 1911)
     if get_num == 0:
-        return {"title": "光明燈", "year": "之後用","one":"","two":"","three":"","four":""}
+        return {"title": "光明燈", "year": year_data,"one":"","two":"","three":"","four":"","five":""}
     if get_num == 1:
-        return {"title": "財神燈", "year": "之後用","one":"","two":"","three":"","four":""}
+        return {"title": "財神燈", "year": year_data,"one":"","two":"","three":"","four":" ","five":""}
     if get_num == 2:
-        return {"title": "文昌燈", "year": "之後用","one":"","two":"","three":"","four":""}
+        return {"title": "文昌燈", "year":year_data,"one":"","two":"","three":"","four":" ","five":""}
     if get_num == 3:
-        return {"title": "太歲星君", "year": "之後用","one":"","two":"","three":"","four":""}
+        return {"title": "太歲星君", "year": year_data,"one":"","two":"","three":"","four":"","five":""}
     if get_num == 4:
-        return {"title": "祈求值年太歲星君解除沖剋文疏","year":"之後用"}
+        return {"title": "祈求值年太歲星君解除沖剋文疏","year":year_data,"one":"","two":"","three":"","four":"","five":""}
     return "x"
 
 
