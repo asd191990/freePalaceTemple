@@ -727,7 +727,7 @@ def name_out(request):
         use_word.merge_rows('one',output_array)
         use_word.write(os.path.join(BASE_DIR, "output","名片檔案",get_activity.date_name+ "_直_全名_"+ chinese_string(i)+".docx"))
 
-    os.startfile(os.path.join(BASE_DIR, "output"))
+    os.startfile(os.path.join(BASE_DIR, "output","名片檔案"))
 
     return JsonResponse(data)
 
@@ -844,8 +844,8 @@ def output_data(request):
             use_word.merge_pages(all_data)
             use_word.write(os.path.join(BASE_DIR, "output","文稿檔案",get_activity.date_name+"_"+  chinese_string(i)+"文稿.docx"))
 
-    print("all_ok")
-    os.startfile(os.path.join(BASE_DIR, "output"))
+    #print("all_ok")
+    os.startfile(os.path.join(BASE_DIR, "output","文稿檔案"))
     return JsonResponse(data)
 
 
