@@ -679,57 +679,78 @@ def updata(request):
 
     return JsonResponse(data)
 
+
+def add_array(x_array, y_array):
+    [x_array.append(i) for i in y_array if not i in x_array]
+    return x_array
+
+
 def name_out(request):
-    data={}
+    data = {}
     activity_id = request.GET.get('activity_ID', None)
     get_activity = Day.objects.get(id=activity_id)
-    get_all_day =every_day.objects.filter(Day_date=get_activity)
+    get_all_day = every_day.objects.filter(Day_date=get_activity)
 
-#{"name1": "1"},{"name1": "1","name2": "4"},{"name1": "19"} [[][]]
+    #{"name1": "1"},{"name1": "1","name2": "4"},{"name1": "19"} [[][]]
     #for j in range(5): #五盞燈 get_people = People_data.objects.get(id=get_join_id[k])
 
-    all_data =[[],[],[],[],[]]
+    all_data = [[], [], [], [], []]
 
-
-    for i in range(len(get_all_day)): #所有資料彙整
+    for i in range(len(get_all_day)):  #所有資料彙整
         if get_all_day[i].one_lights != "":
-            all_data[0]+=get_all_day[i].one_lights.split(",")
+            all_data[0] = add_array(all_data[0],
+                                    get_all_day[i].one_lights.split(","))
         if get_all_day[i].two_lights != "":
-            all_data[1]+=get_all_day[i].two_lights.split(",")
+            all_data[1] = add_array(all_data[1],
+                                    get_all_day[i].two_lights.split(","))
         if get_all_day[i].three_lights != "":
-            all_data[2]+=get_all_day[i].three_lights.split(",")
+            all_data[2] = add_array(all_data[2],
+                                    get_all_day[i].three_lights.split(","))
         if get_all_day[i].four_lights != "":
-            all_data[3]+=get_all_day[i].four_lights.split(",")
+            all_data[3] = add_array(all_data[3],
+                                    get_all_day[i].four_lights.split(","))
         if get_all_day[i].five_lights != "":
-            all_data[4]+=get_all_day[i].five_lights.split(",")
+            all_data[4] = add_array(all_data[4],
+                                    get_all_day[i].five_lights.split(","))
 
     for i in range(5):
-        output_array=[]
-        name_list={"one":"","two":"","three":"","four":""}
-        use_num=0
+        output_array = []
+        name_list = {"one": "", "two": "", "three": "", "four": ""}
+        use_num = 0
         for j in range(len(all_data[i])):
 
-            if  People_data.objects.filter(id=all_data[i][j]).exists():#如果被刪掉了 就不會被加入name_list裡面
-                name_list[num_string(use_num)] = People_data.objects.filter(id=all_data[i][j])[0].name #怕名字有重複用 所以用filter
+            if People_data.objects.filter(
+                    id=all_data[i][j]).exists():  #如果被刪掉了 就不會被加入name_list裡面
+                name_list[num_string(use_num)] = People_data.objects.filter(
+                    id=all_data[i][j])[0].name  #怕名字有重複用 所以用filter
                 use_num += 1
                 if use_num == 4:
                     output_array.append(name_list)
-                    name_list={"one":"","two":"","three":"","four":""}
-                    use_num=0
+                    name_list = {"one": "", "two": "", "three": "", "four": ""}
+                    use_num = 0
         if use_num != 0:
             output_array.append(name_list)
 
         # print(output_array)
-        use_word = MailMerge(os.path.join(BASE_DIR, "files", "files", "row.docx"))
-        use_word.merge_rows('one',output_array)
-        use_word.write(os.path.join(BASE_DIR, "output","名片檔案",get_activity.date_name+ "_行_全名_"+ chinese_string(i)+".docx"))
-        use_word = MailMerge(os.path.join(BASE_DIR, "files", "files", "straight.docx"))
-        use_word.merge_rows('one',output_array)
-        use_word.write(os.path.join(BASE_DIR, "output","名片檔案",get_activity.date_name+ "_直_全名_"+ chinese_string(i)+".docx"))
+        use_word = MailMerge(
+            os.path.join(BASE_DIR, "files", "files", "row.docx"))
+        use_word.merge_rows('one', output_array)
+        use_word.write(
+            os.path.join(
+                BASE_DIR, "output", "名片檔案", get_activity.date_name + "_行_全名_" +
+                chinese_string(i) + ".docx"))
+        use_word = MailMerge(
+            os.path.join(BASE_DIR, "files", "files", "straight.docx"))
+        use_word.merge_rows('one', output_array)
+        use_word.write(
+            os.path.join(
+                BASE_DIR, "output", "名片檔案", get_activity.date_name + "_直_全名_" +
+                chinese_string(i) + ".docx"))
 
-    os.startfile(os.path.join(BASE_DIR, "output","名片檔案"))
+    os.startfile(os.path.join(BASE_DIR, "output", "名片檔案"))
 
     return JsonResponse(data)
+
 
 def new_day(request):
     data = {}
@@ -770,84 +791,90 @@ def output_data(request):
 
     five_data = request.POST.getlist('new_data')  #得到五筆燈的紀錄
 
-
-
     Homes = Home.objects.all()
 
     for i in range(5):  #先用人名id 取得 家庭id 然後搜尋 在加入 該dict的地方
 
         if i == 4:
             use_word = MailMerge(
-            os.path.join(BASE_DIR, "files", "files", "new_mode2.docx"))
-        else :
+                os.path.join(BASE_DIR, "files", "files", "new_mode2.docx"))
+        else:
             use_word = MailMerge(
-        os.path.join(BASE_DIR, "files", "files", "new_mode1.docx"))
+                os.path.join(BASE_DIR, "files", "files", "new_mode1.docx"))
 
         print("燈　－＞" + str(i))
 
-        if five_data[i]!="":
+        if five_data[i] != "":
             get_join_id = five_data[i].split(",")
-           # print(get_join_id)
+            # print(get_join_id)
 
             Home_ids = {}
 
-
             for k in range(len(get_join_id)):  #所有參加人員的id
                 get_people = People_data.objects.get(id=get_join_id[k])
-            #得到實體 後找家庭陣列的id
+                #得到實體 後找家庭陣列的id
                 get_home_id = get_people.home_id
 
                 if not get_home_id in Home_ids:
 
                     Home_ids[get_home_id] = ""
 
-                Home_ids[get_home_id] += ("" if Home_ids[get_home_id] == "" else
-                                      ",") + get_people.name
+                Home_ids[get_home_id] += ("" if Home_ids[get_home_id] == ""
+                                          else ",") + get_people.name
             #print(get_people.name)
 
-            all_data = [] #一個燈的所有資料
+            all_data = []  #一個燈的所有資料
             #print("go->" + str(all_data))
 
             # print(Home_ids)
-        #{"title":"0",},{"title":"1"},{"title":"2"}
+            #{"title":"0",},{"title":"1"},{"title":"2"}
 
             for use_id, k in Home_ids.items():
                 peoples = k.split(",")
                 one_data = basic_data(i)
 
-                get_address= Home.objects.get(pk=int(use_id)).address
+                get_address = Home.objects.get(pk=int(use_id)).address
 
-                one_data["address"] =get_address #一個家庭的基本資料
+                one_data["address"] = get_address  #一個家庭的基本資料
 
                 use_num = 0
 
                 for j in range(len(peoples)):
-                    date =People_data.objects.get(home_id =use_id,name = peoples[j]).birthday.split("-")
-                    if use_num ==0:
+                    date = People_data.objects.get(
+                        home_id=use_id, name=peoples[j]).birthday.split("-")
+                    if use_num == 0:
                         one_data["zero"] = peoples[j]
-                    one_data[num_string(use_num)] = peoples[j]+ " 本命 " + twelve(int(date[0])) + " 年 " + time_chinese(int(date[1])) + " 月 " + time_chinese(
-                        int(date[2])) + " 號 " + "  生行庚 " + time_chinese(year(date)) + " 歲 "
+                    one_data[num_string(
+                        use_num
+                    )] = peoples[j] + " 本命 " + twelve(int(
+                        date[0])) + " 年 " + time_chinese(int(
+                            date[1])) + " 月 " + time_chinese(int(
+                                date[2])) + " 號 " + "  生行庚 " + time_chinese(
+                                    year(date)) + " 歲 "
                     use_num += 1
                     if use_num == 5:
                         use_num = 0
                         #print(one_data)
-                        all_data.append(one_data) #把家庭的資料塞進 all_data
+                        all_data.append(one_data)  #把家庭的資料塞進 all_data
                         one_data = basic_data(i)
-                        one_data["address"] =get_address
+                        one_data["address"] = get_address
 
                 if use_num != 0:
-                   # print(one_data)
+                    # print(one_data)
                     all_data.append(one_data)
+
 
 #            print("okk")
 #            print(all_data)
             use_word.merge_pages(all_data)
-            use_word.write(os.path.join(BASE_DIR, "output","文稿檔案",get_activity.date_name+"_"+  chinese_string(i)+"文稿.docx"))
+            use_word.write(
+                os.path.join(
+                    BASE_DIR, "output", "文稿檔案", get_activity.date_name + "_" +
+                    chinese_string(i) + "文稿.docx"))
 
     #print("all_ok")
-    os.startfile(os.path.join(BASE_DIR, "output","文稿檔案"))
+    os.startfile(os.path.join(BASE_DIR, "output", "文稿檔案"))
     return JsonResponse(data)
-
 
 import docx
 
@@ -886,15 +913,55 @@ def basic_data(get_num):
     else:
         year_data = twelve(int(date.today().year) - 1911)
     if get_num == 0:
-        return {"title": "光明燈", "year": year_data,"one":"","two":"","three":"","four":"","five":""}
+        return {
+            "title": "光明燈",
+            "year": year_data,
+            "one": "",
+            "two": "",
+            "three": "",
+            "four": "",
+            "five": ""
+        }
     if get_num == 1:
-        return {"title": "財神燈", "year": year_data,"one":"","two":"","three":"","four":" ","five":""}
+        return {
+            "title": "財神燈",
+            "year": year_data,
+            "one": "",
+            "two": "",
+            "three": "",
+            "four": " ",
+            "five": ""
+        }
     if get_num == 2:
-        return {"title": "文昌燈", "year":year_data,"one":"","two":"","three":"","four":" ","five":""}
+        return {
+            "title": "文昌燈",
+            "year": year_data,
+            "one": "",
+            "two": "",
+            "three": "",
+            "four": " ",
+            "five": ""
+        }
     if get_num == 3:
-        return {"title": "太歲星君", "year": year_data,"one":"","two":"","three":"","four":"","five":""}
+        return {
+            "title": "太歲星君",
+            "year": year_data,
+            "one": "",
+            "two": "",
+            "three": "",
+            "four": "",
+            "five": ""
+        }
     if get_num == 4:
-        return {"title": "祈求值年太歲星君解除沖剋文疏","year":year_data,"one":"","two":"","three":"","four":"","five":""}
+        return {
+            "title": "祈求值年太歲星君解除沖剋文疏",
+            "year": year_data,
+            "one": "",
+            "two": "",
+            "three": "",
+            "four": "",
+            "five": ""
+        }
     return "x"
 
 
