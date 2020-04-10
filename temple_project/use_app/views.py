@@ -640,7 +640,7 @@ def join_activity(request):
                 date_name=request.POST["activity_name"]).exists():
             Day.objects.create(date_name=request.POST["activity_name"])
         else:
-            error = "名字已經使用過了"
+            error = ""
 
     Days = Day.objects.all().order_by("-id")
     every_days = every_day.objects.all()
