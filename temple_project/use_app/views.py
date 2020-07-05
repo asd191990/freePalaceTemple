@@ -288,7 +288,7 @@ def validate_people_all_date(request):
             output = the_data[i].name + " 本命 " + twelve(int(
                 date[0])) + " 年 " + time_chinese(int(
                     date[1])) + " 月 " + time_chinese(
-                        int(date[2])) + " 號 " + "  生行庚 " + time_chinese(
+                        int(date[2])) + " 日 " + "  行庚 " + time_chinese(
                             year(date)) + " 歲 "
 
             # get_allname_array.append(the_data[i].name + "|" + output + "|" +
@@ -316,7 +316,7 @@ def year(x):
     else:  #其他月直接-1
         old -= 1
 
-    return abs(old)
+    return abs(old) + 1
 
 
 def time_chinese(x):
@@ -694,7 +694,7 @@ def name_out(request):
     #{"name1": "1"},{"name1": "1","name2": "4"},{"name1": "19"} [[][]]
     #for j in range(5): #五盞燈 get_people = People_data.objects.get(id=get_join_id[k])
 
-    all_data = [[], [], [], [], []]
+    all_data = [[], [], [], []]
 
     for i in range(len(get_all_day)):  #所有資料彙整
         if get_all_day[i].one_lights != "":
@@ -709,11 +709,8 @@ def name_out(request):
         if get_all_day[i].four_lights != "":
             all_data[3] = add_array(all_data[3],
                                     get_all_day[i].four_lights.split(","))
-        if get_all_day[i].five_lights != "":
-            all_data[4] = add_array(all_data[4],
-                                    get_all_day[i].five_lights.split(","))
 
-    for i in range(5):
+    for i in range(4):
         output_array = []
         name_list = {"one": "", "two": "", "three": "", "four": ""}
         use_num = 0
@@ -793,9 +790,9 @@ def output_data(request):
 
     Homes = Home.objects.all()
 
-    for i in range(5):  #先用人名id 取得 家庭id 然後搜尋 在加入 該dict的地方
+    for i in range(4):  #先用人名id 取得 家庭id 然後搜尋 在加入 該dict的地方
 
-        if i == 4:
+        if i == 3:
             use_word = MailMerge(
                 os.path.join(BASE_DIR, "files", "files", "new_mode2.docx"))
         else:
@@ -844,12 +841,13 @@ def output_data(request):
                         home_id=use_id, name=peoples[j]).birthday.split("-")
                     if use_num == 0:
                         one_data["zero"] = peoples[j]
-                    one_data[num_string(
-                        use_num
-                    )] = peoples[j] + " 本命 " + twelve(int(
-                        date[0])) + " 年 " + time_chinese(int(
-                            date[1])) + " 月 " + time_chinese(int(
-                                date[2])) + " 號 " + "  生行庚 " + time_chinese(
+                    one_data[
+                        num_string(use_num)] = peoples[j] + " 本命 " + twelve(
+                            int(date[0])) + " 年 " + time_chinese(
+                                int(date[1])) + " 月 " + time_chinese(
+                                    int(date[2])
+                                ) + " 日 " +People_data.objects.get(
+                        home_id=use_id, name=peoples[j]).time  + "　時　" "行庚 " + time_chinese(
                                     year(date)) + " 歲 "
                     use_num += 1
                     if use_num == 5:
@@ -1020,7 +1018,7 @@ def reture_lunar(x, y, z):
     z = int(z)
     ex = LunarSolarConverter.Solar(x, y, z)
     true_time = LunarSolarConverter.LunarSolarConverter.SolarToLunar(ex, ex)
-    x = "{y}年{m}月{d}號".format(y=(true_time.lunarYear - 1911),
+    x = "{y}年{m}月{d}日".format(y=(true_time.lunarYear - 1911),
                               m=true_time.lunarMonth,
                               d=true_time.lunarDay)
     return x

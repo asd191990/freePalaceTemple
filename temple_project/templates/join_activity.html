@@ -217,12 +217,12 @@
                 a_people_data = {}
                 time = 0
                 for (let i = 0; i < all_people_list.length; i++) { //全部家庭
-                    
+
                     for (let j = 0; j < all_people_list[i].length; j++) {
                         if (all_people_list[i][j][2] == "T") {
                             x = "name" + (time + 1)
                             time += 1
-                            console.log( x +" -> " +all_people_list[i][j][0])
+                            console.log(x + " -> " + all_people_list[i][j][0])
                             a_people_data[x] = all_people_list[i][j][0]
                             if (time === 10) {
                                 name_list.push(a_people_data)
@@ -336,8 +336,8 @@
                 }
 
                 // let ok =  ( all_data.map(item => Object.keys(item)[0]))
-                // let nameList = all_data.map(item => Object.values(item)[0]);            
-                // console.log(ok)                
+                // let nameList = all_data.map(item => Object.values(item)[0]);
+                // console.log(ok)
                 // console.log(nameList[1])   //x = JSON.parse(c)
 
                 data_string = JSON.stringify(all_data)
