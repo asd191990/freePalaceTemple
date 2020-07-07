@@ -322,18 +322,61 @@ def year(x):
 def time_chinese(x):
     use = "一 二 三 四 五 六 七 八 九 十".split(" ")
     answer = ""
-    if x == 10:
-        return "十"
-    if x > 10:
+    if x>=10 and x<=19:
+        answer ="十"
+        x-=10
+        if x == 0:
+            return answer
+        else:
+            return answer + use[x  - 1]
+    if len(str(x)) == 2:
         y = x // 10 - 1
-        answer = use[y]
+        answer = use[y] + "十"
         x = x % 10
         if x == 0:
-            return answer + "十"
+            return answer
         else:
-            return answer + use[x - 1]
+            return answer + use[x  - 1]
+
+    if len(str(x)) == 3:
+        y = x // 100 - 1
+        answer = use[y] + "百"
+        x -=100
+
+
+        if len(str(x)) == 2:
+            y = x // 10 - 1
+            answer += use[y] + "十"
+            x = x % 10
+            if x == 0:
+                return answer
+            else:
+                return answer + use[x  - 1]
+        else:
+            if x == 0:
+                return answer
+            return answer +"零" + use[x  - 1]
+
+
+
     return use[x - 1]
 
+print(time_chinese(6))
+print(time_chinese(9))
+print(time_chinese(19))
+print(time_chinese(13))
+print(time_chinese(14))
+print(time_chinese(10))
+print(time_chinese(20))
+print(time_chinese(29))
+print(time_chinese(34))
+print(time_chinese(70))
+print(time_chinese(79))
+print(time_chinese(64))
+print(time_chinese(131))
+print(time_chinese(141))
+print(time_chinese(109))
+print(time_chinese(100))
 
 def twelve(x):
     sky = "甲、乙、丙、丁、戊、己、庚、辛、壬、癸".split("、")
