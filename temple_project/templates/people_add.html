@@ -1,4 +1,5 @@
 {% extends "base.html" %} {% block title %} 表單 {% endblock %} {% block form %}
+
 <head>
     <div id="fix_box" hidden>
         <p>請輸入改動資料</p>
@@ -19,7 +20,7 @@
             let set_button
             let old_time
 
-            $("input[name='x_name']").attr("disabled","disabled");
+            $("input[name='x_name']").attr("disabled", "disabled");
 
             $(".fix").click(function (e) {
                 get_value = $(this).attr("value").split("/")
@@ -46,8 +47,8 @@
                 the_year = parseFloat($("#id_x_birthday").val())
                 if (the_year <= 200 && parseFloat($("#id_x_day").val()) <= 31 && parseFloat($("#id_x_day").val()) >= 1 && parseFloat($("#id_x_month").val()) >= 1 && parseFloat($("#id_x_month").val()) <= 12) {
                     let new_name = $("#id_x_name").val()
-                    let new_birthday = $("#id_x_birthday").val().toString() +"-"+ $("#id_x_month").val().toString()  +"-" + $("#id_x_day").val().toString() 
-                 
+                    let new_birthday = $("#id_x_birthday").val().toString() + "-" + $("#id_x_month").val().toString() + "-" + $("#id_x_day").val().toString()
+
                     let new_gender = $("#id_x_gender").val()
                     let new_time = $("#id_x_time").val()
                     $.ajax({
@@ -64,18 +65,18 @@
                         dataType: 'json',
                         success: function (data) {
                             if (data.is_taken) {
-                              
+
                                 $("#fix_box").dialog("close");
                                 window.location.reload()
                             }
                             else {
-                              
+
                             }
 
                         }
                     })
                 }
-                else{
+                else {
                     alert("日期輸入錯誤")
                 }
 
@@ -108,8 +109,8 @@
         <form method='POST' enctype="multipart/form-data">
             {% csrf_token %} 選擇家庭為: {{x_try}} <br>
             <br>
-            <div id="use">
-                <label for="id_name">輸入信眾姓名:</label>
+            <div id="use" style="margin-bottom:5vmin">
+                <label for="id_name" style="margin-top:20px">輸入信眾姓名:</label>
                 {{ form.name }}
                 <br><br>
                 <label for="id_birthday_y">民國農曆出生年: </label>
@@ -120,17 +121,25 @@
                 {{form.birthday_d}}
                 <label for="id_time">時辰:</label>
                 {{form.time}}
+                <label for="id_animal">動物:</label>
+                {{form.animal}}
                 <label for="id_x_gender">性別</label>
                 {{form.gender}}
             </div>
 
-            <div><input class="btn btn-outline-dark" type="submit" value="送出" /> <button type="button"
-                    class="btn btn-outline-dark" onclick="ShowMeDate()">增加欄位</button> </div>
+            <div style="margin-top:50px">
+
+                <input style="width:20vw;height: 10vh;font-size:100%;" class="btn btn-outline-dark" type="submit"
+                    value="送出" />
+                <button type="button" style="width:20vw;height: 10vh;font-size:100%; margin-left:10vw;"
+                    class=" btn btn-outline-dark" onclick="ShowMeDate()">增加欄位</button>
+            </div>
             {{use_bug}}
             {{y_bug}}
         </form>
         <br>
         <hr>
+
         <h2>{{ get_x }}已經有:</h2>
         {% if people_all %}
         <br>
@@ -140,6 +149,7 @@
                     <th scope="col">{{title_one}}</th>
                     <th scope="col">{{title_two}}</th>
                     <th scope="col">時辰</th>
+                    <th scope="col">生肖</th>
                     <th scope="col">{{title_three}}</th>
                     <th scope="col">功能</th>
             </thead>
@@ -149,6 +159,7 @@
                     <td id={{c.name}}> {{ c.name }} </td>
                     <td id={{c.name}}{{c.birthday}}>{{c.birthday|BeautifyDateStr}}</td>
                     <td>{{c.time}}</td>
+                    <td id={{c.animal}}> {{ c.animal }} </td>
                     {% if c.gender == "female" %}
                     <td id={{c.name}}{{c.gender}}> 女 </td>
                     {% else %}

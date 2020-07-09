@@ -171,9 +171,8 @@ def csv_add(request):
                         """
                 #讀擋完畢，並確認無錯誤。將暫存資料存入資料庫
                 for family_data in append_arr:
-                    print(
-                        Home.objects.create(home_phone=family_data[0],
-                                            address=family_data[1]))
+                    Home.objects.create(home_phone=family_data[0],
+                                        address=family_data[1])
                     error += "--已新增家庭 " + family_data[0] + " 之資料<br/>"
 
                 error += "家庭檔案處理成功！<br/>"
@@ -196,6 +195,8 @@ def csv_add(request):
                         return render(request, "up_date.html", locals())
 
                     time = row['時辰']
+                    animal = row['生肖']
+
                     gender = row['性別']
                     if (gender == "男"):
                         gender = "male"
@@ -215,16 +216,23 @@ def csv_add(request):
                             home_id=home_id, name=name)
                         if (not people_object.exists()):
                             #此筆資料沒有與資料庫中資料衝突，先暫存
-                            append_arr.append(
-                                [name, birthday, time, gender, home_id])
+                            append_arr.append([
+                                name, birthday, time, gender, home_id, animal
+                            ])
                         else:
-                            #此筆資料與資料庫中資料衝突，進行覆寫之動作
-                            people_object[0].name = name
-                            people_object[0].birthday = birthday
-                            people_object[0].time = time
-                            people_object[0].gender = gender
-
-                            people_object[0].save()
+                            people_object.update(animal=animal,
+                                                 birthday=birthday,
+                                                 time=time,
+                                                 gender=gender)
+                            # people_get = People_data.objects.get(
+                            #     home_id=home_id, name=name)
+                            # #此筆資料與資料庫中資料衝突，進行覆寫之動作
+                            # people_get.name = name
+                            # people_get.birthday = birthday
+                            # people_get.time = time
+                            # people_get.gender = gender
+                            # people_get.update(animal=animal)
+                            # people_get.save()
                             """
                             #此筆資料與資料庫中資料衝突，匯入失敗
                             error = "匯入失敗，成員重複（重複家庭成員：{0}家庭之〝{1}〞信眾)".format(
@@ -239,12 +247,13 @@ def csv_add(request):
                 for person_data in append_arr:
                     print(person_data)
                     home_object = Home.objects.get(id=person_data[4])
-                    print(
-                        People_data.objects.create(name=person_data[0],
-                                                   birthday=person_data[1],
-                                                   time=person_data[2],
-                                                   gender=person_data[3],
-                                                   home_id=person_data[4]))
+                    People_data.objects.create(name=person_data[0],
+                                               birthday=person_data[1],
+                                               time=person_data[2],
+                                               gender=person_data[3],
+                                               home_id=person_data[4],
+                                               animal=person_data[5])
+
                     error += "--已新增家庭 " + home_object.home_phone + " 之成員 " + person_data[
                         0] + " 之資料<br/>"
                 error += "成員檔案處理成功！<br/>"
@@ -322,13 +331,13 @@ def year(x):
 def time_chinese(x):
     use = "一 二 三 四 五 六 七 八 九 十".split(" ")
     answer = ""
-    if x>=10 and x<=19:
-        answer ="十"
-        x-=10
+    if x >= 10 and x <= 19:
+        answer = "十"
+        x -= 10
         if x == 0:
             return answer
         else:
-            return answer + use[x  - 1]
+            return answer + use[x - 1]
     if len(str(x)) == 2:
         y = x // 10 - 1
         answer = use[y] + "十"
@@ -336,13 +345,12 @@ def time_chinese(x):
         if x == 0:
             return answer
         else:
-            return answer + use[x  - 1]
+            return answer + use[x - 1]
 
     if len(str(x)) == 3:
         y = x // 100 - 1
         answer = use[y] + "百"
-        x -=100
-
+        x -= 100
 
         if len(str(x)) == 2:
             y = x // 10 - 1
@@ -351,32 +359,14 @@ def time_chinese(x):
             if x == 0:
                 return answer
             else:
-                return answer + use[x  - 1]
+                return answer + use[x - 1]
         else:
             if x == 0:
                 return answer
-            return answer +"零" + use[x  - 1]
-
-
+            return answer + "零" + use[x - 1]
 
     return use[x - 1]
 
-print(time_chinese(6))
-print(time_chinese(9))
-print(time_chinese(19))
-print(time_chinese(13))
-print(time_chinese(14))
-print(time_chinese(10))
-print(time_chinese(20))
-print(time_chinese(29))
-print(time_chinese(34))
-print(time_chinese(70))
-print(time_chinese(79))
-print(time_chinese(64))
-print(time_chinese(131))
-print(time_chinese(141))
-print(time_chinese(109))
-print(time_chinese(100))
 
 def twelve(x):
     sky = "甲、乙、丙、丁、戊、己、庚、辛、壬、癸".split("、")
@@ -884,13 +874,14 @@ def output_data(request):
                         home_id=use_id, name=peoples[j]).birthday.split("-")
                     if use_num == 0:
                         one_data["zero"] = peoples[j]
-                    one_data[
-                        num_string(use_num)] = peoples[j] + " 本命 " + twelve(
-                            int(date[0])) + " 年 " + time_chinese(
-                                int(date[1])) + " 月 " + time_chinese(
-                                    int(date[2])
-                                ) + " 日 " +People_data.objects.get(
-                        home_id=use_id, name=peoples[j]).time  + "　時　" "行庚 " + time_chinese(
+                    one_data[num_string(
+                        use_num
+                    )] = peoples[j] + " 本命 " + twelve(int(
+                        date[0])) + " 年 " + time_chinese(int(
+                            date[1])) + " 月 " + time_chinese(int(
+                                date[2])) + " 日 " + People_data.objects.get(
+                                    home_id=use_id, name=peoples[j]
+                                ).time + "　時　" "行庚 " + time_chinese(
                                     year(date)) + " 歲 "
                     use_num += 1
                     if use_num == 5:
@@ -1126,6 +1117,8 @@ def people_form(request, pk):
         get_all_birthday_d = request.POST.getlist('birthday_d')
         get_all_gender = request.POST.getlist('gender')
         get_all_time = request.POST.getlist('time')
+        get_all_animal = request.POST.getlist('animal')
+        print(get_all_time)
 
         if process_haveno_blank(get_all_birthday_d) and process_haveno_blank(
                 get_all_birthday_y) and process_haveno_blank(
@@ -1151,6 +1144,7 @@ def people_form(request, pk):
                             birthday=x,
                             gender=get_all_gender[i],
                             time=get_all_time[i],
+                            animal=get_all_animal[i],
                             home_id=pk)
                     else:
                         y_bug += get_all_name[i] + " "

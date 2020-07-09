@@ -48,7 +48,7 @@ class peopleform(forms.Form):
     birthday_y = forms.CharField(label="年",widget=forms.TextInput(attrs={"size":"1mv"}))
     birthday_m = forms.CharField(label="月",widget=forms.TextInput(attrs={"size":"1mv"}))
     birthday_d = forms.CharField(label="日",widget=forms.TextInput(attrs={"size":"1mv"}))
-  
+
     time = forms.ChoiceField(label='時辰',
                              required=False,
                              choices=(('子', '子'), ('丑', '丑'), ('寅', '寅'),
@@ -57,6 +57,15 @@ class peopleform(forms.Form):
                                       ('酉', '酉'), ('戌', '戌'), ('亥', '亥')),
                              initial="子",
                              widget=forms.widgets.Select())
+    animal = forms.ChoiceField(label='生肖',
+                             required=False,
+                             choices=(('鼠', '鼠'), ('牛', '牛'), ('虎', '虎'),
+                                      ('兔', '兔'), ('龍', '龍'), ('蛇', '蛇'),
+                                      ('馬', '馬'), ('羊', '羊'), ('猴', '猴'),
+                                      ('雞', '雞'), ('狗', '狗'), ('豬', '豬')),
+                             initial="子",
+                             widget=forms.widgets.Select())
+
     gender = forms.ChoiceField(label='性別',
                                required=False,
                                choices=(('male', '男'), ('female', '女')),
