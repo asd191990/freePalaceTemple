@@ -293,11 +293,10 @@ def validate_people_all_date(request):
     try:
         for i in range(len(the_data)):
             date = the_data[i].birthday.split("-")
-
-            output = the_data[i].name + " 本命 " + twelve(int(
-                date[0])) + " 年 " + time_chinese(int(
-                    date[1])) + " 月 " + time_chinese(
-                        int(date[2])) + " 日 " + "  行庚 " + time_chinese(
+            output = the_data[i].name + " 本命 " + twelve(
+                date[0]) + " 年 " + time_chinese(
+                    date[1]) + " 月 " + time_chinese(
+                        date[2]) + " 日 " + "  行庚 " + time_chinese(
                             year(date)) + " 歲 "
 
             # get_allname_array.append(the_data[i].name + "|" + output + "|" +
@@ -313,22 +312,31 @@ def validate_people_all_date(request):
 
 
 def year(x):
+    if x[0] == "吉":
+        return "吉"
+
     time = date.today()
-    fix = 0
-    if time.month >= 10:
-        fix = 1
+    year = int(time.year) - 1911 - int(x[0])
 
-    old = (int(time.year) - 1911 + fix) - int(x[0])
-    if int(x[1]) == 1:  # 判斷1月有沒有過
-        if int(x[2]) > 12:
-            old -= 1
-    else:  #其他月直接-1
-        old -= 1
+    # if time.month >= 10:
+    #     fix = 1
 
-    return abs(old) + 1
+    # old = (int(time.year) - 1911 + fix) - int(x[0])
+    # if int(x[1]) == 1:  # 判斷1月有沒有過
+    #     if int(x[2]) > 12:
+    #         old -= 1
+    # else:  #其他月直接-1
+    #     old -= 1
+
+    return year + 1
 
 
 def time_chinese(x):
+    if x == "吉":
+        return "吉"
+    else:
+        x = int(x)
+
     use = "一 二 三 四 五 六 七 八 九 十".split(" ")
     answer = ""
     if x >= 10 and x <= 19:
@@ -369,6 +377,10 @@ def time_chinese(x):
 
 
 def twelve(x):
+    if x == "吉":
+        return "吉"
+    else:
+        x = int(x)
     sky = "甲、乙、丙、丁、戊、己、庚、辛、壬、癸".split("、")
     land = "子、丑、寅、卯、辰、巳、午、未、申、酉、戌、亥".split("、")
     the_land = land[(x % 12) - 1]
@@ -876,13 +888,14 @@ def output_data(request):
                         one_data["zero"] = peoples[j]
                     one_data[num_string(
                         use_num
-                    )] = peoples[j] + " 本命 " + twelve(int(
-                        date[0])) + " 年 " + time_chinese(int(
-                            date[1])) + " 月 " + time_chinese(int(
-                                date[2])) + " 日 " + People_data.objects.get(
+                    )] =peoples[j] + " 本命 " + twelve(
+                        date[0]) + " 年 " + time_chinese(
+                            date[1]) + " 月 " + time_chinese(
+                                date[2]) + " 日 " + People_data.objects.get(
                                     home_id=use_id, name=peoples[j]
                                 ).time + "　時　" "行庚 " + time_chinese(
                                     year(date)) + " 歲 "
+
                     use_num += 1
                     if use_num == 5:
                         use_num = 0
@@ -1087,12 +1100,21 @@ def reture_solar(x, y, z):
 @django.template.defaulttags.register.filter
 def BeautifyDateStr(value):
     arr = value.split("-")
-    year = int(arr[0])
-    month = int(arr[1])
-    day = int(arr[2])
+    try:
+        year = int(arr[0])
+    except:
+        year = arr[0]
 
-    month = '0' + str(month) if month < 10 else month
-    day = '0' + str(day) if day < 10 else day
+    try:
+        month = int(arr[1])
+        month = '0' + str(month) if month < 10 else month
+    except:
+        month = arr[1]
+    try:
+        day = int(arr[2])
+        day = '0' + str(day) if day < 10 else day
+    except:
+        day = arr[2]
 
     return "民國" + str(year) + "年" + str(month) + "月" + str(day) + "日（農曆）"
 
@@ -1124,39 +1146,56 @@ def people_form(request, pk):
                 get_all_birthday_y) and process_haveno_blank(
                     get_all_birthday_m) and process_haveno_blank(get_all_name):
             use_bug = ""
-            y_bug = ""
+
             for i in range(len(get_all_name)):
 
                 x_bug = ""
 
                 if (People_data.objects.filter(home_id=pk).filter(
                         name=get_all_name[i]).count() == 0):
-                    if int(get_all_birthday_y[i]) <= 250 and int(
-                            get_all_birthday_m[i]) <= 12 and int(
-                                get_all_birthday_m[i]) >= 1 and int(
-                                    get_all_birthday_d[i]) <= 31 and int(
-                                        get_all_birthday_d[i]) >= 1:
-                        x = get_all_birthday_y[i] + "-" + get_all_birthday_m[
-                            i] + "-" + get_all_birthday_d[i]
 
-                        People_data.objects.create(
-                            name=get_all_name[i].replace(" ", ""),
-                            birthday=x,
-                            gender=get_all_gender[i],
-                            time=get_all_time[i],
-                            animal=get_all_animal[i],
-                            home_id=pk)
-                    else:
-                        y_bug += get_all_name[i] + " "
+                    try:
+                        if int(get_all_birthday_y[i]) <= 250:
+                            x = get_all_birthday_y[i]
+                        else:
+                            x = "吉"
+                    except:
+                        x = "吉"
+
+                    try:
+                        if int(get_all_birthday_m[i]) <= 12 and int(
+                                get_all_birthday_m[i]) >= 1:
+                            x += "-" + get_all_birthday_m[i]
+                        else:
+                            x += "-吉"
+                    except:
+                        x += "-吉"
+
+                    try:
+                        if int(get_all_birthday_d[i]) <= 31 and int(
+                                get_all_birthday_d[i]) >= 1:
+                            x += "-" + get_all_birthday_d[i]
+                        else:
+                            x += "-吉"
+                    except:
+                        x += "-吉"
+
+                    People_data.objects.create(name=get_all_name[i].replace(
+                        " ", ""),
+                                               birthday=x,
+                                               gender=get_all_gender[i],
+                                               time=get_all_time[i],
+                                               animal=get_all_animal[i],
+                                               home_id=pk)
+
                 else:
                     use_bug += get_all_name[i] + " "
             form = peopleform(None)
             if use_bug != "":
-                use_bug = "名字重複的名單有:" + use_bug
-            if y_bug != "":
-                y_bug = "日期錯誤的名單有:" + y_bug
+                use_bug = "名字重複的名單有:" + use_bug + "　"
+
         else:
-            x_bug = "請輸入全部欄位"
+            x_bug = "請輸入全部欄位，如果不清楚請輸入'吉'字"
 
     people_all = People_data.objects.filter(home_id=pk)
 
