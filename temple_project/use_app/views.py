@@ -183,16 +183,41 @@ def csv_add(request):
 
                     birthday = row['生日']
                     date_arr = birthday.split("-")
-                    try:
-                        year = int(date_arr[0])
-                        month = int(date_arr[1])
-                        day = int(date_arr[2])
-                        if (not (year <= 250 and month >= 1 and month <= 12
-                                 and day >= 1 and day <= 31)):
-                            raise Exception('')
-                    except:
-                        error += "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
+                    if len(date_arr) != 3:
+                        error += "匯入失敗，只能輸入兩個-號（成員：{0}）".format(name)
                         return render(request, "up_date.html", locals())
+
+                    if date_arr[0] != "吉":
+                        try:
+                            x = int(date_arr[0])
+                            if x >= 250:
+                                error += "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
+                                return render(request, "up_date.html",
+                                              locals())
+                        except:
+                            error += "匯入失敗，有非吉的字(僅限數字)（成員：{0}）".format(name)
+                            return render(request, "up_date.html", locals())
+
+                    if date_arr[1] != "吉":
+                        try:
+                            x = int(date_arr[1])
+                            if x <= 0 or x >= 13:
+                                error += "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
+                                return render(request, "up_date.html",
+                                              locals())
+                        except:
+                            error += "匯入失敗，有非吉的字(僅限數字)（成員：{0}）".format(name)
+                            return render(request, "up_date.html", locals())
+                    if date_arr[2] != "吉":
+                        try:
+                            x = int(date_arr[2])
+                            if x <= 0 or x >= 32:
+                                error += "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
+                                return render(request, "up_date.html",
+                                              locals())
+                        except:
+                            error += "匯入失敗，有非吉的字(僅限數字)（成員：{0}）".format(name)
+                            return render(request, "up_date.html", locals())
 
                     time = row['時辰']
                     animal = row['生肖']
@@ -887,14 +912,13 @@ def output_data(request):
                     if use_num == 0:
                         one_data["zero"] = peoples[j]
                     one_data[num_string(
-                        use_num
-                    )] =peoples[j] + " 本命 " + twelve(
-                        date[0]) + " 年 " + time_chinese(
-                            date[1]) + " 月 " + time_chinese(
-                                date[2]) + " 日 " + People_data.objects.get(
-                                    home_id=use_id, name=peoples[j]
-                                ).time + "　時　" "行庚 " + time_chinese(
-                                    year(date)) + " 歲 "
+                        use_num)] = peoples[j] + " 本命 " + twelve(
+                            date[0]) + " 年 " + time_chinese(
+                                date[1]) + " 月 " + time_chinese(
+                                    date[2]) + " 日 " + People_data.objects.get(
+                                        home_id=use_id, name=peoples[j]
+                                    ).time + "　時　" "行庚 " + time_chinese(
+                                        year(date)) + " 歲 "
 
                     use_num += 1
                     if use_num == 5:
