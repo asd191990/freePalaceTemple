@@ -19,6 +19,7 @@ from django.urls import path, re_path
 #tryee
 from . import views
 urlpatterns = [
+    path("del_activity",views.del_activity,name="del_activity"),
     path("updata",views.updata,name="updata"),
     path("name_out",views.name_out,name="name_out"),
     path("join_activity/<int:pk>/<str:date>",views.activity_process,name="ok"),
@@ -26,7 +27,7 @@ urlpatterns = [
     path("data_up",views.data_up,name="data_up"),
     path("output_data",views.output_data,name="output_data"),
     path("join_activity/old/<int:pk>",views.old,name="old"),
-    path('remove_record/old/<int:pk>',views.remove_record,name="remove_record"),
+    # path('remove_record/old/<int:pk>',views.remove_record,name="remove_record"),
     path("home/home_del/<int:pk>/<int:people_id>",views.home_del),
     path('', views.index),
     path("data_save",views.data_save,name='data_save'),
@@ -46,7 +47,7 @@ urlpatterns = [
     path('ajax/validate_get_people', views.validate_get_Home, name='validate_get_Home'),
     path('ajax/validate_people_all_date', views.validate_people_all_date, name='validate_people_all_date'),
     path('ajax/validate_submit', views.validate_submit, name='validate_submit'),
-    path("new",views.new),
+    # path("new",views.new),
     path('ajax/validate_get_table', views.validate_get_table, name='validate_get_table'),
     path('csv_add',views.csv_add,name="csv_add"),
     re_path(r".",views.index)

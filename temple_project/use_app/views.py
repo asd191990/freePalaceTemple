@@ -106,10 +106,10 @@ def old(request, pk):
     return render(request, "old_activity.html", locals())
 
 
-def new(request):
-    x_form = choose_form(request.POST or None)
-    x_max = Home.objects.all().count()
-    return render(request, "join_activity.html", locals())
+# def new(request):
+#     x_form = choose_form(request.POST or None)
+#     x_max = Home.objects.all().count()
+#     return render(request, "join_activity.html", locals())
 
 
 def csv_add(request):
@@ -184,39 +184,39 @@ def csv_add(request):
                     birthday = row['生日']
                     date_arr = birthday.split("-")
                     if len(date_arr) != 3:
-                        error += "匯入失敗，只能輸入兩個-號（成員：{0}）".format(name)
+                        error += "匯入失敗，只能輸入兩個-號（信眾：{0}）".format(name)
                         return render(request, "up_date.html", locals())
 
                     if date_arr[0] != "吉":
                         try:
                             x = int(date_arr[0])
                             if x >= 250:
-                                error += "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
+                                error += "匯入失敗，生日輸入錯誤（信眾：{0}）".format(name)
                                 return render(request, "up_date.html",
                                               locals())
                         except:
-                            error += "匯入失敗，有非吉的字(僅限數字)（成員：{0}）".format(name)
+                            error += "匯入失敗，有非吉的字(僅限數字)（信眾：{0}）".format(name)
                             return render(request, "up_date.html", locals())
 
                     if date_arr[1] != "吉":
                         try:
-                            x = int(date_arr[1])
+                            x = int(date_arr[1].replace("閏", ""))
                             if x <= 0 or x >= 13:
-                                error += "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
+                                error += "匯入失敗，生日輸入錯誤（信眾：{0}）".format(name)
                                 return render(request, "up_date.html",
                                               locals())
                         except:
-                            error += "匯入失敗，有非吉的字(僅限數字)（成員：{0}）".format(name)
+                            error += "匯入失敗，有非吉的字(僅限數字)（信眾：{0}）".format(name)
                             return render(request, "up_date.html", locals())
                     if date_arr[2] != "吉":
                         try:
                             x = int(date_arr[2])
                             if x <= 0 or x >= 32:
-                                error += "匯入失敗，生日輸入錯誤（成員：{0}）".format(name)
+                                error += "匯入失敗，生日輸入錯誤（信眾：{0}）".format(name)
                                 return render(request, "up_date.html",
                                               locals())
                         except:
-                            error += "匯入失敗，有非吉的字(僅限數字)（成員：{0}）".format(name)
+                            error += "匯入失敗，有非吉的字(僅限數字)（信眾：{0}）".format(name)
                             return render(request, "up_date.html", locals())
 
                     time = row['時辰']
@@ -337,26 +337,22 @@ def validate_people_all_date(request):
 
 
 def year(x):
-    if x[0] == "吉":
+    if x[0] == "吉" or x[1] == "吉" or x[1] == "吉":
         return "吉"
 
     time = date.today()
     year = int(time.year) - 1911 - int(x[0])
 
-    # if time.month >= 10:
-    #     fix = 1
-
-    # old = (int(time.year) - 1911 + fix) - int(x[0])
-    # if int(x[1]) == 1:  # 判斷1月有沒有過
-    #     if int(x[2]) > 12:
-    #         old -= 1
-    # else:  #其他月直接-1
-    #     old -= 1
-
     return year + 1
 
 
 def time_chinese(x):
+    have_word = False
+    if "閏" in str(x):
+        print(x)
+        x = x.replace("閏", "")
+        have_word = True
+
     if x == "吉":
         return "吉"
     else:
@@ -364,8 +360,12 @@ def time_chinese(x):
 
     use = "一 二 三 四 五 六 七 八 九 十".split(" ")
     answer = ""
+    if have_word:
+        print("ok")
+        answer = "閏"
+
     if x >= 10 and x <= 19:
-        answer = "十"
+        answer += "十"
         x -= 10
         if x == 0:
             return answer
@@ -373,7 +373,7 @@ def time_chinese(x):
             return answer + use[x - 1]
     if len(str(x)) == 2:
         y = x // 10 - 1
-        answer = use[y] + "十"
+        answer += use[y] + "十"
         x = x % 10
         if x == 0:
             return answer
@@ -382,7 +382,7 @@ def time_chinese(x):
 
     if len(str(x)) == 3:
         y = x // 100 - 1
-        answer = use[y] + "百"
+        answer += use[y] + "百"
         x -= 100
 
         if len(str(x)) == 2:
@@ -398,7 +398,7 @@ def time_chinese(x):
                 return answer
             return answer + "零" + use[x - 1]
 
-    return use[x - 1]
+    return answer + use[x - 1]
 
 
 def twelve(x):
@@ -710,11 +710,12 @@ def join_activity(request):
                 date_name=request.POST["activity_name"]).exists():
             Day.objects.create(date_name=request.POST["activity_name"])
         else:
+
             error = ""
 
     Days = Day.objects.all().order_by("-id")
     every_days = every_day.objects.all()
-    return render(request, "choose.html", locals())
+    return render(request, "activity_list.html", locals())
 
 
 def activity_process(request, pk, date):
@@ -756,6 +757,10 @@ def add_array(x_array, y_array):
 
 
 def name_out(request):
+
+    if not os.path.isdir(os.path.join(BASE_DIR, "output", "名片檔案")):
+        os.mkdir(os.path.join(BASE_DIR, "output", "名片檔案"))
+
     data = {}
     activity_id = request.GET.get('activity_ID', None)
     get_activity = Day.objects.get(id=activity_id)
@@ -819,6 +824,18 @@ def name_out(request):
     return JsonResponse(data)
 
 
+def del_activity(request):
+    data = {}
+    activity_id = request.GET.get('activity_ID', None)
+    print(activity_id)
+    get_activity = Day.objects.get(id=activity_id)
+    print("e")
+    every_day.objects.filter(Day_date=get_activity).delete()
+    get_activity.delete()
+
+    return JsonResponse(data)
+
+
 def new_day(request):
     data = {}
     activity_id = request.GET.get('activity_ID', None)
@@ -850,6 +867,9 @@ def new_day(request):
 
 
 def output_data(request):
+
+    if not os.path.isdir(os.path.join(BASE_DIR, "output", "文稿檔案")):
+        os.mkdir(os.path.join(BASE_DIR, "output", "文稿檔案"))
 
     data = {}
     activity = request.POST.get('activity')
@@ -1187,9 +1207,18 @@ def people_form(request, pk):
                         x = "吉"
 
                     try:
+                        have_word = False
+                        if "閏" in get_all_birthday_m[i]:
+                            get_all_birthday_m[i] = get_all_birthday_m[
+                                i].replace("閏","")
+                            have_word = True
+
                         if int(get_all_birthday_m[i]) <= 12 and int(
                                 get_all_birthday_m[i]) >= 1:
-                            x += "-" + get_all_birthday_m[i]
+                            if have_word:
+                                x += "-閏" + get_all_birthday_m[i]
+                            else:
+                                x += "-" + get_all_birthday_m[i]
                         else:
                             x += "-吉"
                     except:
@@ -1325,10 +1354,10 @@ def validate_submit(request):
     return JsonResponse(data)
 
 
-def remove_record(request, pk):
-    history_data.objects.get(pk=pk).delete()
+# def remove_record(request, pk):
+#     history_data.objects.get(pk=pk).delete()
 
-    return HttpResponseRedirect(reverse('join_activity'))
+#     return HttpResponseRedirect(reverse('join_activity'))
 
 
 def index(request):
