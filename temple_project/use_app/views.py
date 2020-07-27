@@ -941,7 +941,7 @@ def output_data(request):
                                         year(date)) + " 歲 "
 
                     use_num += 1
-                    if use_num == 5:
+                    if use_num == 8:
                         use_num = 0
                         #print(one_data)
                         all_data.append(one_data)  #把家庭的資料塞進 all_data
@@ -954,7 +954,7 @@ def output_data(request):
 
 
 #            print("okk")
-#            print(all_data)
+            print(all_data)
             use_word.merge_pages(all_data)
             use_word.write(
                 os.path.join(
@@ -966,6 +966,7 @@ def output_data(request):
     return JsonResponse(data)
 
 import docx
+
 
 
 def chinese_string(use_num):
@@ -992,6 +993,12 @@ def num_string(use_num):
         return "four"
     if use_num == 4:
         return "five"
+    if use_num == 5:
+        return "Six"
+    if use_num == 6:
+        return "Seven"
+    if use_num == 7:
+        return "Eight"
 
 
 def basic_data(get_num):
@@ -1009,7 +1016,10 @@ def basic_data(get_num):
             "two": "",
             "three": "",
             "four": "",
-            "five": ""
+            "five": "",
+            "Six": "",
+            "Seven": "",
+            "Eight": "",
         }
     if get_num == 1:
         return {
@@ -1019,7 +1029,10 @@ def basic_data(get_num):
             "two": "",
             "three": "",
             "four": " ",
-            "five": ""
+            "five": "",
+            "Six": "",
+            "Seven": "",
+            "Eight": "",
         }
     if get_num == 2:
         return {
@@ -1029,7 +1042,10 @@ def basic_data(get_num):
             "two": "",
             "three": "",
             "four": " ",
-            "five": ""
+            "five": "",
+            "Six": "",
+            "Seven": "",
+            "Eight": "",
         }
     if get_num == 3:
         return {
@@ -1039,7 +1055,10 @@ def basic_data(get_num):
             "two": "",
             "three": "",
             "four": "",
-            "five": ""
+            "five": "",
+            "Six": "",
+            "Seven": "",
+            "Eight": "",
         }
     if get_num == 4:
         return {
@@ -1049,7 +1068,10 @@ def basic_data(get_num):
             "two": "",
             "three": "",
             "four": "",
-            "five": ""
+            "five": "",
+            "Six": "",
+            "Seven": "",
+            "Eight": "",
         }
     return "x"
 
@@ -1210,7 +1232,7 @@ def people_form(request, pk):
                         have_word = False
                         if "閏" in get_all_birthday_m[i]:
                             get_all_birthday_m[i] = get_all_birthday_m[
-                                i].replace("閏","")
+                                i].replace("閏", "")
                             have_word = True
 
                         if int(get_all_birthday_m[i]) <= 12 and int(
