@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'use_app',
-    'crispy_forms',
+    # 'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -129,5 +129,5 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers' + '.PickleSerializer'
 MEDIA_URL = '/upload/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'upload')
 
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['*']

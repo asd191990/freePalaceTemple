@@ -8,7 +8,6 @@
 <script>
 
     $(document).ready(function () {
-
         $(".name_button").click(function () {
 
             $.ajax({
@@ -43,13 +42,13 @@
                         }
                         else {
                             alert("刪除成功");
-                            window.location.reload()
+                            history.go(-1);
                         }
 
                     }
                 })
             }
-            else{
+            else {
                 alert("已取消操作。")
             }
         })

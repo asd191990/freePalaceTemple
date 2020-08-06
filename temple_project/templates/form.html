@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %} 表單 {% endblock %}
 {% block form %}
-{% load crispy_forms_tags %}
 
 <head>
     <meta charset="utf-8">
@@ -150,14 +149,14 @@
             <div class="col-6">
                 <label for="id_address" class="control-label requiredField">
                     地址
-                    <span class="asteriskField">*</span> 
+                    <span class="asteriskField">*</span>
                 </label>
                 <br/>
                 {{form.address}}
                 <br/><br/>
                 <label for="id_phone" class="control-label requiredField">
                     家庭電話（可搜尋舊有資料）
-                    <span class="asteriskField">*</span> 
+                    <span class="asteriskField">*</span>
                 </label>
                 <br/>
                 {{form.phone}}

@@ -1,6 +1,6 @@
 from datetime import date
 import datetime
-from dateutil.relativedelta import relativedelta
+# from dateutil.relativedelta import relativedelta
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect, render_to_response, redirect
 from django.http import JsonResponse
 from .forms import homeform, peopleform, activity_form, choose_form, login_form, fix_peopleform
@@ -8,7 +8,6 @@ from .models import Home, People_data, activity_data, history_data, every_day, D
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import auth
 from django.urls import reverse
-from mailmerge import MailMerge
 from django.contrib.auth import logout
 import os
 import json
@@ -17,7 +16,7 @@ from django.template.defaultfilters import stringfilter
 import time
 
 from docxtpl import DocxTemplate
-from docx.enum.section import WD_ORIENT
+# from docx.enum.section import WD_ORIENT
 from docx import Document
 import csv
 from django import template
@@ -27,6 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 from use_app import LunarSolarConverter
 
+from mailmerge import MailMerge
 
 @login_required
 def x_try(request):
@@ -635,7 +635,7 @@ def validate_remove_file(request):
 
 @login_required(login_url='/use_login')
 def home_form(request):
-
+    print("x")
     form = homeform(request.POST or None)
 
     title_one = "家庭電話"
@@ -706,7 +706,8 @@ def activityform(request):
 def join_activity(request):
 
     if request.method == "POST":
-        if not Day.objects.filter(
+
+        if  request.POST["activity_name"] !="" and not Day.objects.filter(
                 date_name=request.POST["activity_name"]).exists():
             Day.objects.create(date_name=request.POST["activity_name"])
         else:
@@ -832,6 +833,7 @@ def del_activity(request):
     print("e")
     every_day.objects.filter(Day_date=get_activity).delete()
     get_activity.delete()
+    print("ok")
 
     return JsonResponse(data)
 
