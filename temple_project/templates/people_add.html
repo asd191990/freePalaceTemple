@@ -19,6 +19,7 @@
             let get_home_id
             let set_button
             let old_time
+            let old_animal
 
             $("input[name='x_name']").attr("disabled", "disabled");
 
@@ -29,6 +30,7 @@
                 old_bithday = get_value[2].split("-");
                 get_home_id = get_value[3]
                 old_time = get_value[4]
+                old_animal = get_value[5]
                 set_button = this
                 $("#id_x_name").val(old_name);
                 $("#id_x_gender").val(old_gender);
@@ -37,6 +39,8 @@
                 $("#id_x_month").val(old_bithday[1]);
                 $("#id_x_day").val(old_bithday[2]);
                 $("#id_x_time").val(old_time.toString());
+
+                $("#id_x_animal").val(old_animal);
                 $("#fix_box").dialog("open");
                 e.preventDefault();
             });
@@ -50,12 +54,14 @@
                     let new_birthday = $("#id_x_birthday").val().toString() + "-" + $("#id_x_month").val().toString() + "-" + $("#id_x_day").val().toString()
 
                     let new_gender = $("#id_x_gender").val()
+
                     let new_time = $("#id_x_time").val()
                     $.ajax({
                         url: '{% url "validate_people_data" %}',
 
                         data: {
                             "old_name": old_name,
+                            "old_animal": $("#id_x_animal").val(),
                             "new_name": new_name,
                             "new_birthday": new_birthday,
                             "new_gender": new_gender,
@@ -167,7 +173,8 @@
                     {% endif %}
                     <td>
                         <button class="btn btn-success fix"
-                            value="{{c.name}}/{{c.gender}}/{{c.birthday}}/{{c.home_id}}/{{c.time}}"> 修改</button>
+                            value="{{c.name}}/{{c.gender}}/{{c.birthday}}/{{c.home_id}}/{{c.time}}/{{c.animal}}">
+                            修改</button>
                         <a href="home_del/{{c.home_id}}/{{c.pk}}"> <button class="btn btn-success del"
                                 value="{{c.home_id}}▲{{c.name}}"> 刪除</button> </a>
                     </td>

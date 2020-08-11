@@ -13,6 +13,8 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <script>
+        let file_date = "{{ date }}";
+
         let use_page = 0;
         let page_array = []
 
@@ -244,12 +246,14 @@
                 $.ajax({//把五筆資料送去後台
                     type: "POST",
                     url: '{% url "output_data" %}',
+
                     traditional: true,
                     data: {
                         csrfmiddlewaretoken: '{{ csrf_token }}',
                         "new_data": five_data,
                         "activity": "{{use_activity}}",
-                        "use_date": "{{use_date}}"
+                        "use_date": "{{use_date}}",
+                        "file_date": file_date
                     },
                     dataType: 'json',
                     async: false,

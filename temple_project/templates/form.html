@@ -76,37 +76,34 @@
 
             var check_login = function () {
                 let new_phone = $("#phone").val()
-                let re = /(^\d{2}-?\d{3}-?\d{4}$)|(^\d{10}$)/
-                if (re.test(new_phone)) {
-                    let new_address = $("#address").val()
-                    $.ajax({
-                        url: '{% url "validate_username" %}',
+                // let re = /(^\d{2}-?\d{3}-?\d{4}$)|(^\d{10}$)/
 
-                        data: {
-                            "old_phone": old_phone,
-                            "old_address": old_address,
-                            "new_phone": new_phone,
-                            "new_address": new_address
-                        },
-                        dataType: 'json',
-                        success: function (data) {
-                            if (data.is_taken) {
-                                alert(data.result);
-                                document.getElementById(old_address).innerHTML = new_address;
-                                document.getElementById(old_address).id = new_address;
-                                document.getElementById(old_phone).innerHTML = new_phone;
-                                document.getElementById(old_phone).id = new_phone;
-                                set_button.value = new_address + "/" + new_phone
-                            } else {
-                                alert(data.error_message)
-                            }
+                let new_address = $("#address").val()
+                $.ajax({
+                    url: '{% url "validate_username" %}',
+
+                    data: {
+                        "old_phone": old_phone,
+                        "old_address": old_address,
+                        "new_phone": new_phone,
+                        "new_address": new_address
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.is_taken) {
+                            alert(data.result);
+                            document.getElementById(old_address).innerHTML = new_address;
+                            document.getElementById(old_address).id = new_address;
+                            document.getElementById(old_phone).innerHTML = new_phone;
+                            document.getElementById(old_phone).id = new_phone;
+                            set_button.value = new_address + "/" + new_phone
+                        } else {
+                            alert(data.error_message)
                         }
-                    })
-                    $(this).dialog("close");
-                }
-                else {
-                    alert("電話格式錯誤")
-                }
+                    }
+                })
+                $(this).dialog("close");
+
 
             }
 
@@ -151,14 +148,14 @@
                     地址
                     <span class="asteriskField">*</span>
                 </label>
-                <br/>
+                <br />
                 {{form.address}}
-                <br/><br/>
+                <br /><br />
                 <label for="id_phone" class="control-label requiredField">
                     家庭電話（可搜尋舊有資料）
                     <span class="asteriskField">*</span>
                 </label>
-                <br/>
+                <br />
                 {{form.phone}}
             </div>
 

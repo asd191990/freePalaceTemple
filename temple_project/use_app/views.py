@@ -488,12 +488,14 @@ def validate_people_data(request):
     new_gender = request.GET.get("new_gender", None)
     home_id = request.GET.get("home_id", None)
     time = request.GET.get("time", None)
+    animal = request.GET.get("old_animal", None)
     if old_name != new_name:
         data = {"is_taken": False, "error_message": "要更改的名字已經被註冊過了"}
     else:
 
         People_data.objects.filter(home_id=home_id,
                                    name=old_name).update(name=new_name,
+                                                         animal=animal,
                                                          birthday=new_birthday,
                                                          gender=new_gender,
                                                          time=time)
@@ -721,6 +723,7 @@ def join_activity(request):
 
 def activity_process(request, pk, date):
     x_form = choose_form(request.POST or None)
+
     x_max = Home.objects.all().count()
     use_date = date
     use_activity = pk
@@ -874,6 +877,7 @@ def output_data(request):
         os.mkdir(os.path.join(BASE_DIR, "output", "文稿檔案"))
 
     data = {}
+    file_date = request.POST.get('file_date')
     activity = request.POST.get('activity')
 
     get_activity = Day.objects.get(id=activity)  #得到活動的實體
@@ -960,7 +964,7 @@ def output_data(request):
             use_word.merge_pages(all_data)
             use_word.write(
                 os.path.join(
-                    BASE_DIR, "output", "文稿檔案", get_activity.date_name + "_" +
+                    BASE_DIR, "output", "文稿檔案",file_date+"_"+ get_activity.date_name + "_" +
                     chinese_string(i) + "文稿.docx"))
 
     #print("all_ok")
