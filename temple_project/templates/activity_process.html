@@ -91,12 +91,20 @@
                 })
             }
 
+            get_no = function (i) {
+
+                $("input[name=" + "people" + i + "]").each(function () {
+                    $(this).prop("checked", false);//把所有的核取方框的property都變成勾選
+                })
+            }
+
             five_data_array = ["{{all_data.one_lights}}".split(","), "{{all_data.two_lights}}".split(","), "{{all_data.three_lights}}".split(","), "{{all_data.four_lights}}".split(","), "{{all_data.five_lights}}".split(",")]
             five_array = ["one", "two", "three", "four", "five"]
             function show_people() {
 
                 for (let j = 0; j < 5; j++) {
                     people_list = "<button onclick='get_all(" + j + ")'>全選</button><br><br>"
+                    people_list += "<button onclick='get_no(" + j + ")'>取消選擇</button><br><br>"
 
                     let get_one = five_data_array[j]
 

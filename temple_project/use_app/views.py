@@ -28,6 +28,7 @@ from use_app import LunarSolarConverter
 
 from mailmerge import MailMerge
 
+
 @login_required
 def x_try(request):
     x = {}
@@ -484,15 +485,13 @@ def register(request):
 def validate_people_data(request):
     old_name = request.GET.get("old_name", None)
     new_name = request.GET.get("new_name", None)  # 只判斷有沒有重複名字
+    print(old_name, "x", new_name, old_name == new_name)
     new_birthday = request.GET.get("new_birthday", None)
     new_gender = request.GET.get("new_gender", None)
     home_id = request.GET.get("home_id", None)
     time = request.GET.get("time", None)
     animal = request.GET.get("old_animal", None)
-    if old_name != new_name:
-        data = {"is_taken": False, "error_message": "要更改的名字已經被註冊過了"}
-    else:
-
+    if old_name == new_name:
         People_data.objects.filter(home_id=home_id,
                                    name=old_name).update(name=new_name,
                                                          animal=animal,
@@ -500,6 +499,19 @@ def validate_people_data(request):
                                                          gender=new_gender,
                                                          time=time)
         data = {'is_taken': True, "result": "更改成功"}
+    else:
+
+        if (len(People_data.objects.filter(home_id=home_id,
+                                           name=new_name)) == 0):
+            People_data.objects.filter(home_id=home_id, name=old_name).update(
+                name=new_name,
+                animal=animal,
+                birthday=new_birthday,
+                gender=new_gender,
+                time=time)
+            data = {'is_taken': True, "result": "更改成功"}
+        else:
+            data = {"is_taken": False, "error_message": "要更改的名字已經被註冊過了"}
 
     return JsonResponse(data)
 
@@ -637,7 +649,6 @@ def validate_remove_file(request):
 
 @login_required(login_url='/use_login')
 def home_form(request):
-    print("x")
     form = homeform(request.POST or None)
 
     title_one = "家庭電話"
@@ -646,25 +657,20 @@ def home_form(request):
     get_all_data = Home.objects.all()  # 表單資料
     load_js = "home"
 
-    if request.method == "POST" and request.POST['phone'].replace(
-            "-", "") and request.POST['address'] == "":
-        return HttpResponseRedirect(
-            reverse('home',
-                    kwargs={
-                        'pk':
-                        Home.objects.get(home_phone=request.POST["phone"]).pk
-                    }))
+    x_bug = ""
 
-    if form.is_valid():
-        process_string = request.POST['phone'].replace("-", "")
-        try:
-            if (Home.objects.get(home_phone=process_string)):
-                x_bug = "已經有註冊過的家庭電話"
-        except:
-            Home.objects.create(address=request.POST["address"],
-                                home_phone=process_string)
-            messages = "已送出"
-
+    if request.method == "POST":
+        process_string = request.POST['phone']
+        if (request.POST["address"] == ""):
+            x_bug = "地址請勿輸入空白"
+        else:
+            try:
+                if (Home.objects.get(home_phone=process_string)):
+                    x_bug = "已經有註冊過的家庭電話"
+            except:
+                Home.objects.create(address=request.POST["address"],
+                                    home_phone=process_string)
+                messages = "已送出"
     context = locals()
     return render(request, "form.html", context)
 
@@ -709,7 +715,7 @@ def join_activity(request):
 
     if request.method == "POST":
 
-        if  request.POST["activity_name"] !="" and not Day.objects.filter(
+        if request.POST["activity_name"] != "" and not Day.objects.filter(
                 date_name=request.POST["activity_name"]).exists():
             Day.objects.create(date_name=request.POST["activity_name"])
         else:
@@ -904,16 +910,19 @@ def output_data(request):
             Home_ids = {}
 
             for k in range(len(get_join_id)):  #所有參加人員的id
-                get_people = People_data.objects.get(id=get_join_id[k])
-                #得到實體 後找家庭陣列的id
-                get_home_id = get_people.home_id
+                try:
+                    get_people = People_data.objects.get(id=get_join_id[k])
+                    #得到實體 後找家庭陣列的id
+                    get_home_id = get_people.home_id
 
-                if not get_home_id in Home_ids:
+                    if not get_home_id in Home_ids:
 
-                    Home_ids[get_home_id] = ""
+                        Home_ids[get_home_id] = ""
 
-                Home_ids[get_home_id] += ("" if Home_ids[get_home_id] == ""
-                                          else ",") + get_people.name
+                    Home_ids[get_home_id] += ("" if Home_ids[get_home_id] == ""
+                                              else ",") + get_people.name
+                except Exception as e:
+                    print(e)
             #print(get_people.name)
 
             all_data = []  #一個燈的所有資料
@@ -961,18 +970,19 @@ def output_data(request):
 
 #            print("okk")
             print(all_data)
-            use_word.merge_pages(all_data)
-            use_word.write(
-                os.path.join(
-                    BASE_DIR, "output", "文稿檔案",file_date+"_"+ get_activity.date_name + "_" +
-                    chinese_string(i) + "文稿.docx"))
+            if (all_data != []):
+                use_word.merge_pages(all_data)
+                use_word.write(
+                    os.path.join(
+                        BASE_DIR, "output", "文稿檔案",
+                        file_date + "_" + get_activity.date_name + "_" +
+                        chinese_string(i) + "文稿.docx"))
 
     #print("all_ok")
     os.startfile(os.path.join(BASE_DIR, "output", "文稿檔案"))
     return JsonResponse(data)
 
 import docx
-
 
 
 def chinese_string(use_num):
