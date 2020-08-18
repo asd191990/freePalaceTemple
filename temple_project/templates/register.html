@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %} 表單 {% endblock %}
 {% block form %}
-{% load crispy_forms_tags %}
+
 
 <head>
     <meta charset="utf-8">
@@ -16,14 +16,14 @@
 </head>
 
 <body>
-      
+
     <form method="post" style="margin-left:50px;">
         {% csrf_token %}
-        {{ form|crispy}}
-            
+        {{ form}}
+
         <button class="btn btn-info del" name="submit">註冊</button>
-        <input  type="hidden" name="next"  />
-      </form>
+        <input type="hidden" name="next" />
+    </form>
 
 </body>
 
